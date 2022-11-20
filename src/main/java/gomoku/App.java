@@ -12,12 +12,13 @@ public class App
     public static void main( String[] args )
     {
         HashMap<Integer, Integer> result;
-        GameEnvironment game = new GameEnvironment(6);
+        GameEnvironment game = new GameEnvironment(5);
         int move;
-        Scanner scanner = new Scanner(System.in);
+        Minimax player1 = new Minimax(3);
         while(true){
             try {
-                move = scanner.nextInt();
+                move = player1.move(game);
+                System.out.println(move);
                 game.move(move);
             } catch (Exception e) {
                 System.out.println(e);
@@ -30,6 +31,5 @@ public class App
                 break;
             }
         }
-        scanner.close();
     }
 }
