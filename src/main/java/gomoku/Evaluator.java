@@ -97,7 +97,8 @@ public class Evaluator {
         int boardSize = game.getBoardSize();
         BitSet gameBoardOne = game.getGameBoardOne();
         BitSet gameBoardTwo = game.getGameBoardTwo();
-        int score = 0;
+        int scoreOne = 0;
+        int scoreTwo = 0;
         int thisPoints;
         BitSet temp1 = new BitSet(5);
         BitSet temp2 = new BitSet(5);
@@ -110,10 +111,10 @@ public class Evaluator {
 
                 if (temp1.cardinality() > 1 && temp2.cardinality() == 0) {
                     thisPoints = points.getOrDefault(temp1, 0);
-                    score += thisPoints;
+                    scoreOne += thisPoints;
                 } else if (temp2.cardinality() > 1 && temp1.cardinality() == 0) {
                     thisPoints = points.getOrDefault(temp2, 0);
-                    score -= thisPoints;
+                    scoreTwo += thisPoints;
                 }
 
             }
@@ -136,10 +137,10 @@ public class Evaluator {
 
                 if (temp1.cardinality() > 1 && temp2.cardinality() == 0) {
                     thisPoints = points.getOrDefault(temp1, 0);
-                    score += thisPoints;
+                    scoreOne += thisPoints;
                 } else if (temp2.cardinality() > 1 && temp1.cardinality() == 0) {
                     thisPoints = points.getOrDefault(temp2, 0);
-                    score -= thisPoints;
+                    scoreTwo += thisPoints;
                 }
             }
         }
@@ -164,10 +165,10 @@ public class Evaluator {
 
                 if (temp1.cardinality() > 1 && temp2.cardinality() == 0) {
                     thisPoints = points.getOrDefault(temp1, 0);
-                    score += thisPoints;
+                    scoreOne += thisPoints;
                 } else if (temp2.cardinality() > 1 && temp1.cardinality() == 0) {
                     thisPoints = points.getOrDefault(temp2, 0);
-                    score -= thisPoints;
+                    scoreTwo += thisPoints;
                 }
 
                 if (col > 0) {
@@ -185,10 +186,10 @@ public class Evaluator {
 
                     if (temp1.cardinality() > 1 && temp2.cardinality() == 0) {
                         thisPoints = points.getOrDefault(temp1, 0);
-                        score += thisPoints;
+                        scoreOne += thisPoints;
                     } else if (temp2.cardinality() > 1 && temp1.cardinality() == 0) {
                         thisPoints = points.getOrDefault(temp2, 0);
-                        score -= thisPoints;
+                        scoreTwo += thisPoints;
                     }
                 }
             }
@@ -211,10 +212,10 @@ public class Evaluator {
 
                 if (temp1.cardinality() > 1 && temp2.cardinality() == 0) {
                     thisPoints = points.getOrDefault(temp1, 0);
-                    score += thisPoints;
+                    scoreOne += thisPoints;
                 } else if (temp2.cardinality() > 1 && temp1.cardinality() == 0) {
                     thisPoints = points.getOrDefault(temp2, 0);
-                    score -= thisPoints;
+                    scoreTwo += thisPoints;
                 }
 
                 if (col < boardSize - 1) {
@@ -232,16 +233,20 @@ public class Evaluator {
 
                     if (temp1.cardinality() > 1 && temp2.cardinality() == 0) {
                         thisPoints = points.getOrDefault(temp1, 0);
-                        score += thisPoints;
+                        scoreOne += thisPoints;
                     } else if (temp2.cardinality() > 1 && temp1.cardinality() == 0) {
                         thisPoints = points.getOrDefault(temp2, 0);
-                        score -= thisPoints;
+                        scoreTwo += thisPoints;
                     }
                 }
             }
         }
 
-        return score;
+        if(game.getCurrentPlayer() == 1){
+            return 15*scoreOne-10*scoreTwo;
+        }else{
+            return 10*scoreOne-15*scoreTwo;
+        }
     }
 
 }

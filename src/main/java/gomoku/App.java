@@ -1,24 +1,24 @@
 package gomoku;
 
 import java.util.HashMap;
-
 public class App 
 {
     public static void main( String[] args )
     {
         HashMap<Integer, Integer> result;
         GameEnvironment game = new GameEnvironment(7);
-        Minimax player1 = new Minimax(2);
-        Minimax player2 = new Minimax(2);
+        AlphaBetaPruning player1 = new AlphaBetaPruning(5);
+        AlphaBetaPruning player2 = new AlphaBetaPruning(3);
+        Evaluator ev = new Evaluator();
         int move;
-        while(true){
+        while(true){ 
             try {
                 if(game.getCurrentPlayer() == 1){
                     move = player1.move(game);
                 }else{
                     move = player2.move(game);
                 }
-                System.out.println(move);
+                ev.calculateEvaluation(game);
                 game.move(move);
             } catch (Exception e) {
                 System.out.println(e);

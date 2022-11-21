@@ -57,6 +57,8 @@ public class GameEnvironment {
 
         if (gameBoardOne.cardinality() + gameBoardTwo.cardinality() == boardSize * boardSize) {
             result.put(0, 1);
+        }else if(gameBoardOne.cardinality()<5){
+            return result;
         }
 
         if (currentPlayer == -1) {
