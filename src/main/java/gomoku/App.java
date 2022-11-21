@@ -1,23 +1,23 @@
 package gomoku;
 
 import java.util.HashMap;
-import java.util.Scanner;
 
-/**
- * Hello world!
- *
- */
 public class App 
 {
     public static void main( String[] args )
     {
         HashMap<Integer, Integer> result;
-        GameEnvironment game = new GameEnvironment(5);
+        GameEnvironment game = new GameEnvironment(7);
+        Minimax player1 = new Minimax(2);
+        Minimax player2 = new Minimax(2);
         int move;
-        Minimax player1 = new Minimax(3);
         while(true){
             try {
-                move = player1.move(game);
+                if(game.getCurrentPlayer() == 1){
+                    move = player1.move(game);
+                }else{
+                    move = player2.move(game);
+                }
                 System.out.println(move);
                 game.move(move);
             } catch (Exception e) {

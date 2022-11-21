@@ -1,46 +1,50 @@
 package gomoku;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 
 public class GameEnvironment {
     private int boardSize;
-    private int[][] gameBoard;
+    private BitSet gameBoardOne;
+    private BitSet gameBoardTwo;
     private int currentPlayer;
 
     GameEnvironment(int boardSize) {
         this.boardSize = boardSize;
-        this.gameBoard = new int[boardSize][boardSize];
+        this.gameBoardOne = new BitSet(boardSize * boardSize);
+        this.gameBoardTwo = new BitSet(boardSize * boardSize);
         resetState();
     }
 
     public void resetState() {
-        for (int row = 0; row < boardSize; row++) {
-            for (int col = 0; col < boardSize; col++) {
-                gameBoard[row][col] = 0;
-            }
-        }
-
+        gameBoardOne.clear();
+        gameBoardTwo.clear();
         currentPlayer = 1;
     }
 
     public void move(int move) throws Exception {
         if (move < 0 || move > boardSize * boardSize - 1) {
             throw new Exception("Space out of bound.");
-        } else if (gameBoard[(int) move / boardSize][(int) move % boardSize] != 0) {
+        } else if (gameBoardOne.get(move) || gameBoardTwo.get(move)) {
             throw new Exception("Already occupied space.");
         }
-        gameBoard[(int) move / boardSize][(int) move % boardSize] = currentPlayer;
+        if (currentPlayer == 1) {
+            gameBoardOne.set(move);
+        } else {
+            gameBoardTwo.set(move);
+        }
         currentPlayer *= -1;
     }
 
     public ArrayList<Integer> getLegalMoves() {
         ArrayList<Integer> result = new ArrayList<>();
-        for (int row = 0; row < boardSize; row++) {
-            for (int col = 0; col < boardSize; col++) {
-                if (gameBoard[row][col] == 0) {
-                    result.add(row * boardSize + col);
-                }
+        BitSet c = (BitSet) gameBoardOne.clone();
+        c.or(gameBoardTwo);
+        c.flip(0, boardSize * boardSize);
+        for (int i = 0; i < boardSize * boardSize; i++) {
+            if (c.get(i)) {
+                result.add(i);
             }
         }
         return result;
@@ -50,283 +54,119 @@ public class GameEnvironment {
         HashMap<Integer, Integer> result = new HashMap<>();
         result.put(0, 0);
         result.put(1, 0);
-        int currentScore;
-        int currentPlayerScore;
-        int maxScore = 0;
-        int maxScorePlayer = 0;
 
-        // HORIZONTAL
-        for (int row = 0; row < boardSize; row++) {
-            currentScore = 0;
-            currentPlayerScore = 0;
-            maxScore = 0;
-            maxScorePlayer = 0;
-            for (int col = 0; col < boardSize; col++) {
-                if (currentPlayerScore == gameBoard[row][col] && currentPlayerScore != 0) {
-                    currentPlayerScore = gameBoard[row][col];
-                    currentScore += 1;
-                } else if (currentPlayerScore != gameBoard[row][col] && currentPlayerScore != 0) {
-                    if (currentScore > maxScore) {
-                        maxScorePlayer = currentPlayerScore;
-                        maxScore = currentScore;
-                    }
-                    currentPlayerScore = gameBoard[row][col];
-                    currentScore = 1;
-                } else {
-                    if (currentScore > maxScore) {
-                        maxScorePlayer = currentPlayerScore;
-                        maxScore = currentScore;
-                    }
-                    currentPlayerScore = gameBoard[row][col];
-                    currentScore = 1;
-                }
-            }
-
-            if (currentScore == 5){
-                result.put(0, 1);
-                result.put(1, currentPlayerScore);
-                return result;
-            }
-            else if (maxScore == 5) {
-                result.put(0, 1);
-                result.put(1, maxScorePlayer);
-                return result;
-            }
-        }
-
-        // VERTICAL
-        for (int col = 0; col < boardSize; col++) {
-            currentScore = 0;
-            currentPlayerScore = 0;
-            maxScore = 0;
-            maxScorePlayer = 0;
-            for (int row = 0; row < boardSize; row++) {
-                if (currentPlayerScore == gameBoard[row][col] && currentPlayerScore != 0) {
-                    currentPlayerScore = gameBoard[row][col];
-                    currentScore += 1;
-                } else if (currentPlayerScore != gameBoard[row][col] && currentPlayerScore != 0) {
-                    if (currentScore > maxScore) {
-                        maxScorePlayer = currentPlayerScore;
-                        maxScore = currentScore;
-                    }
-                    currentPlayerScore = gameBoard[row][col];
-                    currentScore = 1;
-                } else {
-                    if (currentScore > maxScore) {
-                        maxScorePlayer = currentPlayerScore;
-                        maxScore = currentScore;
-                    }
-                    currentPlayerScore = gameBoard[row][col];
-                    currentScore = 1;
-                }
-            }
-
-            if (currentScore == 5){
-                result.put(0, 1);
-                result.put(1, currentPlayerScore);
-                return result;
-            }
-            else if (maxScore == 5) {
-                result.put(0, 1);
-                result.put(1, maxScorePlayer);
-                return result;
-            }
-        }
-
-        // DIAGONAL (L-R)
-        for (int col = 1; col < boardSize; col++) {
-            currentScore = 0;
-            currentPlayerScore = 0;
-            maxScore = 0;
-            maxScorePlayer = 0;
-            if ((boardSize - col) - 5 < 0) {
-                break;
-            }
-            for (int rowL = 0; rowL < boardSize - col; rowL++) {
-                if (currentPlayerScore == gameBoard[rowL][col + rowL] && currentPlayerScore != 0) {
-                    currentPlayerScore = gameBoard[rowL][col + rowL];
-                    currentScore += 1;
-                } else if (currentPlayerScore != gameBoard[rowL][col + rowL] && currentPlayerScore != 0) {
-                    if (currentScore > maxScore) {
-                        maxScorePlayer = currentPlayerScore;
-                        maxScore = currentScore;
-                    }
-                    currentPlayerScore = gameBoard[rowL][col + rowL];
-                    currentScore = 1;
-                } else {
-                    if (currentScore > maxScore) {
-                        maxScorePlayer = currentPlayerScore;
-                        maxScore = currentScore;
-                    }
-                    currentPlayerScore = gameBoard[rowL][col + rowL];
-                    currentScore = 1;
-                }
-            }
-
-            if (currentScore == 5){
-                result.put(0, 1);
-                result.put(1, currentPlayerScore);
-                return result;
-            }
-            else if (maxScore == 5) {
-                result.put(0, 1);
-                result.put(1, maxScorePlayer);
-                return result;
-            }
-        }
-
-        for (int row = 0; row < boardSize; row++) {
-            currentScore = 0;
-            currentPlayerScore = 0;
-            maxScore = 0;
-            maxScorePlayer = 0;
-            if ((boardSize - row) - 5 < 0) {
-                break;
-            }
-            for (int colL = 0; colL < boardSize - row; colL++) {
-                if (currentPlayerScore == gameBoard[row + colL][colL] && currentPlayerScore != 0) {
-                    currentPlayerScore = gameBoard[row + colL][colL];
-                    currentScore += 1;
-                } else if (currentPlayerScore != gameBoard[row + colL][colL] && currentPlayerScore != 0) {
-                    if (currentScore > maxScore) {
-                        maxScorePlayer = currentPlayerScore;
-                        maxScore = currentScore;
-                    }
-                    currentPlayerScore = gameBoard[row + colL][colL];
-                    currentScore = 1;
-                } else {
-                    if (currentScore > maxScore) {
-                        maxScorePlayer = currentPlayerScore;
-                        maxScore = currentScore;
-                    }
-                    currentPlayerScore = gameBoard[row + colL][colL];
-                    currentScore = 1;
-                }
-            }
-
-            if (currentScore == 5){
-                result.put(0, 1);
-                result.put(1, currentPlayerScore);
-                return result;
-            }
-            else if (maxScore == 5) {
-                result.put(0, 1);
-                result.put(1, maxScorePlayer);
-                return result;
-            }
-        }
-
-        // DIAGONAL (R-L)
-        for (int col = boardSize - 1; col >= 0; col--) {
-            currentScore = 0;
-            currentPlayerScore = 0;
-            maxScore = 0;
-            maxScorePlayer = 0;
-            if (col - 4 < 0) {
-                break;
-            }
-            for (int rowL = 0; rowL <= col; rowL++) {
-                if (currentPlayerScore == gameBoard[rowL][col - rowL] && currentPlayerScore != 0) {
-                    currentPlayerScore = gameBoard[rowL][col - rowL];
-                    currentScore += 1;
-                } else if (currentPlayerScore != gameBoard[rowL][col - rowL] && currentPlayerScore != 0) {
-                    if (currentScore > maxScore) {
-                        maxScorePlayer = currentPlayerScore;
-                        maxScore = currentScore;
-                    }
-                    currentPlayerScore = gameBoard[rowL][col - rowL];
-                    currentScore = 1;
-                } else {
-                    if (currentScore > maxScore) {
-                        maxScorePlayer = currentPlayerScore;
-                        maxScore = currentScore;
-                    }
-                    currentPlayerScore = gameBoard[rowL][col - rowL];
-                    currentScore = 1;
-                }
-            }
-
-            if (currentScore == 5){
-                result.put(0, 1);
-                result.put(1, currentPlayerScore);
-                return result;
-            }
-            else if (maxScore == 5) {
-                result.put(0, 1);
-                result.put(1, maxScorePlayer);
-                return result;
-            }
-        }
-
-        for (int row = 1; row < boardSize; row++) {
-            currentScore = 0;
-            currentPlayerScore = 0;
-            maxScore = 0;
-            maxScorePlayer = 0;
-            if ((boardSize - row) - 5 < 0) {
-                break;
-            }
-            for (int colL = boardSize - 1; colL >= row; colL--) {
-                if (currentPlayerScore == gameBoard[row + boardSize - 1 - colL][colL] && currentPlayerScore != 0) {
-                    currentPlayerScore = gameBoard[row + boardSize - 1 - colL][colL];
-                    currentScore += 1;
-                } else if (currentPlayerScore != gameBoard[row + boardSize - 1 - colL][colL]
-                        && currentPlayerScore != 0) {
-                    if (currentScore > maxScore) {
-                        maxScorePlayer = currentPlayerScore;
-                        maxScore = currentScore;
-                    }
-                    currentPlayerScore = gameBoard[row + boardSize - 1 - colL][colL];
-                    currentScore = 1;
-                } else {
-                    if (currentScore > maxScore) {
-                        maxScorePlayer = currentPlayerScore;
-                        maxScore = currentScore;
-                    }
-                    currentPlayerScore = gameBoard[row + boardSize - 1 - colL][colL];
-                    currentScore = 1;
-                }
-            }
-
-            if (currentScore == 5){
-                result.put(0, 1);
-                result.put(1, currentPlayerScore);
-                return result;
-            }
-            else if (maxScore == 5) {
-                result.put(0, 1);
-                result.put(1, maxScorePlayer);
-                return result;
-            }
-        }
-
-        boolean isZero = false;
-        for (int row = 0; row < boardSize; row++) {
-            for (int col = 0; col < boardSize; col++) {
-                if (gameBoard[row][col] == 0) {
-                    return result;
-                }
-            }
-        }
-        if (!isZero) {
+        if (gameBoardOne.cardinality() + gameBoardTwo.cardinality() == boardSize * boardSize) {
             result.put(0, 1);
+        }
+
+        if (currentPlayer == -1) {
+            if (checkBoards(gameBoardOne)) {
+                result.put(0, 1);
+                result.put(1, 1);
+            }
+        } else {
+            if (checkBoards(gameBoardTwo)) {
+                result.put(0, 1);
+                result.put(1, -1);
+            }
         }
 
         return result;
 
     }
 
+    public boolean checkBoards(BitSet gameBoard) {
+        BitSet temp = new BitSet(5);
+
+        // HORIZONTAL
+        for (int row = 0; row < boardSize; row++) {
+            for (int col = 0; col < boardSize - 4; col++) {
+                if (gameBoard.get(row * boardSize + col, row * boardSize + col + 5).cardinality() == 5) {
+                    return true;
+                }
+            }
+        }
+
+        // VERTICAL
+        for (int col = 0; col < boardSize; col++) {
+            for (int row = 0; row < boardSize - 4; row++) {
+                temp.set(0, gameBoard.get(col + row * boardSize));
+                temp.set(1, gameBoard.get(col + row * boardSize + boardSize));
+                temp.set(2, gameBoard.get(col + row * boardSize + 2 * boardSize));
+                temp.set(3, gameBoard.get(col + row * boardSize + 3 * boardSize));
+                temp.set(4, gameBoard.get(col + row * boardSize + 4 * boardSize));
+                if (temp.cardinality() == 5) {
+                    return true;
+                }
+            }
+        }
+
+        // DIAGONAL (L->R)
+        for (int col = 0; col < boardSize; col++) {
+            if ((boardSize - col) - 5 < 0) {
+                break;
+            }
+            for (int row = 0; row < boardSize - col - 4; row++) {
+                temp.set(0, gameBoard.get(col + row * boardSize + row));
+                temp.set(1, gameBoard.get(col + row * boardSize + boardSize + 1 + row));
+                temp.set(2, gameBoard.get(col + row * boardSize + 2 * boardSize + 2 + row));
+                temp.set(3, gameBoard.get(col + row * boardSize + 3 * boardSize + 3 + row));
+                temp.set(4, gameBoard.get(col + row * boardSize + 4 * boardSize + 4 + row));
+                if (temp.cardinality() == 5) {
+                    return true;
+                }
+                if (col > 0) {
+                    temp.set(0, gameBoard.get(col + row * boardSize + row + boardSize - 1));
+                    temp.set(1, gameBoard.get(col + row * boardSize + boardSize + 1 + row + boardSize - 1));
+                    temp.set(2, gameBoard.get(col + row * boardSize + 2 * boardSize + 2 + row + boardSize - 1));
+                    temp.set(3, gameBoard.get(col + row * boardSize + 3 * boardSize + 3 + row + boardSize - 1));
+                    temp.set(4, gameBoard.get(col + row * boardSize + 4 * boardSize + 4 + row + boardSize - 1));
+                    if (temp.cardinality() == 5) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        // DIAGONAL (R->L)
+        for (int col = boardSize - 1; col >= 4; col--) {
+            for (int row = 0; row <= col - 4; row++) {
+                temp.set(0, gameBoard.get(col + row * (boardSize - 1)));
+                temp.set(1, gameBoard.get(col + (row + 1) * (boardSize - 1)));
+                temp.set(2, gameBoard.get(col + (row + 2) * (boardSize - 1)));
+                temp.set(3, gameBoard.get(col + (row + 3) * (boardSize - 1)));
+                temp.set(4, gameBoard.get(col + (row + 4) * (boardSize - 1)));
+                if (temp.cardinality() == 5) {
+                    return true;
+                }
+                if (col < boardSize - 1) {
+                    temp.set(0, gameBoard.get(col + row * (boardSize - 1) + boardSize + 1));
+                    temp.set(1, gameBoard.get(col + (row + 1) * (boardSize - 1) + boardSize + 1));
+                    temp.set(2, gameBoard.get(col + (row + 2) * (boardSize - 1) + boardSize + 1));
+                    temp.set(3, gameBoard.get(col + (row + 3) * (boardSize - 1) + boardSize + 1));
+                    temp.set(4, gameBoard.get(col + (row + 4) * (boardSize - 1) + boardSize + 1));
+                    if (temp.cardinality() == 5) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
     public void printBoard() {
         System.out.printf("%n");
         for (int row = 0; row < boardSize; row++) {
             for (int col = 0; col < boardSize; col++) {
-                if (gameBoard[row][col] == 0) {
-                    System.out.printf("_ ");
-                } else if (gameBoard[row][col] == 1) {
+                if (gameBoardOne.get(row * boardSize + col)) {
                     System.out.printf("O ");
-                } else {
+                } else if (gameBoardTwo.get(row * boardSize + col)) {
                     System.out.printf("X ");
+                } else {
+                    System.out.printf("_ ");
                 }
+
             }
             System.out.printf("%n");
         }
@@ -337,15 +177,23 @@ public class GameEnvironment {
         GameEnvironment newGame = new GameEnvironment(boardSize);
         for (int row = 0; row < boardSize; row++) {
             for (int col = 0; col < boardSize; col++) {
-                newGame.gameBoard[row][col] = gameBoard[row][col];
+                if (gameBoardOne.get(row * boardSize + col)) {
+                    newGame.gameBoardOne.set(row * boardSize + col);
+                } else if (gameBoardTwo.get(row * boardSize + col)) {
+                    newGame.gameBoardTwo.set(row * boardSize + col);
+                }
             }
         }
         newGame.currentPlayer = currentPlayer;
         return newGame;
     }
 
-    public int[][] getGameBoard() {
-        return gameBoard;
+    public BitSet getGameBoardOne() {
+        return gameBoardOne;
+    }
+
+    public BitSet getGameBoardTwo() {
+        return gameBoardTwo;
     }
 
     public int getBoardSize() {
@@ -354,5 +202,9 @@ public class GameEnvironment {
 
     public int getCurrentPlayer() {
         return currentPlayer;
+    }
+
+    public String newHash(){
+        return Integer.toString(currentPlayer)+gameBoardOne.toString()+gameBoardTwo.toString();
     }
 }
