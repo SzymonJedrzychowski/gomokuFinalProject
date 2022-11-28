@@ -6,10 +6,9 @@ public class App
     public static void main( String[] args )
     {
         HashMap<Integer, Integer> result;
-        GameEnvironment game = new GameEnvironment(7);
-        AlphaBetaPruning player1 = new AlphaBetaPruning(5);
+        GameEnvironment game = new GameEnvironment(5);
+        IterativeDeepening player1 = new IterativeDeepening(5000);
         AlphaBetaPruning player2 = new AlphaBetaPruning(3);
-        Evaluator ev = new Evaluator();
         int move;
         while(true){ 
             try {
@@ -18,7 +17,6 @@ public class App
                 }else{
                     move = player2.move(game);
                 }
-                ev.calculateEvaluation(game);
                 game.move(move);
             } catch (Exception e) {
                 System.out.println(e);

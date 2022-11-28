@@ -75,7 +75,7 @@ public class Evaluator {
 
         BitSet e1 = new BitSet(5);
         e1.set(0, 3);
-        e1.set(5);
+        e1.set(4);
         points.put(e1, rewards[1]);
 
         BitSet e2 = new BitSet(5);
@@ -243,9 +243,9 @@ public class Evaluator {
         }
 
         if(game.getCurrentPlayer() == 1){
-            return 15*scoreOne-10*scoreTwo;
-        }else{
             return 10*scoreOne-15*scoreTwo;
+        }else{
+            return 15*scoreOne-10*scoreTwo;
         }
     }
 
