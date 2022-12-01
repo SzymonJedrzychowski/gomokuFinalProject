@@ -8,7 +8,7 @@ public class App
         HashMap<Integer, Integer> result;
         GameEnvironment game = new GameEnvironment(7);
         MCTS player1 = new MCTS(1000, true, (float)1.4);
-        AlphaBetaPruning player2 = new AlphaBetaPruning(5);
+        AlphaBetaPruning player2 = new AlphaBetaPruning(3);
         int move;
         while(true){ 
             try {

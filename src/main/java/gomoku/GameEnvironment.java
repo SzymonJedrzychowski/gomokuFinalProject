@@ -57,7 +57,7 @@ public class GameEnvironment {
 
         if (gameBoardOne.cardinality() + gameBoardTwo.cardinality() == boardSize * boardSize) {
             result.put(0, 1);
-        }else if(gameBoardOne.cardinality()<5){
+        } else if (gameBoardOne.cardinality() < 5) {
             return result;
         }
 
@@ -79,12 +79,22 @@ public class GameEnvironment {
 
     public boolean checkBoards(BitSet gameBoard) {
         BitSet temp = new BitSet(5);
+        boolean over;
 
         // HORIZONTAL
         for (int row = 0; row < boardSize; row++) {
             for (int col = 0; col < boardSize - 4; col++) {
                 if (gameBoard.get(row * boardSize + col, row * boardSize + col + 5).cardinality() == 5) {
-                    return true;
+                    over = false;
+                    if (col > 0) {
+                        over = gameBoard.get(row * boardSize + col - 1);
+                    }
+                    if (col < boardSize - 5) {
+                        over = over || gameBoard.get(row * boardSize + col + 5);
+                    }
+                    if (!over) {
+                        return true;
+                    }
                 }
             }
         }
@@ -93,12 +103,21 @@ public class GameEnvironment {
         for (int col = 0; col < boardSize; col++) {
             for (int row = 0; row < boardSize - 4; row++) {
                 temp.set(0, gameBoard.get(col + row * boardSize));
-                temp.set(1, gameBoard.get(col + row * boardSize + boardSize));
-                temp.set(2, gameBoard.get(col + row * boardSize + 2 * boardSize));
-                temp.set(3, gameBoard.get(col + row * boardSize + 3 * boardSize));
-                temp.set(4, gameBoard.get(col + row * boardSize + 4 * boardSize));
+                temp.set(1, gameBoard.get(col + (row + 1) * boardSize));
+                temp.set(2, gameBoard.get(col + (row + 2) * boardSize));
+                temp.set(3, gameBoard.get(col + (row + 3) * boardSize));
+                temp.set(4, gameBoard.get(col + (row + 4) * boardSize));
                 if (temp.cardinality() == 5) {
-                    return true;
+                    over = false;
+                    if (row > 0) {
+                        over = gameBoard.get(col + (row - 1) * boardSize);
+                    }
+                    if (row < boardSize - 5) {
+                        over = over || gameBoard.get(col + (row + 5) * boardSize);
+                    }
+                    if (!over) {
+                        return true;
+                    }
                 }
             }
         }
@@ -110,21 +129,39 @@ public class GameEnvironment {
             }
             for (int row = 0; row < boardSize - col - 4; row++) {
                 temp.set(0, gameBoard.get(col + row * boardSize + row));
-                temp.set(1, gameBoard.get(col + row * boardSize + boardSize + 1 + row));
-                temp.set(2, gameBoard.get(col + row * boardSize + 2 * boardSize + 2 + row));
-                temp.set(3, gameBoard.get(col + row * boardSize + 3 * boardSize + 3 + row));
-                temp.set(4, gameBoard.get(col + row * boardSize + 4 * boardSize + 4 + row));
+                temp.set(1, gameBoard.get(col + (row + 1) * boardSize + 1 + row));
+                temp.set(2, gameBoard.get(col + (row + 2) * boardSize + 2 + row));
+                temp.set(3, gameBoard.get(col + (row + 3) * boardSize + 3 + row));
+                temp.set(4, gameBoard.get(col + (row + 4) * boardSize + 4 + row));
                 if (temp.cardinality() == 5) {
-                    return true;
+                    over = false;
+                    if (row > 0) {
+                        over = gameBoard.get(col + (row - 1) * boardSize - 1 + row);
+                    }
+                    if (row < boardSize - 5) {
+                        over = over || gameBoard.get(col + (row + 5) * boardSize + 5 + row);
+                    }
+                    if (!over) {
+                        return true;
+                    }
                 }
                 if (col > 0) {
-                    temp.set(0, gameBoard.get(col + row * boardSize + row + boardSize - 1));
-                    temp.set(1, gameBoard.get(col + row * boardSize + boardSize + 1 + row + boardSize - 1));
-                    temp.set(2, gameBoard.get(col + row * boardSize + 2 * boardSize + 2 + row + boardSize - 1));
-                    temp.set(3, gameBoard.get(col + row * boardSize + 3 * boardSize + 3 + row + boardSize - 1));
-                    temp.set(4, gameBoard.get(col + row * boardSize + 4 * boardSize + 4 + row + boardSize - 1));
+                    temp.set(0, gameBoard.get(col + (row + 1) * boardSize + row - 1));
+                    temp.set(1, gameBoard.get(col + (row + 2) * boardSize + row));
+                    temp.set(2, gameBoard.get(col + (row + 3) * boardSize + row + 1));
+                    temp.set(3, gameBoard.get(col + (row + 4) * boardSize + row + 2));
+                    temp.set(4, gameBoard.get(col + (row + 5) * boardSize + row + 3));
                     if (temp.cardinality() == 5) {
-                        return true;
+                        over = false;
+                        if (row > 0) {
+                            over = gameBoard.get(col + row * boardSize + row - 2);
+                        }
+                        if (row < boardSize - 5) {
+                            over = over || gameBoard.get(col + (row + 6) * boardSize + row + 4);
+                        }
+                        if (!over) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -139,7 +176,16 @@ public class GameEnvironment {
                 temp.set(3, gameBoard.get(col + (row + 3) * (boardSize - 1)));
                 temp.set(4, gameBoard.get(col + (row + 4) * (boardSize - 1)));
                 if (temp.cardinality() == 5) {
-                    return true;
+                    over = false;
+                    if (row > 0) {
+                        over = gameBoard.get(col + (row - 1) * (boardSize - 1));
+                    }
+                    if (row < boardSize - 5) {
+                        over = over || gameBoard.get(col + (row + 5) * (boardSize - 1));
+                    }
+                    if (!over) {
+                        return true;
+                    }
                 }
                 if (col < boardSize - 1) {
                     temp.set(0, gameBoard.get(col + row * (boardSize - 1) + boardSize + 1));
@@ -148,7 +194,16 @@ public class GameEnvironment {
                     temp.set(3, gameBoard.get(col + (row + 3) * (boardSize - 1) + boardSize + 1));
                     temp.set(4, gameBoard.get(col + (row + 4) * (boardSize - 1) + boardSize + 1));
                     if (temp.cardinality() == 5) {
-                        return true;
+                        over = false;
+                        if (row > 0) {
+                            over = gameBoard.get(col + (row - 1) * (boardSize - 1) + boardSize + 1);
+                        }
+                        if (row < boardSize - 5) {
+                            over = over || gameBoard.get(col + (row + 5) * (boardSize - 1) + boardSize + 1);
+                        }
+                        if (!over) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -206,7 +261,7 @@ public class GameEnvironment {
         return currentPlayer;
     }
 
-    public String newHash(){
-        return Integer.toString(currentPlayer)+gameBoardOne.toString()+gameBoardTwo.toString();
+    public String newHash() {
+        return Integer.toString(currentPlayer) + gameBoardOne.toString() + gameBoardTwo.toString();
     }
 }
