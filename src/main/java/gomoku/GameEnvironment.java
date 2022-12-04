@@ -3,12 +3,15 @@ package gomoku;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
+import java.util.Random;
 
 public class GameEnvironment {
     private int boardSize;
     private BitSet gameBoardOne;
     private BitSet gameBoardTwo;
     private int currentPlayer;
+    private long[][][] hashArray;
+    private long hash;
 
     GameEnvironment(int boardSize) {
         this.boardSize = boardSize;
@@ -35,6 +38,15 @@ public class GameEnvironment {
             gameBoardTwo.set(move);
         }
         currentPlayer *= -1;
+    }
+
+    public void undoMove(int move) {
+        currentPlayer *= -1;
+        if (currentPlayer == 1) {
+            gameBoardOne.set(move, false);
+        } else {
+            gameBoardTwo.set(move, false);
+        }
     }
 
     public ArrayList<Integer> getLegalMoves() {
@@ -232,6 +244,8 @@ public class GameEnvironment {
 
     public GameEnvironment copy() {
         GameEnvironment newGame = new GameEnvironment(boardSize);
+        newGame.hashArray = hashArray;
+        newGame.hash = hash;
         for (int row = 0; row < boardSize; row++) {
             for (int col = 0; col < boardSize; col++) {
                 if (gameBoardOne.get(row * boardSize + col)) {
@@ -261,7 +275,37 @@ public class GameEnvironment {
         return currentPlayer;
     }
 
-    public String newHash() {
-        return Integer.toString(currentPlayer) + gameBoardOne.toString() + gameBoardTwo.toString();
+    public long getHash() {
+        return hash;
+    }
+
+    public void hashInit() {
+        hashArray = new long[2][boardSize][boardSize];
+        Random randomGenerator = new Random();
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                for (int k = 0; k < boardSize; k++) {
+                    hashArray[i][j][k] = randomGenerator.nextLong();
+                }
+            }
+        }
+        hash = 0;
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                if (gameBoardOne.get(i * boardSize + j)) {
+                    hash ^= hashArray[0][i][j];
+                } else if (gameBoardTwo.get(i * boardSize + j)) {
+                    hash ^= hashArray[1][i][j];
+                }
+            }
+        }
+    }
+
+    public long update(int player, int space) {
+        if (player == 1) {
+            return hash ^= hashArray[0][(int) (space / boardSize)][space % boardSize];
+        } else {
+            return hash ^= hashArray[1][(int) (space / boardSize)][space % boardSize];
+        }
     }
 }

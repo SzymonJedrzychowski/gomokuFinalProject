@@ -3,18 +3,24 @@ package gomoku;
 import java.sql.Timestamp;
 import java.util.HashMap;
 
-public class MCTS {
+public class MCTS extends Player {
     int simulationLimit;
     float explorationValue;
     boolean simulationLimitIsMoves;
 
     MCTS(int simulationLimit, boolean simulationLimitIsMoves, float explorationValue) {
         this.simulationLimit = simulationLimit;
-        this.explorationValue = explorationValue;
         this.simulationLimitIsMoves = simulationLimitIsMoves;
+        this.explorationValue = explorationValue;
     }
 
-    public int move(GameEnvironment state) throws Exception{
+    MCTS(int simulationLimit, boolean simulationLimitIsMoves) {
+        this.simulationLimit = simulationLimit;
+        this.simulationLimitIsMoves = simulationLimitIsMoves;
+        this.explorationValue = 1.4f;
+    }
+
+    public int move(GameEnvironment state) throws Exception {
         Timestamp timestamp1 = new Timestamp(System.currentTimeMillis());
         Timestamp timestamp2;
         int moveCount = 0;

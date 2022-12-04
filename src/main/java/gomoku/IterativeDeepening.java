@@ -9,12 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.sql.Timestamp;
 
-public class IterativeDeepening {
+public class IterativeDeepening extends Player {
     int globalDepth;
     Evaluator evaluator = new Evaluator();
-    HashMap<String, Integer> transpositionTable = new HashMap<>();
-    HashMap<String, HashMap<Integer, GameEnvironment>> previousStates = new HashMap<>();
-    HashMap<String, HashMap<Integer, Integer>> previousScores = new HashMap<>();
+    HashMap<Long, Integer> transpositionTable = new HashMap<>();
+    HashMap<Long, HashMap<Integer, GameEnvironment>> previousStates = new HashMap<>();
+    HashMap<Long, HashMap<Integer, Integer>> previousScores = new HashMap<>();
+
     int timeLimit;
     long startTime;
 
@@ -27,13 +28,14 @@ public class IterativeDeepening {
         globalDepth = 1;
         HashMap<Integer, Integer> results = new HashMap<>();
         HashMap<Integer, Integer> previousResult = new HashMap<>();
+        game.hashInit();
         previousStates.clear();
         previousScores.clear();
         previousResult.put(2, -1);
         do {
             transpositionTable.clear();
             results = iterativeMove(game, globalDepth);
-            if (!results.containsKey(3) && globalDepth%2 == 1) {
+            if (!results.containsKey(3) && globalDepth % 2 == 1) {
                 previousResult = results;
             }
             globalDepth += 1;
@@ -50,12 +52,10 @@ public class IterativeDeepening {
         ArrayList<Integer> bestMovePlace = new ArrayList<>();
         int bestScore = -10000 * currentPlayer;
         int newScore;
-        String hs;
-        String gameHash = game.newHash();
+        long hash = game.getHash();
         GameEnvironment stateCopy;
 
         HashMap<Integer, Integer> results = game.ifTerminal();
-
         if (results.get(0) == 1) {
             results.put(2, results.get(1) * 1000 - results.get(1) * 10 * (globalDepth - depth));
             return results;
@@ -70,24 +70,23 @@ public class IterativeDeepening {
             results.put(3, 1);
             return results;
         }
-
-        LinkedHashMap<Integer, GameEnvironment> states = getStates(game);
-
+        LinkedHashMap<Integer, GameEnvironment> states = getStates(game, hash);
         for (int moveIndex : states.keySet()) {
             stateCopy = states.get(moveIndex);
 
-            hs = stateCopy.newHash();
-            if (transpositionTable.containsKey(hs)) {
-                newScore = transpositionTable.get(hs);
+            hash = game.update(currentPlayer, moveIndex);
+            if (transpositionTable.containsKey(hash)) {
+                newScore = transpositionTable.get(hash);
             } else {
                 results = iterativeDeepMove(stateCopy, depth - 1, -10000, 10000);
                 if (results.containsKey(3)) {
                     return results;
                 }
                 newScore = results.get(2);
-                transpositionTable.put(hs, newScore);
+                transpositionTable.put(hash, newScore);
             }
-            previousScores.get(gameHash).put(moveIndex, newScore);
+            hash = game.update(currentPlayer, moveIndex);
+            previousScores.get(hash).put(moveIndex, newScore);
             if ((newScore > bestScore && currentPlayer == 1)
                     || (newScore < bestScore && currentPlayer == -1)) {
                 bestScore = newScore;
@@ -106,14 +105,13 @@ public class IterativeDeepening {
         int currentPlayer = game.getCurrentPlayer();
         int bestScore = -10000 * currentPlayer;
         int newScore;
-        String hs;
-        String gameHash = game.newHash();
+        long hash = game.getHash();
         GameEnvironment stateCopy;
 
         HashMap<Integer, Integer> results = game.ifTerminal();
 
         if (results.get(0) == 1) {
-            results.put(2, results.get(1) * 1000 - results.get(1) * 10 * (globalDepth - depth));
+            results.put(2, results.get(1) * 10000 - results.get(1) * 10 * (globalDepth - depth));
             return results;
         }
 
@@ -127,27 +125,28 @@ public class IterativeDeepening {
             return results;
         }
 
-        LinkedHashMap<Integer, GameEnvironment> states = getStates(game);
+        LinkedHashMap<Integer, GameEnvironment> states = getStates(game, hash);
 
         for (int moveIndex : states.keySet()) {
             stateCopy = states.get(moveIndex);
 
-            hs = stateCopy.newHash();
-            if (transpositionTable.containsKey(hs)) {
-                newScore = transpositionTable.get(hs);
+            hash = game.update(currentPlayer, moveIndex);
+            if (transpositionTable.containsKey(hash)) {
+                newScore = transpositionTable.get(hash);
             } else {
                 results = iterativeDeepMove(stateCopy, depth - 1, alpha, beta);
                 if (results.containsKey(3)) {
                     return results;
                 }
                 newScore = results.get(2);
-                transpositionTable.put(hs, newScore);
+                transpositionTable.put(hash, newScore);
             }
             if ((newScore > bestScore && currentPlayer == 1)
                     || (newScore < bestScore && currentPlayer == -1)) {
                 bestScore = newScore;
             }
-            previousScores.get(gameHash).put(moveIndex, newScore);
+            hash = game.update(currentPlayer, moveIndex);
+            previousScores.get(hash).put(moveIndex, newScore);
 
             if (game.getCurrentPlayer() == 1) {
                 if (newScore >= beta) {
@@ -186,29 +185,28 @@ public class IterativeDeepening {
         return temp;
     }
 
-    public LinkedHashMap<Integer, GameEnvironment> getStates(GameEnvironment game) throws Exception{
+    public LinkedHashMap<Integer, GameEnvironment> getStates(GameEnvironment game, long hash) throws Exception {
         LinkedHashMap<Integer, GameEnvironment> results = new LinkedHashMap<>();
         ArrayList<Integer> legalMoves = game.getLegalMoves();
-        String hs = game.newHash();
         ArrayList<Integer> indexes = new ArrayList<>();
-        if(previousScores.containsKey(hs)){
-            HashMap<Integer, Integer> moves = previousScores.get(hs);
+        if (previousScores.containsKey(hash)) {
+            HashMap<Integer, Integer> moves = previousScores.get(hash);
             indexes = sortByValue(moves);
-        }else{
-            previousStates.put(hs, new HashMap<>());
-            previousScores.put(hs, new HashMap<>());
+        } else {
+            previousStates.put(hash, new HashMap<>());
+            previousScores.put(hash, new HashMap<>());
         }
-        
-        for(int moveIndex:indexes){
-            results.put(moveIndex, previousStates.get(hs).get(moveIndex));
+
+        for (int moveIndex : indexes) {
+            results.put(moveIndex, previousStates.get(hash).get(moveIndex));
         }
-        if(indexes.size() < legalMoves.size()){
+        if (indexes.size() < legalMoves.size()) {
             GameEnvironment gameCopy;
-            for(int moveIndex:legalMoves){
-                if(!results.containsKey(moveIndex)){
+            for (int moveIndex : legalMoves) {
+                if (!results.containsKey(moveIndex)) {
                     gameCopy = game.copy();
                     gameCopy.move(moveIndex);
-                    previousStates.get(hs).put(moveIndex, gameCopy);
+                    previousStates.get(hash).put(moveIndex, gameCopy);
                     results.put(moveIndex, gameCopy);
                 }
             }

@@ -242,10 +242,10 @@ public class Evaluator {
             }
         }
 
-        if(game.getCurrentPlayer() == 1){
-            return 10*scoreOne-15*scoreTwo;
-        }else{
-            return 15*scoreOne-10*scoreTwo;
+        if (game.getCurrentPlayer() == 1) {
+            return scoreOne - scoreTwo;
+        } else {
+            return scoreOne - scoreTwo;
         }
     }
 

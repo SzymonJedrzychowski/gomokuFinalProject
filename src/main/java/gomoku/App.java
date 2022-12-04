@@ -1,20 +1,19 @@
 package gomoku;
 
 import java.util.HashMap;
-public class App 
-{
-    public static void main( String[] args )
-    {
+
+public class App {
+    public static void main(String[] args) {
         HashMap<Integer, Integer> result;
-        GameEnvironment game = new GameEnvironment(7);
-        MCTS player1 = new MCTS(1000, true, (float)1.4);
-        AlphaBetaPruning player2 = new AlphaBetaPruning(3);
+        GameEnvironment game = new GameEnvironment(11);
+        Player player1 = new AlphaBetaPruning(3);
+        Player player2 = new AlphaBetaPruning(3);
         int move;
-        while(true){ 
+        while (true) {
             try {
-                if(game.getCurrentPlayer() == 1){
+                if (game.getCurrentPlayer() == 1) {
                     move = player1.move(game);
-                }else{
+                } else {
                     move = player2.move(game);
                 }
                 game.move(move);
@@ -25,7 +24,7 @@ public class App
             }
             game.printBoard();
             result = game.ifTerminal();
-            if(result.get(0) != 0){
+            if (result.get(0) != 0) {
                 System.out.printf("Player %d has won.", result.get(1));
                 break;
             }

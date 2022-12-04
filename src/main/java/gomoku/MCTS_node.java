@@ -61,7 +61,7 @@ public class MCTS_node {
             }
 
             int randomNum = ThreadLocalRandom.current().nextInt(0, moves.size());
-            
+
             return children.get(moves.get(randomNum));
         }
     }
