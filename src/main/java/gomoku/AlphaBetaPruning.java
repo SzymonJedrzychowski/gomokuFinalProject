@@ -14,7 +14,8 @@ public class AlphaBetaPruning extends Player {
         this.globalDepth = globalDepth;
     }
 
-    public int move(GameEnvironment game) throws Exception {
+    public int move(GameEnvironment gameState) throws Exception {
+        GameEnvironment game = gameState.copy();
         count = 0;
         int currentPlayer = game.getCurrentPlayer();
         int bestScore = -10000 * currentPlayer;

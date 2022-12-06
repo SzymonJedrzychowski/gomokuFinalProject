@@ -12,12 +12,18 @@ public class GameEnvironment {
     private int currentPlayer;
     private long[][][] hashArray;
     private long hash;
+    private boolean useGraphicalInterface;
+    GraphicsBoard graphicsBoard;
 
-    GameEnvironment(int boardSize) {
+    GameEnvironment(int boardSize, boolean useGraphicalInterface) {
         this.boardSize = boardSize;
         this.gameBoardOne = new BitSet(boardSize * boardSize);
         this.gameBoardTwo = new BitSet(boardSize * boardSize);
+        this.useGraphicalInterface = useGraphicalInterface;
         resetState();
+        if(useGraphicalInterface){
+            graphicsBoard = new GraphicsBoard(boardSize);
+        }
     }
 
     public void resetState() {
@@ -36,6 +42,9 @@ public class GameEnvironment {
             gameBoardOne.set(move);
         } else {
             gameBoardTwo.set(move);
+        }
+        if(useGraphicalInterface){
+            graphicsBoard.makeMove(gameBoardOne, gameBoardTwo);
         }
         currentPlayer *= -1;
     }
@@ -243,7 +252,7 @@ public class GameEnvironment {
     }
 
     public GameEnvironment copy() {
-        GameEnvironment newGame = new GameEnvironment(boardSize);
+        GameEnvironment newGame = new GameEnvironment(boardSize, false);
         newGame.hashArray = hashArray;
         newGame.hash = hash;
         for (int row = 0; row < boardSize; row++) {

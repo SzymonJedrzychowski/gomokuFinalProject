@@ -5,7 +5,7 @@ import java.util.HashMap;
 public class App {
     public static void main(String[] args) {
         HashMap<Integer, Integer> result;
-        GameEnvironment game = new GameEnvironment(11);
+        GameEnvironment game = new GameEnvironment(7, true);
         Player player1 = new AlphaBetaPruning(3);
         Player player2 = new AlphaBetaPruning(3);
         int move;

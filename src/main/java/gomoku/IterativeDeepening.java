@@ -23,11 +23,12 @@ public class IterativeDeepening extends Player {
         this.timeLimit = timeLimit;
     }
 
-    public int move(GameEnvironment game) throws Exception {
+    public int move(GameEnvironment gameState) throws Exception {
         startTime = new Timestamp(System.currentTimeMillis()).getTime();
         globalDepth = 1;
         HashMap<Integer, Integer> results = new HashMap<>();
         HashMap<Integer, Integer> previousResult = new HashMap<>();
+        GameEnvironment game = gameState.copy();
         game.hashInit();
         previousStates.clear();
         previousScores.clear();
