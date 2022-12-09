@@ -3,14 +3,21 @@ package gomoku;
 import java.sql.Timestamp;
 import java.util.HashMap;
 
-public class MCTS extends Player {
+public class MCTS_UCT extends Player {
     int simulationLimit;
     float explorationValue;
     boolean simulationLimitIsMoves;
 
-    MCTS(int simulationLimit, boolean simulationLimitIsMoves) {
+    MCTS_UCT(int simulationLimit, boolean simulationLimitIsMoves, float explorationValue) {
         this.simulationLimit = simulationLimit;
         this.simulationLimitIsMoves = simulationLimitIsMoves;
+        this.explorationValue = explorationValue;
+    }
+
+    MCTS_UCT(int simulationLimit, boolean simulationLimitIsMoves) {
+        this.simulationLimit = simulationLimit;
+        this.simulationLimitIsMoves = simulationLimitIsMoves;
+        this.explorationValue = 1.4f;
     }
 
     public int move(GameEnvironment state) throws Exception {
@@ -18,30 +25,30 @@ public class MCTS extends Player {
         Timestamp timestamp2;
         int moveCount = 0;
 
-        MCTS_node currentNode = new MCTS_node(state, null);
-        MCTS_node selectedNode;
+        MCTS_UCT_node currentNode = new MCTS_UCT_node(state, null);
+        MCTS_UCT_node selectedNode;
 
         if (simulationLimitIsMoves == true) {
             while (moveCount < simulationLimit) {
-                selectedNode = currentNode.select();
+                selectedNode = currentNode.select(explorationValue);
                 while (selectedNode != null) {
-                    selectedNode = selectedNode.select();
+                    selectedNode = selectedNode.select(explorationValue);
                 }
                 moveCount += 1;
             }
         } else {
             do {
                 timestamp2 = new Timestamp(System.currentTimeMillis());
-                selectedNode = currentNode.select();
+                selectedNode = currentNode.select(explorationValue);
                 while (selectedNode != null) {
-                    selectedNode = selectedNode.select();
+                    selectedNode = selectedNode.select(explorationValue);
                 }
                 moveCount += 1;
             } while (timestamp2.getTime() - timestamp1.getTime() < simulationLimit);
         }
 
         HashMap<Integer, Float> UCB = new HashMap<>();
-        MCTS_node child;
+        MCTS_UCT_node child;
 
         for (int moveIndex : currentNode.children.keySet()) {
             child = currentNode.children.get(moveIndex);

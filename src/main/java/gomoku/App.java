@@ -6,8 +6,8 @@ public class App {
     public static void main(String[] args) {
         HashMap<Integer, Integer> result;
         GameEnvironment game = new GameEnvironment(7, true);
-        Player player1 = new AlphaBetaPruning(3);
-        Player player2 = new AlphaBetaPruning(3);
+        Player player1 = new MCTS(3000, true);
+        Player player2 = new MCTS_UCT(3000, true);
         int move;
         while (true) {
             try {
