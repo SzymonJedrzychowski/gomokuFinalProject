@@ -6,8 +6,8 @@ public class App {
     public static void main(String[] args) {
         HashMap<Integer, Integer> result;
         GameEnvironment game = new GameEnvironment(7, true);
-        Player player1 = new MCTS_UCT(1000, false);
-        Player player2 = new IterativeDeepening(1000);
+        Player player1 = new BestFirstMinimax(5000);
+        Player player2 = new MCTS_UCT(5000);
         int move;
         while (true) {
             try {

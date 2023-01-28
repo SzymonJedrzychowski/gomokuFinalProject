@@ -55,7 +55,7 @@ public class IterativeDeepening extends Player {
         int currentPlayer = game.getCurrentPlayer();
 
         ArrayList<Integer> bestMovePlace = new ArrayList<>();
-        int bestScore = -10000 * currentPlayer;
+        int bestScore = currentPlayer == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int newScore;
 
         HashMap<Integer, Integer> results = game.ifTerminal();
@@ -109,7 +109,7 @@ public class IterativeDeepening extends Player {
         int currentPlayer = game.getCurrentPlayer();
         
         ArrayList<Integer> bestMovePlace = new ArrayList<>();
-        int bestScore = -10000 * currentPlayer;
+        int bestScore = currentPlayer == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int newScore;
 
         long hash = game.getHash();
@@ -117,7 +117,7 @@ public class IterativeDeepening extends Player {
         HashMap<Integer, Integer> results = game.ifTerminal();
 
         if (results.get(0) == 1) {
-            results.put(2, results.get(1) * 10000 - results.get(1) * 10 * (globalDepth - depth));
+            results.put(2, results.get(1) == 1 ? Integer.MAX_VALUE-(globalDepth-depth)*10 : Integer.MIN_VALUE+(globalDepth-depth)*10);
             return results;
         }
 

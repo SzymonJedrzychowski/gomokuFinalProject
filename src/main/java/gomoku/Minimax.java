@@ -74,7 +74,7 @@ public class Minimax extends Player {
         HashMap<Integer, Integer> results = game.ifTerminal();
 
         if (results.get(0) == 1) {
-            return results.get(1) == 1 ? Integer.MAX_VALUE+(globalDepth-depth)*10 : Integer.MIN_VALUE-(globalDepth-depth)*10;
+            return results.get(1) == 1 ? Integer.MAX_VALUE-(globalDepth-depth)*10 : Integer.MIN_VALUE+(globalDepth-depth)*10;
         }
 
         if (depth == 0) {

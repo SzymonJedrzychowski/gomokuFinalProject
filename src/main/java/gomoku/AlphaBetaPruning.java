@@ -18,7 +18,7 @@ public class AlphaBetaPruning extends Player {
         GameEnvironment game = gameState.copy();
         count = 0;
         int currentPlayer = game.getCurrentPlayer();
-        int bestScore = -10000 * currentPlayer;
+        int bestScore = currentPlayer == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int newScore;
         ArrayList<Integer> bestMovePlace = new ArrayList<>();
         transpositionTable.clear();
@@ -59,13 +59,13 @@ public class AlphaBetaPruning extends Player {
 
     public int deepMove(GameEnvironment game, int depth, long hash, int alpha, int beta) throws Exception {
         int currentPlayer = game.getCurrentPlayer();
-        int bestScore = -10000 * currentPlayer;
+        int bestScore = currentPlayer == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int newScore;
 
         HashMap<Integer, Integer> results = game.ifTerminal();
 
         if (results.get(0) == 1) {
-            return results.get(1) * 5000 - results.get(1) * 10 * (globalDepth - depth);
+            return results.get(1) == 1 ? Integer.MAX_VALUE-(globalDepth-depth)*10 : Integer.MIN_VALUE+(globalDepth-depth)*10;
         }
 
         if (depth == 0) {

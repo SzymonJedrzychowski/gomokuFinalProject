@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class MCTS_UCT_node {
+public class MCTS_UCT_node{
     GameEnvironment state;
     MCTS_UCT_node parent;
     HashMap<Integer, MCTS_UCT_node> children = new HashMap<>();
-    int reward = 0;
+    int[] stats = {0,0,0};
     int visits = 0;
 
     MCTS_UCT_node(GameEnvironment state, MCTS_UCT_node parent) {
@@ -17,22 +17,12 @@ public class MCTS_UCT_node {
     }
 
     public MCTS_UCT_node select(float explorationValue) throws Exception {
-        if (children.size() == 0) {
-            GameEnvironment stateCopy;
-            MCTS_UCT_node newNode;
-
-            ArrayList<Integer> legalMoves = state.getLegalMoves();
-
-            for (int move : legalMoves) {
-                stateCopy = state.copy();
-                stateCopy.move(move);
-
-                newNode = new MCTS_UCT_node(stateCopy, this);
-                newNode.randomPolicy();
-
-                children.put(move, newNode);
-            }
-
+        ArrayList<Integer> legalMoves = state.getLegalMoves();
+        if (children.size() < legalMoves.size()) {
+            expand();
+            return null;
+        } else if(legalMoves.size() == 0){
+            randomPolicy();
             return null;
         } else {
             HashMap<Integer, Float> UCB = new HashMap<>();
@@ -40,11 +30,11 @@ public class MCTS_UCT_node {
             for (Integer move : children.keySet()) {
                 child = children.get(move);
                 if (state.getCurrentPlayer() == 1) {
-                    UCB.put(move, (float) (child.reward / child.visits
-                            + explorationValue * Math.pow((2 * Math.log(visits) / child.visits), 0.5)));
+                    UCB.put(move, (float) ((child.stats[0]+0.5*child.stats[1]) / child.visits
+                            + explorationValue * Math.sqrt((Math.log(visits) / child.visits))));
                 } else {
-                    UCB.put(move, (float) (-child.reward / child.visits
-                            + explorationValue * Math.pow((2 * Math.log(visits) / child.visits), 0.5)));
+                    UCB.put(move, (float) ((child.stats[2]+0.5*child.stats[1]) / child.visits
+                            + explorationValue * Math.sqrt((Math.log(visits) / child.visits))));
                 }
             }
             float bestValue = Float.NEGATIVE_INFINITY;
@@ -60,16 +50,44 @@ public class MCTS_UCT_node {
                 }
             }
 
-            int randomNum = ThreadLocalRandom.current().nextInt(0, moves.size());
-
-            return children.get(moves.get(randomNum));
+            return children.get(moves.get((int) (Math.random()*moves.size())));
         }
     }
+
+    private void expand() throws Exception{
+        GameEnvironment stateCopy;
+        MCTS_UCT_node newNode;
+
+        ArrayList<Integer> legalMoves = state.getLegalMoves();
+        ArrayList<Integer> possibleMoves = new ArrayList<>();
+
+        for (int move : legalMoves) {
+            if (!children.containsKey(move)) {
+                possibleMoves.add(move);
+            }
+        }
+
+        int move = possibleMoves.get((int) (Math.random() * possibleMoves.size()));
+        stateCopy = state.copy();
+        stateCopy.move(move);
+
+        newNode = new MCTS_UCT_node(stateCopy, this);
+        newNode.randomPolicy();
+
+        children.put(move, newNode);
+    }
+
 
     private void randomPolicy() throws Exception {
         HashMap<Integer, Integer> results = state.ifTerminal();
         if (results.get(0) == 1) {
-            reward += results.get(1);
+            if(results.get(1) == 1){
+                stats[0] += 1;
+            }else if(results.get(1) == -1){
+                stats[2] += 1;
+            }else{
+                stats[1] += 1;
+            }
             visits += 1;
             propagate(results.get(1));
         } else {
@@ -90,7 +108,13 @@ public class MCTS_UCT_node {
                 }
                 results = thisState.ifTerminal();
             }
-            reward += results.get(1);
+            if(results.get(1) == 1){
+                stats[0] += 1;
+            }else if(results.get(1) == -1){
+                stats[2] += 1;
+            }else{
+                stats[1] += 1;
+            }
             visits += 1;
             propagate(results.get(1));
         }
@@ -103,7 +127,13 @@ public class MCTS_UCT_node {
             if (parentNode == null) {
                 break;
             }
-            parentNode.reward += result;
+            if(result == 1){
+                parentNode.stats[0] += 1;
+            }else if(result == -1){
+                parentNode.stats[2] += 1;
+            }else{
+                parentNode.stats[1] += 1;
+            }
             parentNode.visits += 1;
         }
     }

@@ -17,22 +17,12 @@ public class MCTS_node {
     }
 
     public MCTS_node select() throws Exception {
-        if (children.size() == 0) {
-            GameEnvironment stateCopy;
-            MCTS_node newNode;
-
-            ArrayList<Integer> legalMoves = state.getLegalMoves();
-
-            for (int move : legalMoves) {
-                stateCopy = state.copy();
-                stateCopy.move(move);
-
-                newNode = new MCTS_node(stateCopy, this);
-                newNode.randomPolicy();
-
-                children.put(move, newNode);
-            }
-
+        ArrayList<Integer> legalMoves = state.getLegalMoves();
+        if (children.size() < legalMoves.size()) {
+            expand();
+            return null;
+        } else if(legalMoves.size() == 0){
+            randomPolicy();
             return null;
         } else {
             HashMap<Integer, Float> UCB = new HashMap<>();
@@ -57,11 +47,32 @@ public class MCTS_node {
                     moves.add(move);
                 }
             }
-
-            int randomNum = ThreadLocalRandom.current().nextInt(0, moves.size());
-
-            return children.get(moves.get(randomNum));
+            
+            return children.get(moves.get((int) (Math.random()*moves.size())));
         }
+    }
+
+    private void expand() throws Exception{
+        GameEnvironment stateCopy;
+        MCTS_node newNode;
+
+        ArrayList<Integer> legalMoves = state.getLegalMoves();
+        ArrayList<Integer> possibleMoves = new ArrayList<>();
+
+        for (int move : legalMoves) {
+            if (!children.containsKey(move)) {
+                possibleMoves.add(move);
+            }
+        }
+
+        int move = possibleMoves.get((int) (Math.random() * possibleMoves.size()));
+        stateCopy = state.copy();
+        stateCopy.move(move);
+
+        newNode = new MCTS_node(stateCopy, this);
+        newNode.randomPolicy();
+
+        children.put(move, newNode);
     }
 
     private void randomPolicy() throws Exception {
@@ -94,7 +105,7 @@ public class MCTS_node {
         }
     }
 
-    private void propagate(int result) {
+    protected void propagate(int result) {
         MCTS_node parentNode = this;
         while (true) {
             parentNode = parentNode.parent;

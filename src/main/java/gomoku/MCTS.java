@@ -4,13 +4,11 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 
 public class MCTS extends Player {
-    int simulationLimit;
+    int timeLimit;
     float explorationValue;
-    boolean simulationLimitIsMoves;
 
-    MCTS(int simulationLimit, boolean simulationLimitIsMoves) {
-        this.simulationLimit = simulationLimit;
-        this.simulationLimitIsMoves = simulationLimitIsMoves;
+    MCTS(int timeLimit) {
+        this.timeLimit = timeLimit;
     }
 
     public int move(GameEnvironment state) throws Exception {
@@ -20,35 +18,24 @@ public class MCTS extends Player {
 
         MCTS_node currentNode = new MCTS_node(state, null);
         MCTS_node selectedNode;
-
-        if (simulationLimitIsMoves == true) {
-            while (moveCount < simulationLimit) {
-                selectedNode = currentNode.select();
-                while (selectedNode != null) {
-                    selectedNode = selectedNode.select();
-                }
-                moveCount += 1;
+        do {
+            timestamp2 = new Timestamp(System.currentTimeMillis());
+            selectedNode = currentNode.select();
+            while (selectedNode != null) {
+                selectedNode = selectedNode.select();
             }
-        } else {
-            do {
-                timestamp2 = new Timestamp(System.currentTimeMillis());
-                selectedNode = currentNode.select();
-                while (selectedNode != null) {
-                    selectedNode = selectedNode.select();
-                }
-                moveCount += 1;
-            } while (timestamp2.getTime() - timestamp1.getTime() < simulationLimit);
-        }
+            moveCount += 1;
+        } while (timestamp2.getTime() - timestamp1.getTime() < timeLimit);
 
-        HashMap<Integer, Float> UCB = new HashMap<>();
+        HashMap<Integer, Float> scores = new HashMap<>();
         MCTS_node child;
 
         for (int moveIndex : currentNode.children.keySet()) {
             child = currentNode.children.get(moveIndex);
             if (state.getCurrentPlayer() == 1) {
-                UCB.put(moveIndex, ((float) child.reward / (float) child.visits));
+                scores.put(moveIndex, ((float) child.reward / (float) child.visits));
             } else {
-                UCB.put(moveIndex, ((float) -child.reward / (float) child.visits));
+                scores.put(moveIndex, ((float) -child.reward / (float) child.visits));
             }
         }
 
@@ -56,8 +43,8 @@ public class MCTS extends Player {
         int bestMovePlace = -1;
         float moveValue;
 
-        for (int moveIndex : UCB.keySet()) {
-            moveValue = UCB.get(moveIndex);
+        for (int moveIndex : scores.keySet()) {
+            moveValue = scores.get(moveIndex);
             if (moveValue > bestValue) {
                 bestValue = moveValue;
                 bestMovePlace = moveIndex;
