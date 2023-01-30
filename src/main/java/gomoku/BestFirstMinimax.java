@@ -20,7 +20,6 @@ public class BestFirstMinimax extends Player {
         BestFirstMinimax_node currentNode = new BestFirstMinimax_node(state, null, 1);
         BestFirstMinimax_node selectedNode = currentNode;
         BestFirstMinimax_node nextNode;
-
         do {
             timestamp2 = new Timestamp(System.currentTimeMillis());
             nextNode = currentNode.select();
@@ -61,7 +60,7 @@ public class BestFirstMinimax extends Player {
         }
 
         timestamp2 = new Timestamp(System.currentTimeMillis());
-        System.out.printf("%-30s time: %10d moveCount: %10d %n", "BFS",
+        System.out.printf("%-30s time: %10d moveCount: %10d %n", "BFMS",
                 timestamp2.getTime() - timestamp1.getTime(), moveCount);
 
         return moves.get((int) (Math.random() * moves.size()));

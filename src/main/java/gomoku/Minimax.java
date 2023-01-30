@@ -15,6 +15,8 @@ public class Minimax extends Player {
     }
 
     public int move(GameEnvironment gameState) throws Exception {
+        count = 0;
+        
         GameEnvironment game = gameState.copy();
         int currentPlayer = game.getCurrentPlayer();
         
@@ -23,8 +25,8 @@ public class Minimax extends Player {
         int newScore;
 
         transpositionTable.clear();
+        
         game.hashInit();
-        count = 0;
 
         Timestamp timestamp1 = new Timestamp(System.currentTimeMillis());
 
@@ -69,11 +71,14 @@ public class Minimax extends Player {
         int bestScore = currentPlayer == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int newScore;
         
-        long hash = game.getHash();
+        long hash;
 
         HashMap<Integer, Integer> results = game.ifTerminal();
 
         if (results.get(0) == 1) {
+            if(results.get(1) == 0){
+                return 0;
+            }
             return results.get(1) == 1 ? Integer.MAX_VALUE-(globalDepth-depth)*10 : Integer.MIN_VALUE+(globalDepth-depth)*10;
         }
 

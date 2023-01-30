@@ -51,7 +51,6 @@ public class BestFirstMinimax_node {
         BestFirstMinimax_node newNode;
 
         ArrayList<Integer> legalMoves = state.getLegalMoves();
-
         for (int move : legalMoves) {
             stateCopy = state.copy();
             stateCopy.move(move);
@@ -74,6 +73,7 @@ public class BestFirstMinimax_node {
                 score = 0;
             }
             this.propagate(score);
+            return;
         }
 
         int bestScore = currentPlayer == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
@@ -108,8 +108,8 @@ public class BestFirstMinimax_node {
             }
             currentPlayer = parentNode.state.getCurrentPlayer();
 
-            if ((currentPlayer == 1 && parentNode.score < result)
-                    || (currentPlayer == -1 && parentNode.score > result)) {
+            if ((currentPlayer == 1 && parentNode.score <= result)
+                    || (currentPlayer == -1 && parentNode.score >= result)) {
                 parentNode.score = result;
             } else {
                 parentNode.score = currentPlayer == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;

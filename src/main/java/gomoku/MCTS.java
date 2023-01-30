@@ -33,9 +33,9 @@ public class MCTS extends Player {
         for (int moveIndex : currentNode.children.keySet()) {
             child = currentNode.children.get(moveIndex);
             if (state.getCurrentPlayer() == 1) {
-                scores.put(moveIndex, ((float) child.reward / (float) child.visits));
+                scores.put(moveIndex, (float) ((child.stats[0] + child.stats[1] * 0.5) / child.visits));
             } else {
-                scores.put(moveIndex, ((float) -child.reward / (float) child.visits));
+                scores.put(moveIndex, (float) ((child.stats[2] + child.stats[1] * 0.5) / child.visits));
             }
         }
 

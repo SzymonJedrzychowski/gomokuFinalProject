@@ -8,7 +8,7 @@ public class MCTS_node {
     GameEnvironment state;
     MCTS_node parent;
     HashMap<Integer, MCTS_node> children = new HashMap<>();
-    int reward = 0;
+    int[] stats = {0,0,0};
     int visits = 0;
 
     MCTS_node(GameEnvironment state, MCTS_node parent) {
@@ -30,9 +30,9 @@ public class MCTS_node {
             for (Integer move : children.keySet()) {
                 child = children.get(move);
                 if (state.getCurrentPlayer() == 1) {
-                    UCB.put(move, (float) (child.reward / child.visits));
+                    UCB.put(move, (float) ((child.stats[0]+0.5*child.stats[1]) / child.visits));
                 } else {
-                    UCB.put(move, (float) (-child.reward / child.visits));
+                    UCB.put(move, (float) ((child.stats[2]+0.5*child.stats[1]) / child.visits));
                 }
             }
             float bestValue = Float.NEGATIVE_INFINITY;
@@ -78,7 +78,13 @@ public class MCTS_node {
     private void randomPolicy() throws Exception {
         HashMap<Integer, Integer> results = state.ifTerminal();
         if (results.get(0) == 1) {
-            reward += results.get(1);
+            if(results.get(1) == 1){
+                stats[0] += 1;
+            }else if(results.get(1) == -1){
+                stats[2] += 1;
+            }else{
+                stats[1] += 1;
+            }
             visits += 1;
             propagate(results.get(1));
         } else {
@@ -99,7 +105,13 @@ public class MCTS_node {
                 }
                 results = thisState.ifTerminal();
             }
-            reward += results.get(1);
+            if(results.get(1) == 1){
+                stats[0] += 1;
+            }else if(results.get(1) == -1){
+                stats[2] += 1;
+            }else{
+                stats[1] += 1;
+            }
             visits += 1;
             propagate(results.get(1));
         }
@@ -112,7 +124,13 @@ public class MCTS_node {
             if (parentNode == null) {
                 break;
             }
-            parentNode.reward += result;
+            if(result == 1){
+                parentNode.stats[0] += 1;
+            }else if(result == -1){
+                parentNode.stats[2] += 1;
+            }else{
+                parentNode.stats[1] += 1;
+            }
             parentNode.visits += 1;
         }
     }

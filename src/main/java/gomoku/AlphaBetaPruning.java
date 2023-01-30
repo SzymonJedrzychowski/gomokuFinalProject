@@ -15,14 +15,17 @@ public class AlphaBetaPruning extends Player {
     }
 
     public int move(GameEnvironment gameState) throws Exception {
-        GameEnvironment game = gameState.copy();
         count = 0;
+        
+        GameEnvironment game = gameState.copy();
         int currentPlayer = game.getCurrentPlayer();
+        
         int bestScore = currentPlayer == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-        int newScore;
         ArrayList<Integer> bestMovePlace = new ArrayList<>();
+        int newScore;
+        
         transpositionTable.clear();
-        long hash;
+        
         game.hashInit();
 
         Timestamp timestamp1 = new Timestamp(System.currentTimeMillis());
@@ -36,8 +39,9 @@ public class AlphaBetaPruning extends Player {
                 throw new Exception("Minimax: " + e);
             }
 
-            hash = game.update(currentPlayer, moveIndex);
-            newScore = deepMove(game, globalDepth - 1, hash, -10000, 10000);
+            game.update(currentPlayer, moveIndex);
+        
+            newScore = deepMove(game, globalDepth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
             if ((newScore > bestScore && currentPlayer == 1)
                     || (newScore < bestScore && currentPlayer == -1)) {
                 bestScore = newScore;
@@ -47,24 +51,31 @@ public class AlphaBetaPruning extends Player {
                     || (newScore == bestScore && currentPlayer == -1)) {
                 bestMovePlace.add(moveIndex);
             }
-            hash = game.update(currentPlayer, moveIndex);
+        
+            game.update(currentPlayer, moveIndex);
             game.undoMove(moveIndex);
         }
+
         Timestamp timestamp2 = new Timestamp(System.currentTimeMillis());
-        System.out.printf("%-30s: %d time: %10d%n", "AlphaBetaPruning", currentPlayer,
-                timestamp2.getTime() - timestamp1.getTime());
-        System.out.println(count);
+        System.out.printf("%-30s: %d time: %8d moveCount: %10d%n", "AlphaBetaPruning", currentPlayer,
+                timestamp2.getTime() - timestamp1.getTime(), count);
         return bestMovePlace.get((int) (Math.random() * bestMovePlace.size()));
     }
 
-    public int deepMove(GameEnvironment game, int depth, long hash, int alpha, int beta) throws Exception {
+    public int deepMove(GameEnvironment game, int depth, int alpha, int beta) throws Exception {
         int currentPlayer = game.getCurrentPlayer();
+        
         int bestScore = currentPlayer == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int newScore;
+
+        long hash;        
 
         HashMap<Integer, Integer> results = game.ifTerminal();
 
         if (results.get(0) == 1) {
+            if(results.get(1) == 0){
+                return 0;
+            }
             return results.get(1) == 1 ? Integer.MAX_VALUE-(globalDepth-depth)*10 : Integer.MIN_VALUE+(globalDepth-depth)*10;
         }
 
@@ -82,21 +93,24 @@ public class AlphaBetaPruning extends Player {
             }
 
             hash = game.update(currentPlayer, moveIndex);
+            
             if (transpositionTable.containsKey(hash)) {
                 count += 1;
                 newScore = transpositionTable.get(hash);
             } else {
-                newScore = deepMove(game, depth - 1, hash, alpha, beta);
+                newScore = deepMove(game, depth - 1, alpha, beta);
                 transpositionTable.put(hash, newScore);
             }
+
             if ((newScore > bestScore && currentPlayer == 1)
                     || (newScore < bestScore && currentPlayer == -1)) {
                 bestScore = newScore;
             }
+            
             game.undoMove(moveIndex);
             hash = game.update(currentPlayer, moveIndex);
 
-            if (game.getCurrentPlayer() == 1) {
+            if (currentPlayer == 1) {
                 if (newScore >= beta) {
                     break;
                 }
@@ -108,6 +122,7 @@ public class AlphaBetaPruning extends Player {
                 beta = Math.min(beta, newScore);
             }
         }
+        
         return bestScore;
     }
 

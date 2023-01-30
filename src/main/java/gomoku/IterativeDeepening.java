@@ -76,7 +76,7 @@ public class IterativeDeepening extends Player {
 
             game.update(currentPlayer, moveIndex);
 
-            results = iterativeDeepMove(game, depth - 1, -10000, 10000);
+            results = iterativeDeepMove(game, depth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
             if (results.containsKey(3)) {
                 return results;
             }
@@ -117,7 +117,11 @@ public class IterativeDeepening extends Player {
         HashMap<Integer, Integer> results = game.ifTerminal();
 
         if (results.get(0) == 1) {
-            results.put(2, results.get(1) == 1 ? Integer.MAX_VALUE-(globalDepth-depth)*10 : Integer.MIN_VALUE+(globalDepth-depth)*10);
+            if(results.get(1) == 0){
+                results.put(2, 0);
+            }else{
+                results.put(2, results.get(1) == 1 ? Integer.MAX_VALUE-(globalDepth-depth)*10 : Integer.MIN_VALUE+(globalDepth-depth)*10);
+            }
             return results;
         }
 
@@ -126,7 +130,7 @@ public class IterativeDeepening extends Player {
             return results;
         }
 
-        if (new Timestamp(System.currentTimeMillis()).getTime() - timeLimit + 10 > startTime) {
+        if (new Timestamp(System.currentTimeMillis()).getTime() - timeLimit > startTime) {
             results.put(3, 1);
             return results;
         }
