@@ -4,11 +4,11 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class BestFirstMinimax extends Player {
+public class RecursiveBestFirstMinimax extends Player{
     int timeLimit;
     Evaluator evaluator = new Evaluator();
 
-    BestFirstMinimax(int timeLimit) {
+    RecursiveBestFirstMinimax(int timeLimit) {
         this.timeLimit = timeLimit;
     }
 
@@ -43,8 +43,6 @@ public class BestFirstMinimax extends Player {
                 UCB.put(moveIndex, -child.score);
             }
         }
-
-        System.out.println(UCB);
 
         int bestValue = Integer.MIN_VALUE;
         ArrayList<Integer> moves = new ArrayList<>();

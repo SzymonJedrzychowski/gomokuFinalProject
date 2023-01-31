@@ -170,27 +170,28 @@ public class Evaluator {
                     thisPoints = points.getOrDefault(temp2, 0);
                     scoreTwo += thisPoints;
                 }
+            }
+        }
+        for (int col = 0; col < boardSize - 5; col++) {
+            for (int row = 1; row <= boardSize - 5 - col; row++) {
+                temp1.set(0, gameBoardOne.get((row) * boardSize + col * (boardSize + 1)));
+                temp1.set(1, gameBoardOne.get((row + 1) * boardSize + col * (boardSize + 1) + 1));
+                temp1.set(2, gameBoardOne.get((row + 2) * boardSize + col * (boardSize + 1) + 2));
+                temp1.set(3, gameBoardOne.get((row + 3) * boardSize + col * (boardSize + 1) + 3));
+                temp1.set(4, gameBoardOne.get((row + 4) * boardSize + col * (boardSize + 1) + 4));
 
-                if (col > 0) {
-                    temp1.set(0, gameBoardOne.get(col + row * boardSize + row + boardSize - 1));
-                    temp1.set(1, gameBoardOne.get(col + row * boardSize + boardSize + 1 + row + boardSize - 1));
-                    temp1.set(2, gameBoardOne.get(col + row * boardSize + 2 * boardSize + 2 + row + boardSize - 1));
-                    temp1.set(3, gameBoardOne.get(col + row * boardSize + 3 * boardSize + 3 + row + boardSize - 1));
-                    temp1.set(4, gameBoardOne.get(col + row * boardSize + 4 * boardSize + 4 + row + boardSize - 1));
+                temp2.set(0, gameBoardTwo.get((row) * boardSize + col * (boardSize + 1)));
+                temp2.set(1, gameBoardTwo.get((row + 1) * boardSize + col * (boardSize + 1) + 1));
+                temp2.set(2, gameBoardTwo.get((row + 2) * boardSize + col * (boardSize + 1) + 2));
+                temp2.set(3, gameBoardTwo.get((row + 3) * boardSize + col * (boardSize + 1) + 3));
+                temp2.set(4, gameBoardTwo.get((row + 4) * boardSize + col * (boardSize + 1) + 4));
 
-                    temp2.set(0, gameBoardTwo.get(col + row * boardSize + row + boardSize - 1));
-                    temp2.set(1, gameBoardTwo.get(col + row * boardSize + boardSize + 1 + row + boardSize - 1));
-                    temp2.set(2, gameBoardTwo.get(col + row * boardSize + 2 * boardSize + 2 + row + boardSize - 1));
-                    temp2.set(3, gameBoardTwo.get(col + row * boardSize + 3 * boardSize + 3 + row + boardSize - 1));
-                    temp2.set(4, gameBoardTwo.get(col + row * boardSize + 4 * boardSize + 4 + row + boardSize - 1));
-
-                    if (temp1.cardinality() > 1 && temp2.cardinality() == 0) {
-                        thisPoints = points.getOrDefault(temp1, 0);
-                        scoreOne += thisPoints;
-                    } else if (temp2.cardinality() > 1 && temp1.cardinality() == 0) {
-                        thisPoints = points.getOrDefault(temp2, 0);
-                        scoreTwo += thisPoints;
-                    }
+                if (temp1.cardinality() > 1 && temp2.cardinality() == 0) {
+                    thisPoints = points.getOrDefault(temp1, 0);
+                    scoreOne += thisPoints;
+                } else if (temp2.cardinality() > 1 && temp1.cardinality() == 0) {
+                    thisPoints = points.getOrDefault(temp2, 0);
+                    scoreTwo += thisPoints;
                 }
             }
         }
@@ -217,27 +218,28 @@ public class Evaluator {
                     thisPoints = points.getOrDefault(temp2, 0);
                     scoreTwo += thisPoints;
                 }
-
-                if (col < boardSize - 1) {
-                    temp1.set(0, gameBoardOne.get(col + row * (boardSize - 1) + boardSize + 1));
-                    temp1.set(1, gameBoardOne.get(col + (row + 1) * (boardSize - 1) + boardSize + 1));
-                    temp1.set(2, gameBoardOne.get(col + (row + 2) * (boardSize - 1) + boardSize + 1));
-                    temp1.set(3, gameBoardOne.get(col + (row + 3) * (boardSize - 1) + boardSize + 1));
-                    temp1.set(4, gameBoardOne.get(col + (row + 4) * (boardSize - 1) + boardSize + 1));
-
-                    temp2.set(0, gameBoardTwo.get(col + row * (boardSize - 1) + boardSize + 1));
-                    temp2.set(1, gameBoardTwo.get(col + (row + 1) * (boardSize - 1) + boardSize + 1));
-                    temp2.set(2, gameBoardTwo.get(col + (row + 2) * (boardSize - 1) + boardSize + 1));
-                    temp2.set(3, gameBoardTwo.get(col + (row + 3) * (boardSize - 1) + boardSize + 1));
-                    temp2.set(4, gameBoardTwo.get(col + (row + 4) * (boardSize - 1) + boardSize + 1));
-
-                    if (temp1.cardinality() > 1 && temp2.cardinality() == 0) {
-                        thisPoints = points.getOrDefault(temp1, 0);
-                        scoreOne += thisPoints;
-                    } else if (temp2.cardinality() > 1 && temp1.cardinality() == 0) {
-                        thisPoints = points.getOrDefault(temp2, 0);
-                        scoreTwo += thisPoints;
-                    }
+            }
+        }
+        for (int col = boardSize - 1; col >= 5; col--) {
+            for (int row = 1; row <= col-4 ; row++) {
+                temp1.set(0, gameBoardOne.get((row+1)*boardSize+(boardSize-col-1)*(boardSize-1)-1));
+                temp1.set(1, gameBoardOne.get((row+2)*boardSize+(boardSize-col-1)*(boardSize-1)-2));
+                temp1.set(2, gameBoardOne.get((row+3)*boardSize+(boardSize-col-1)*(boardSize-1)-3));
+                temp1.set(3, gameBoardOne.get((row+4)*boardSize+(boardSize-col-1)*(boardSize-1)-4));
+                temp1.set(4, gameBoardOne.get((row+5)*boardSize+(boardSize-col-1)*(boardSize-1)-5));
+    
+                temp2.set(0, gameBoardTwo.get((row+1)*boardSize+(boardSize-col-1)*(boardSize-1)-1));
+                temp2.set(1, gameBoardTwo.get((row+2)*boardSize+(boardSize-col-1)*(boardSize-1)-2));
+                temp2.set(2, gameBoardTwo.get((row+3)*boardSize+(boardSize-col-1)*(boardSize-1)-3));
+                temp2.set(3, gameBoardTwo.get((row+4)*boardSize+(boardSize-col-1)*(boardSize-1)-4));
+                temp2.set(4, gameBoardTwo.get((row+5)*boardSize+(boardSize-col-1)*(boardSize-1)-5));
+    
+                if (temp1.cardinality() > 1 && temp2.cardinality() == 0) {
+                    thisPoints = points.getOrDefault(temp1, 0);
+                    scoreOne += thisPoints;
+                } else if (temp2.cardinality() > 1 && temp1.cardinality() == 0) {
+                    thisPoints = points.getOrDefault(temp2, 0);
+                    scoreTwo += thisPoints;
                 }
             }
         }
