@@ -1,16 +1,18 @@
 package gomoku;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.sql.Timestamp;
 
-public class AlphaBetaPruning extends Player {
+public class AlphaBetaPruning_Ordered extends Player {
     int globalDepth;
     Evaluator evaluator = new Evaluator();
     HashMap<Long, Integer> transpositionTable = new HashMap<>();
     int count;
 
-    AlphaBetaPruning(int globalDepth) {
+    AlphaBetaPruning_Ordered(int globalDepth) {
         this.globalDepth = globalDepth;
     }
 
@@ -30,10 +32,10 @@ public class AlphaBetaPruning extends Player {
 
         Timestamp timestamp1 = new Timestamp(System.currentTimeMillis());
 
-        ArrayList<Integer> legalMoves = game.getLegalMoves();
+        ArrayList<Integer> sortedMoves = sortMoves(game);
         int alpha = Integer.MIN_VALUE;
         int beta = Integer.MAX_VALUE;
-        for (int moveIndex : legalMoves) {
+        for (int moveIndex : sortedMoves) {
             try {
                 game.move(moveIndex);
             } catch (Exception e) {
@@ -62,9 +64,9 @@ public class AlphaBetaPruning extends Player {
             game.update(currentPlayer, moveIndex);
             game.undoMove(moveIndex);
         }
-
+        System.out.println(bestScore);
         Timestamp timestamp2 = new Timestamp(System.currentTimeMillis());
-        System.out.printf("%-30s: %d time: %8d moveCount: %10d%n", "AlphaBetaPruning", currentPlayer,
+        System.out.printf("%-30s: %d time: %8d moveCount: %10d%n", "AlphaBetaPruning_Ordered", currentPlayer,
                 timestamp2.getTime() - timestamp1.getTime(), count);
         return bestMovePlace.get((int) (Math.random() * bestMovePlace.size()));
     }
@@ -90,9 +92,14 @@ public class AlphaBetaPruning extends Player {
             return evaluator.calculateEvaluation(game);
         }
 
-        ArrayList<Integer> legalMoves = game.getLegalMoves();
+        ArrayList<Integer> movesArray;
+        if(globalDepth-depth <= 2){
+            movesArray = sortMoves(game);
+        }else{
+            movesArray = game.getLegalMoves();
+        }
 
-        for (int moveIndex : legalMoves) {
+        for (int moveIndex : movesArray) {
             try {
                 game.move(moveIndex);
             } catch (Exception e) {
@@ -133,4 +140,32 @@ public class AlphaBetaPruning extends Player {
         return bestScore;
     }
 
+    public ArrayList<Integer> sortMoves(GameEnvironment game) throws Exception{
+        ArrayList<Integer> sortedMoves = new ArrayList<>();
+        ArrayList<Integer> legalMoves = game.getLegalMoves();
+        TreeMap<Integer, ArrayList<Integer>> sortedMap;
+        if(game.getCurrentPlayer() == 1){
+            sortedMap = new TreeMap<>(Collections.reverseOrder()); 
+        }else{
+            sortedMap = new TreeMap<>(); 
+        }
+
+        ArrayList<Integer> tempArray;
+        int tempScore;
+        for(int moveIndex: legalMoves){
+            game.move(moveIndex);
+            
+            tempScore = evaluator.calculateEvaluation(game);
+            tempArray = sortedMap.getOrDefault(tempScore, new ArrayList<>());
+            tempArray.add(moveIndex);
+            sortedMap.put(tempScore, tempArray);
+
+            game.undoMove(moveIndex);
+        }
+
+        for(int score: sortedMap.keySet()){
+            sortedMoves.addAll(sortedMap.get(score));
+        }
+        return sortedMoves;
+    } 
 }

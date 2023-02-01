@@ -54,7 +54,6 @@ public class BFM extends Player {
             game.undoMove(move);
             moveCount += 1;
         }
-        System.out.println(bestMoves);
         timestamp1 = new Timestamp(System.currentTimeMillis());
 
         int randomIndex;
