@@ -1,13 +1,14 @@
 package gomoku;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.sql.Timestamp;
 
 public class IterativeDeepening extends Player {
     int globalDepth;
     Evaluator evaluator = new Evaluator();
-    HashMap<Long, Integer> transpositionTable = new HashMap<>();
+    HashMap<Long, ArrayList<Integer>> transpositionTable = new HashMap<>();
     HashMap<Long, Integer[]> previousScores = new HashMap<>();
 
     int simulationLimit;
@@ -16,7 +17,7 @@ public class IterativeDeepening extends Player {
 
     IterativeDeepening(int simulationLimit, boolean isLimitTime) {
         this.simulationLimit = simulationLimit;
-        this.simulationLimit = simulationLimit;
+        this.isLimitTime = isLimitTime;
     }
 
     public int move(GameEnvironment gameState) throws Exception {
@@ -36,13 +37,13 @@ public class IterativeDeepening extends Player {
             transpositionTable.clear();
             results = iterativeMove(game, globalDepth);
 
-            if (!results.containsKey(3) && globalDepth % 2 == 1) {
+            if (!results.containsKey(3)) {
                 previousResult = results;
             }
 
             globalDepth += 1;
 
-            if (globalDepth == 30 || (!isLimitTime && globalDepth-1==simulationLimit)) {
+            if (globalDepth == 30 || (!isLimitTime && globalDepth - 1 == simulationLimit)) {
                 break;
             }
         } while (!results.containsKey(3));
@@ -121,7 +122,7 @@ public class IterativeDeepening extends Player {
 
         ArrayList<Integer> bestMovePlace = new ArrayList<>();
         int bestScore = currentPlayer == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-        int newScore;
+        int newScore = -1;
 
         long hash = game.getHash();
 
@@ -142,7 +143,7 @@ public class IterativeDeepening extends Player {
             return results;
         }
 
-        if(isLimitTime){
+        if (isLimitTime) {
             if (new Timestamp(System.currentTimeMillis()).getTime() - simulationLimit > startTime) {
                 results.put(3, 1);
                 return results;
@@ -150,25 +151,41 @@ public class IterativeDeepening extends Player {
         }
 
         ArrayList<Integer> legalMoves = getMoves(game);
-
+        ArrayList<Integer> tempArray;
+        int flag;
+        boolean skipSimulation;
+        boolean cutoff = false;
         for (int moveIndex : legalMoves) {
+            skipSimulation = false;
             try {
                 game.move(moveIndex);
             } catch (Exception e) {
-                throw new Exception("Minimax: " + e);
+                throw new Exception("IterativeDeepening: " + e);
             }
 
             hash = game.update(currentPlayer, moveIndex);
 
             if (transpositionTable.containsKey(hash)) {
-                newScore = transpositionTable.get(hash);
-            } else {
+                tempArray = transpositionTable.get(hash);
+                flag = tempArray.get(1);
+                newScore = tempArray.get(0);
+                if (flag == 0) {
+                    skipSimulation = true;
+                } else if (flag == 1) {
+                    alpha = Math.max(alpha, newScore);
+                } else {
+                    beta = Math.min(beta, newScore);
+                }
+                if (alpha >= beta) {
+                    skipSimulation = true;
+                }
+            }
+            if (!skipSimulation) {
                 results = iterativeDeepMove(game, depth - 1, alpha, beta);
                 if (results.containsKey(3)) {
                     return results;
                 }
                 newScore = results.get(2);
-                transpositionTable.put(hash, newScore);
             }
 
             if ((newScore > bestScore && currentPlayer == 1)
@@ -182,18 +199,26 @@ public class IterativeDeepening extends Player {
             }
 
             game.undoMove(moveIndex);
+
+            flag = 0;
+            if (currentPlayer == 1) {
+                alpha = Math.max(alpha, newScore);
+                if (newScore > beta) {
+                    flag = 2;
+                    cutoff = true;
+                }
+            } else {
+                beta = Math.min(beta, newScore);
+                if (newScore < alpha) {
+                    flag = 1;
+                    cutoff = true;
+                }
+            }
+            transpositionTable.put(hash, new ArrayList<>(Arrays.asList(newScore, flag)));
             hash = game.update(currentPlayer, moveIndex);
 
-            if (game.getCurrentPlayer() == 1) {
-                if (newScore > beta) {
-                    break;
-                }
-                alpha = Math.max(alpha, newScore);
-            } else {
-                if (newScore < alpha) {
-                    break;
-                }
-                beta = Math.min(beta, newScore);
+            if (cutoff) {
+                break;
             }
         }
 

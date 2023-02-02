@@ -5,9 +5,9 @@ import java.util.HashMap;
 public class App {
     public static void main(String[] args) {
         HashMap<Integer, Integer> result;
-        GameEnvironment game = new GameEnvironment(9, true);
+        GameEnvironment game = new GameEnvironment(7, true);
         Player player1 = new AlphaBetaPruning_Ordered(3);
-        Player player2 = new BFM(5000);
+        Player player2 = new BFM(1000);
         int move;
         while (true) {
             try {
