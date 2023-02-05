@@ -26,8 +26,6 @@ public class PVS extends Player {
         ArrayList<Integer> bestMovePlace = new ArrayList<>();
         int newScore;
         
-        transpositionTable.clear();
-        
         game.hashInit();
 
         Timestamp timestamp1 = new Timestamp(System.currentTimeMillis());
@@ -85,6 +83,7 @@ public class PVS extends Player {
         Timestamp timestamp2 = new Timestamp(System.currentTimeMillis());
         System.out.printf("%-30s: %d time: %8d moveCount: %10d%n", "PVS", currentPlayer,
                 timestamp2.getTime() - timestamp1.getTime(), count);
+        transpositionTable.clear();
         return bestMovePlace.get((int) (Math.random() * bestMovePlace.size()));
     }
 

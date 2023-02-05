@@ -28,6 +28,7 @@ public class App {
                 System.out.printf("Player %d has won.", result.get(1));
                 break;
             }
+            break;
         }
     }
 }

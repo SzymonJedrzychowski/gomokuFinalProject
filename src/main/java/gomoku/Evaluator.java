@@ -116,24 +116,18 @@ public class Evaluator {
                     thisPoints = points.getOrDefault(temp2, 0);
                     scoreTwo += thisPoints;
                 }
+                
+                temp1.set(0, gameBoardOne.get(row + col * boardSize));
+                temp1.set(1, gameBoardOne.get(row + col * boardSize + boardSize));
+                temp1.set(2, gameBoardOne.get(row + col * boardSize + 2 * boardSize));
+                temp1.set(3, gameBoardOne.get(row + col * boardSize + 3 * boardSize));
+                temp1.set(4, gameBoardOne.get(row + col * boardSize + 4 * boardSize));
 
-            }
-        }
-
-        // VERTICAL
-        for (int col = 0; col < boardSize; col++) {
-            for (int row = 0; row < boardSize - 4; row++) {
-                temp1.set(0, gameBoardOne.get(col + row * boardSize));
-                temp1.set(1, gameBoardOne.get(col + row * boardSize + boardSize));
-                temp1.set(2, gameBoardOne.get(col + row * boardSize + 2 * boardSize));
-                temp1.set(3, gameBoardOne.get(col + row * boardSize + 3 * boardSize));
-                temp1.set(4, gameBoardOne.get(col + row * boardSize + 4 * boardSize));
-
-                temp2.set(0, gameBoardTwo.get(col + row * boardSize));
-                temp2.set(1, gameBoardTwo.get(col + row * boardSize + boardSize));
-                temp2.set(2, gameBoardTwo.get(col + row * boardSize + 2 * boardSize));
-                temp2.set(3, gameBoardTwo.get(col + row * boardSize + 3 * boardSize));
-                temp2.set(4, gameBoardTwo.get(col + row * boardSize + 4 * boardSize));
+                temp2.set(0, gameBoardTwo.get(row + col * boardSize));
+                temp2.set(1, gameBoardTwo.get(row + col * boardSize + boardSize));
+                temp2.set(2, gameBoardTwo.get(row + col * boardSize + 2 * boardSize));
+                temp2.set(3, gameBoardTwo.get(row + col * boardSize + 3 * boardSize));
+                temp2.set(4, gameBoardTwo.get(row + col * boardSize + 4 * boardSize));
 
                 if (temp1.cardinality() > 1 && temp2.cardinality() == 0) {
                     thisPoints = points.getOrDefault(temp1, 0);
@@ -142,6 +136,7 @@ public class Evaluator {
                     thisPoints = points.getOrDefault(temp2, 0);
                     scoreTwo += thisPoints;
                 }
+
             }
         }
 

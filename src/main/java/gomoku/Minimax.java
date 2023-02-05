@@ -23,8 +23,6 @@ public class Minimax extends Player {
         ArrayList<Integer> bestMovePlace = new ArrayList<>();
         int bestScore = currentPlayer == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int newScore;
-
-        transpositionTable.clear();
         
         game.hashInit();
 
@@ -61,7 +59,7 @@ public class Minimax extends Player {
 
         System.out.printf("%-30s: %d time: %10d moveCount: %10d%n", "Minimax", currentPlayer,
                 timestamp2.getTime() - timestamp1.getTime(), count);
-
+        transpositionTable.clear();
         return bestMovePlace.get((int) (Math.random() * bestMovePlace.size()));
     }
 
