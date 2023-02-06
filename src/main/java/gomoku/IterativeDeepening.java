@@ -174,12 +174,11 @@ public class IterativeDeepening extends Player {
                 newScore = tempArray.get(0);
                 if (flag == 0) {
                     skipSimulation = true;
-                } else if (flag == 1) {
-                    alpha = Math.max(alpha, newScore);
-                } else {
-                    beta = Math.min(beta, newScore);
-                }
-                if (alpha >= beta) {
+                }else if(flag == 1 && newScore >= beta){
+                    skipSimulation = true;
+                }else if(flag == 2 && newScore <= alpha){
+                    skipSimulation = true;
+                }else if(beta <= alpha){
                     skipSimulation = true;
                 }
             }
