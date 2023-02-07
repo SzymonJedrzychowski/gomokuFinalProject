@@ -73,23 +73,30 @@ public class GameEnvironment {
         HashMap<Integer, Integer> result = new HashMap<>();
         result.put(0, 0);
         result.put(1, 0);
-
-        if (moveCount == boardSize * boardSize) {
-            result.put(0, 1);
-        } else if (moveCount < 9) {
+        if (moveCount < 9) {
             return result;
         }
-
-        return checkBoards();
+        result = checkBoards();
+        if(result.get(0) == 1){
+            return result;
+        }
+        else if(moveCount == boardSize*boardSize){
+            result.put(0, 1);
+        }
+        return result;
     }
 
     public int right(int row, int col, int checkPlayer) {
         int result = 0;
+        int maxResult = 0;
         for (int i = 0; i < 5; i++) {
             if (gameBoard.get(row).get(col + i) == -checkPlayer) {
                 return 0;
             } else if (gameBoard.get(row).get(col + i) == checkPlayer) {
                 result += 1;
+                maxResult = Math.max(result, maxResult);
+            } else {
+                result = 0;
             }
         }
         if (col > 0) {
@@ -102,16 +109,20 @@ public class GameEnvironment {
                 return 0;
             }
         }
-        return result;
+        return maxResult;
     }
 
     public int down(int row, int col, int checkPlayer) {
         int result = 0;
+        int maxResult = 0;
         for (int i = 0; i < 5; i++) {
             if (gameBoard.get(row + i).get(col) == -checkPlayer) {
                 return 0;
             } else if (gameBoard.get(row + i).get(col) == checkPlayer) {
                 result += 1;
+                maxResult = Math.max(result, maxResult);
+            } else {
+                result = 0;
             }
         }
         if (row > 0) {
@@ -124,16 +135,20 @@ public class GameEnvironment {
                 return 0;
             }
         }
-        return result;
+        return maxResult;
     }
 
     public int rightBottom(int row, int col, int checkPlayer) {
         int result = 0;
+        int maxResult = 0;
         for (int i = 0; i < 5; i++) {
             if (gameBoard.get(row + i).get(col + i) == -checkPlayer) {
                 return 0;
             } else if (gameBoard.get(row + i).get(col + i) == checkPlayer) {
                 result += 1;
+                maxResult = Math.max(result, maxResult);
+            } else {
+                result = 0;
             }
         }
         if (col > 0 && row > 0) {
@@ -146,16 +161,20 @@ public class GameEnvironment {
                 return 0;
             }
         }
-        return result;
+        return maxResult;
     }
 
     public int rightUpward(int row, int col, int checkPlayer) {
         int result = 0;
+        int maxResult = 0;
         for (int i = 0; i < 5; i++) {
-            if (gameBoard.get(row - i).get(col + i) != checkPlayer) {
+            if (gameBoard.get(row - i).get(col + i) == -checkPlayer) {
                 return 0;
-            } else if (gameBoard.get(row - i).get(col + i) != checkPlayer) {
-                result = +1;
+            } else if (gameBoard.get(row - i).get(col + i) == checkPlayer) {
+                result += 1;
+                maxResult = Math.max(result, maxResult);
+            } else {
+                result = 0;
             }
         }
         if (col>0 && row+1 < boardSize) {
@@ -168,7 +187,7 @@ public class GameEnvironment {
                 return 0;
             }
         }
-        return result;
+        return maxResult;
     }
 
     public HashMap<Integer, Integer> checkBoards() {
@@ -247,11 +266,7 @@ public class GameEnvironment {
                 }
             }
         }
-        if (currentPlayer == 1) {
-            return results[1] - results[0];
-        } else {
-            return results[0] - results[1];
-        }
+        return results[0] - results[1];
     }
 
     public void printBoard() {
