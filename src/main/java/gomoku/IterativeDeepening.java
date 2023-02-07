@@ -7,7 +7,6 @@ import java.sql.Timestamp;
 
 public class IterativeDeepening extends Player {
     int globalDepth;
-    Evaluator evaluator = new Evaluator();
     HashMap<Long, ArrayList<Integer>> transpositionTable = new HashMap<>();
     HashMap<Long, Integer[]> previousScores = new HashMap<>();
 
@@ -142,7 +141,7 @@ public class IterativeDeepening extends Player {
         }
 
         if (depth == 0) {
-            results.put(2, evaluator.calculateEvaluation(game));
+            results.put(2, game.evaluateBoard());
             return results;
         }
 

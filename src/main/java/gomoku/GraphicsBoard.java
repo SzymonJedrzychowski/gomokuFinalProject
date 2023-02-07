@@ -2,7 +2,7 @@ package gomoku;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.BitSet;
+import java.util.ArrayList;
 
 public class GraphicsBoard extends JFrame {
 
@@ -20,7 +20,7 @@ public class GraphicsBoard extends JFrame {
         setVisible(true);
     }
 
-    public void makeMove(BitSet boardOne, BitSet boardTwo) {
-        board.makeMove(boardOne, boardTwo);
+    public void makeMove(ArrayList<ArrayList<Integer>> gameBoard) {
+        board.makeMove(gameBoard);
     }
 }

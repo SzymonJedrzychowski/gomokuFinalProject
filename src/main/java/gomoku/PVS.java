@@ -8,7 +8,6 @@ import java.sql.Timestamp;
 
 public class PVS extends Player {
     int globalDepth;
-    Evaluator evaluator = new Evaluator();
     HashMap<Long, Integer> transpositionTable = new HashMap<>();
     int count;
 
@@ -105,7 +104,7 @@ public class PVS extends Player {
         }
 
         if (depth == 0) {
-            return evaluator.calculateEvaluation(game);
+            return game.evaluateBoard();
         }
 
         ArrayList<Integer> movesArray;
@@ -193,7 +192,7 @@ public class PVS extends Player {
         for(int moveIndex: legalMoves){
             game.move(moveIndex);
             
-            tempScore = evaluator.calculateEvaluation(game);
+            tempScore = game.evaluateBoard();
             tempArray = sortedMap.getOrDefault(tempScore, new ArrayList<>());
             tempArray.add(moveIndex);
             sortedMap.put(tempScore, tempArray);

@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 
 public class Minimax extends Player {
     int globalDepth;
-    Evaluator evaluator = new Evaluator();
     HashMap<Long, Integer> transpositionTable = new HashMap<>();
     int count;
 
@@ -53,6 +52,7 @@ public class Minimax extends Player {
             game.undoMove(moveIndex);
             game.update(currentPlayer, moveIndex);
             count += 1;
+            System.out.printf("%d %d%n", moveIndex, newScore);
         }
 
         Timestamp timestamp2 = new Timestamp(System.currentTimeMillis());
@@ -81,7 +81,7 @@ public class Minimax extends Player {
         }
 
         if (depth == 0) {
-            return evaluator.calculateEvaluation(game);
+            return game.evaluateBoard();
         }
 
         ArrayList<Integer> legalMoves = game.getLegalMoves();

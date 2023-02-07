@@ -9,7 +9,6 @@ import java.sql.Timestamp;
 
 public class AlphaBetaPruning_Ordered extends Player {
     int globalDepth;
-    Evaluator evaluator = new Evaluator();
     HashMap<Long, ArrayList<Integer>> transpositionTable = new HashMap<>();
     int count;
 
@@ -90,7 +89,7 @@ public class AlphaBetaPruning_Ordered extends Player {
         }
 
         if (depth == 0) {
-            return evaluator.calculateEvaluation(game);
+            return game.evaluateBoard();
         }
         ArrayList<Integer> tempArray;
         int flag;
@@ -179,7 +178,7 @@ public class AlphaBetaPruning_Ordered extends Player {
         for(int moveIndex: legalMoves){
             game.move(moveIndex);
             
-            tempScore = evaluator.calculateEvaluation(game);
+            tempScore = game.evaluateBoard();
             tempArray = sortedMap.getOrDefault(tempScore, new ArrayList<>());
             tempArray.add(moveIndex);
             sortedMap.put(tempScore, tempArray);

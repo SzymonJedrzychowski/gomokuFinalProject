@@ -1,7 +1,7 @@
 package gomoku;
 
 import java.awt.*;
-import java.util.BitSet;
+import java.util.ArrayList;
 
 import javax.swing.*;
 
@@ -10,16 +10,21 @@ public class BoardDisplay extends JPanel {
     private int windowSize=500;
     private int difference;
     private Graphics2D g2D;
-    private BitSet boardOne;
-    private BitSet boardTwo;
+    private ArrayList<ArrayList<Integer>> gameBoard;
 
     
     BoardDisplay(int boardSize) {
         setPreferredSize(new Dimension(windowSize, windowSize));
         this.difference = (int)((windowSize-100)/(boardSize-1));
         this.boardSize = boardSize;
-        this.boardOne = new BitSet();
-        this.boardTwo = new BitSet();
+        this.gameBoard = new ArrayList<>();
+        for(int i=0; i<boardSize; i++){
+            ArrayList<Integer> temp = new ArrayList<>();
+            for(int j=0; j<boardSize; j++){
+                temp.add(0);
+            }
+            this.gameBoard.add(temp);
+        }
     }
 
     public void paint(Graphics g) {
@@ -32,23 +37,25 @@ public class BoardDisplay extends JPanel {
         }
         int x;
         int y;
-        g2D.setPaint(Color.white);
-        for (int i = boardOne.nextSetBit(0); i != -1; i = boardOne.nextSetBit(i + 1)) {
-            x = (i%boardSize) * difference + 50 - (int)(0.4*difference);
-            y = (int)(i/boardSize) * difference + 50 - (int)(0.4*difference);
-            g2D.fillOval(x, y, (int)(0.8*difference), (int)(0.8*difference));
-        }
-        g2D.setPaint(Color.black);
-        for (int i = boardTwo.nextSetBit(0); i != -1; i = boardTwo.nextSetBit(i + 1)) {
-            x = (i%boardSize) * difference + 50 - (int)(0.4*difference);
-            y = (int)(i/boardSize) * difference + 50 - (int)(0.4*difference);
-            g2D.fillOval(x, y, (int)(0.8*difference), (int)(0.8*difference));
+        for(int row = 0; row<boardSize; row++){
+            for(int column = 0; column<boardSize; column++){
+                if(gameBoard.get(row).get(column) == 1){
+                    g2D.setPaint(Color.white);
+                    x = column * difference + 50 - (int)(0.4*difference);
+                    y = row * difference + 50 - (int)(0.4*difference);
+                    g2D.fillOval(x, y, (int)(0.8*difference), (int)(0.8*difference));
+                }else if(gameBoard.get(row).get(column) == -1){
+                    g2D.setPaint(Color.black);
+                    x = column * difference + 50 - (int)(0.4*difference);
+                    y = row * difference + 50 - (int)(0.4*difference);
+                    g2D.fillOval(x, y, (int)(0.8*difference), (int)(0.8*difference));
+                }
+            }
         }
     }
 
-    public void makeMove(BitSet boardOne, BitSet boardTwo){
-        this.boardOne = boardOne;
-        this.boardTwo = boardTwo;
+    public void makeMove(ArrayList<ArrayList<Integer>> gameBoard){
+        this.gameBoard = gameBoard;
         repaint();
     }
 }

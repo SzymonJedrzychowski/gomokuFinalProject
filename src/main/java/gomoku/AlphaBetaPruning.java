@@ -7,7 +7,6 @@ import java.sql.Timestamp;
 
 public class AlphaBetaPruning extends Player {
     int globalDepth;
-    Evaluator evaluator = new Evaluator();
     HashMap<Long, ArrayList<Integer>> transpositionTable = new HashMap<>();
     int count;
 
@@ -60,6 +59,7 @@ public class AlphaBetaPruning extends Player {
 
             game.update(currentPlayer, moveIndex);
             game.undoMove(moveIndex);
+            System.out.printf("%d %d%n", moveIndex, newScore);
         }
 
         Timestamp timestamp2 = new Timestamp(System.currentTimeMillis());
@@ -89,7 +89,7 @@ public class AlphaBetaPruning extends Player {
         }
 
         if (depth == 0) {
-            return evaluator.calculateEvaluation(game);
+            return game.evaluateBoard();
         }
         ArrayList<Integer> tempArray;
         int flag;

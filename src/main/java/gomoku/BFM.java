@@ -8,7 +8,6 @@ import java.util.TreeMap;
 
 public class BFM extends Player {
     int timeLimit;
-    Evaluator evaluator = new Evaluator();
     Timestamp timestamp1;
     int moveCount;
 
@@ -44,7 +43,7 @@ public class BFM extends Player {
                     evaluationScore = Integer.MIN_VALUE;
                 }
             } else {
-                evaluationScore = evaluator.calculateEvaluation(game);
+                evaluationScore = game.evaluateBoard();
             }
 
             tempArray = bestMoves.getOrDefault(evaluationScore, new ArrayList<>());
@@ -133,7 +132,7 @@ public class BFM extends Player {
                     evaluationScore = Integer.MIN_VALUE;
                 }
             } else {
-                evaluationScore = evaluator.calculateEvaluation(game);
+                evaluationScore = game.evaluateBoard();
             }
 
             tempArray = bestMoves.getOrDefault(evaluationScore, new ArrayList<>());
