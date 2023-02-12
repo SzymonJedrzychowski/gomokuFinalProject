@@ -52,7 +52,7 @@ public class Minimax extends Player {
             game.undoMove(moveIndex);
             game.update(currentPlayer, moveIndex);
             count += 1;
-            System.out.printf("%d %d%n", moveIndex, newScore);
+            //System.out.printf("%d %d%n", moveIndex, newScore);
         }
 
         Timestamp timestamp2 = new Timestamp(System.currentTimeMillis());

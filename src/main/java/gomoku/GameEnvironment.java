@@ -14,6 +14,7 @@ public class GameEnvironment {
     private boolean useGraphicalInterface;
     GraphicsBoard graphicsBoard;
     int moveCount;
+    int[] scoreTable = { 0, 0, 1, 10, 50, 0 };
 
     GameEnvironment(int boardSize, boolean useGraphicalInterface) {
         this.boardSize = boardSize;
@@ -77,52 +78,139 @@ public class GameEnvironment {
             return result;
         }
         result = checkBoards();
-        if(result.get(0) == 1){
+        if (result.get(0) == 1) {
             return result;
-        }
-        else if(moveCount == boardSize*boardSize){
+        } else if (moveCount == boardSize * boardSize) {
             result.put(0, 1);
         }
         return result;
     }
 
-    public int right(int row, int col, int checkPlayer) {
-        int result = 0;
-        int maxResult = 0;
+    public boolean checkRight(int row, int col, int checkPlayer) {
         for (int i = 0; i < 5; i++) {
-            if (gameBoard.get(row).get(col + i) == -checkPlayer) {
-                return 0;
-            } else if (gameBoard.get(row).get(col + i) == checkPlayer) {
-                result += 1;
-                maxResult = Math.max(result, maxResult);
-            } else {
-                result = 0;
+            if (gameBoard.get(row).get(col + i) != checkPlayer) {
+                return false;
             }
         }
+        if (col > 0) {
+            if (gameBoard.get(row).get(col - 1) == checkPlayer) {
+                return false;
+            }
+        }
+        if (col + 5 < boardSize) {
+            if (gameBoard.get(row).get(col + 5) == checkPlayer) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean checkDown(int row, int col, int checkPlayer) {
+        for (int i = 0; i < 5; i++) {
+            if (gameBoard.get(row + i).get(col) != checkPlayer) {
+                return false;
+            }
+        }
+        if (row > 0) {
+            if (gameBoard.get(row - 1).get(col) == checkPlayer) {
+                return false;
+            }
+        }
+        if (row + 5 < boardSize) {
+            if (gameBoard.get(row + 5).get(col) == checkPlayer) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean checkRightBottom(int row, int col, int checkPlayer) {
+        for (int i = 0; i < 5; i++) {
+            if (gameBoard.get(row + i).get(col + i) != checkPlayer) {
+                return false;
+            }
+        }
+        if (col > 0 && row > 0) {
+            if (gameBoard.get(row - 1).get(col - 1) == checkPlayer) {
+                return false;
+            }
+        }
+        if (col + 5 < boardSize && row + 5 < boardSize) {
+            if (gameBoard.get(row + 5).get(col + 5) == checkPlayer) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean checkRightUpward(int row, int col, int checkPlayer) {
+        for (int i = 0; i < 5; i++) {
+            if (gameBoard.get(row - i).get(col + i) != checkPlayer) {
+                return false;
+            }
+        }
+        if (col > 0 && row + 1 < boardSize) {
+            if (gameBoard.get(row + 1).get(col - 1) == checkPlayer) {
+                return false;
+            }
+        }
+        if (col + 5 < boardSize && row - 5 > 0) {
+            if (gameBoard.get(row - 5).get(col + 5) == checkPlayer) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public int right(int row, int col) {
+        int result = 1;
+        int maxResult = 1;
+        int checkPlayer = 0;
+        for (int i = 0; i < 5; i++) {
+            if (checkPlayer == 0) {
+                checkPlayer = gameBoard.get(row).get(col + i);
+            } else {
+                if (gameBoard.get(row).get(col + i) == -checkPlayer) {
+                    return 0;
+                } else if (gameBoard.get(row).get(col + i) == checkPlayer) {
+                    result += 1;
+                    maxResult = Math.max(result, maxResult);
+                } else {
+                    result = 0;
+                }
+            }
+        }
+        if (checkPlayer == 0)
+            return 0;
         if (col > 0) {
             if (gameBoard.get(row).get(col - 1) == checkPlayer) {
                 return 0;
             }
         }
-        if (col+5 < boardSize) {
+        if (col + 5 < boardSize) {
             if (gameBoard.get(row).get(col + 5) == checkPlayer) {
                 return 0;
             }
         }
-        return maxResult;
+        return checkPlayer * scoreTable[maxResult];
     }
 
-    public int down(int row, int col, int checkPlayer) {
-        int result = 0;
-        int maxResult = 0;
+    public int down(int row, int col) {
+        int result = 1;
+        int maxResult = 1;
+        int checkPlayer = 0;
         for (int i = 0; i < 5; i++) {
-            if (gameBoard.get(row + i).get(col) == -checkPlayer) {
-                return 0;
-            } else if (gameBoard.get(row + i).get(col) == checkPlayer) {
-                result += 1;
-                maxResult = Math.max(result, maxResult);
+            if (checkPlayer == 0) {
+                checkPlayer = gameBoard.get(row + i).get(col);
             } else {
-                result = 0;
+                if (gameBoard.get(row + i).get(col) == -checkPlayer) {
+                    return 0;
+                } else if (gameBoard.get(row + i).get(col) == checkPlayer) {
+                    result += 1;
+                    maxResult = Math.max(result, maxResult);
+                } else {
+                    result = 0;
+                }
             }
         }
         if (row > 0) {
@@ -130,25 +218,30 @@ public class GameEnvironment {
                 return 0;
             }
         }
-        if (row+5 < boardSize) {
+        if (row + 5 < boardSize) {
             if (gameBoard.get(row + 5).get(col) == checkPlayer) {
                 return 0;
             }
         }
-        return maxResult;
+        return checkPlayer * scoreTable[maxResult];
     }
 
-    public int rightBottom(int row, int col, int checkPlayer) {
-        int result = 0;
-        int maxResult = 0;
+    public int rightBottom(int row, int col) {
+        int result = 1;
+        int maxResult = 1;
+        int checkPlayer = 0;
         for (int i = 0; i < 5; i++) {
-            if (gameBoard.get(row + i).get(col + i) == -checkPlayer) {
-                return 0;
-            } else if (gameBoard.get(row + i).get(col + i) == checkPlayer) {
-                result += 1;
-                maxResult = Math.max(result, maxResult);
+            if (checkPlayer == 0) {
+                checkPlayer = gameBoard.get(row + i).get(col + i);
             } else {
-                result = 0;
+                if (gameBoard.get(row + i).get(col + i) == -checkPlayer) {
+                    return 0;
+                } else if (gameBoard.get(row + i).get(col + i) == checkPlayer) {
+                    result += 1;
+                    maxResult = Math.max(result, maxResult);
+                } else {
+                    result = 0;
+                }
             }
         }
         if (col > 0 && row > 0) {
@@ -156,38 +249,43 @@ public class GameEnvironment {
                 return 0;
             }
         }
-        if (col+5 < boardSize && row+5 < boardSize) {
+        if (col + 5 < boardSize && row + 5 < boardSize) {
             if (gameBoard.get(row + 5).get(col + 5) == checkPlayer) {
                 return 0;
             }
         }
-        return maxResult;
+        return checkPlayer * scoreTable[maxResult];
     }
 
-    public int rightUpward(int row, int col, int checkPlayer) {
-        int result = 0;
-        int maxResult = 0;
+    public int rightUpward(int row, int col) {
+        int result = 1;
+        int maxResult = 1;
+        int checkPlayer = 0;
         for (int i = 0; i < 5; i++) {
-            if (gameBoard.get(row - i).get(col + i) == -checkPlayer) {
-                return 0;
-            } else if (gameBoard.get(row - i).get(col + i) == checkPlayer) {
-                result += 1;
-                maxResult = Math.max(result, maxResult);
+            if (checkPlayer == 0) {
+                checkPlayer = gameBoard.get(row - i).get(col + i);
             } else {
-                result = 0;
+                if (gameBoard.get(row - i).get(col + i) == -checkPlayer) {
+                    return 0;
+                } else if (gameBoard.get(row - i).get(col + i) == checkPlayer) {
+                    result += 1;
+                    maxResult = Math.max(result, maxResult);
+                } else {
+                    result = 0;
+                }
             }
         }
-        if (col>0 && row+1 < boardSize) {
+        if (col > 0 && row + 1 < boardSize) {
             if (gameBoard.get(row + 1).get(col - 1) == checkPlayer) {
                 return 0;
             }
         }
-        if (col+5 < boardSize && row-5 > 0) {
+        if (col + 5 < boardSize && row - 5 > 0) {
             if (gameBoard.get(row - 5).get(col + 5) == checkPlayer) {
                 return 0;
             }
         }
-        return maxResult;
+        return checkPlayer * scoreTable[maxResult];
     }
 
     public HashMap<Integer, Integer> checkBoards() {
@@ -202,28 +300,28 @@ public class GameEnvironment {
                     continue;
                 }
                 if (col + 4 < boardSize) {
-                    if (right(row, col, checkPlayer) == 5) {
+                    if (checkRight(row, col, checkPlayer)) {
                         results.put(0, 1);
                         results.put(1, checkPlayer);
                         return results;
                     }
                 }
                 if (row + 4 < boardSize) {
-                    if (down(row, col, checkPlayer) == 5) {
+                    if (checkDown(row, col, checkPlayer)) {
                         results.put(0, 1);
                         results.put(1, checkPlayer);
                         return results;
                     }
                 }
                 if (col + 4 < boardSize && row + 4 < boardSize) {
-                    if (rightBottom(row, col, checkPlayer) == 5) {
+                    if (checkRightBottom(row, col, checkPlayer)) {
                         results.put(0, 1);
                         results.put(1, checkPlayer);
                         return results;
                     }
                 }
                 if (col + 4 < boardSize && row - 4 >= 0) {
-                    if (rightUpward(row, col, checkPlayer) == 5) {
+                    if (checkRightUpward(row, col, checkPlayer)) {
                         results.put(0, 1);
                         results.put(1, checkPlayer);
                         return results;
@@ -235,38 +333,24 @@ public class GameEnvironment {
     }
 
     public int evaluateBoard() {
-        int[] results = new int[2];
-        int[] scoreTable = {0,0,1,10,50,0};
-        int tempResult;
+        int result = 0;
         for (int row = 0; row < boardSize; row++) {
             for (int col = 0; col < boardSize; col++) {
                 if (col + 4 < boardSize) {
-                    tempResult = right(row, col, 1);
-                    results[0] += scoreTable[tempResult];
-                    tempResult = right(row, col, -1);
-                    results[1] += scoreTable[tempResult];
+                    result += right(row, col);
                 }
                 if (row + 4 < boardSize) {
-                    tempResult = down(row, col, 1);
-                    results[0] += scoreTable[tempResult];
-                    tempResult = down(row, col, -1);
-                    results[1] += scoreTable[tempResult];
+                    result += down(row, col);
                 }
                 if (col + 4 < boardSize && row + 4 < boardSize) {
-                    tempResult = rightBottom(row, col, 1);
-                    results[0] += scoreTable[tempResult];
-                    tempResult = rightBottom(row, col, -1);
-                    results[1] += scoreTable[tempResult];
+                    result += rightBottom(row, col);
                 }
                 if (col + 4 < boardSize && row - 4 >= 0) {
-                    tempResult = rightUpward(row, col, 1);
-                    results[0] += scoreTable[tempResult];
-                    tempResult = rightUpward(row, col, -1);
-                    results[1] += scoreTable[tempResult];
+                    result += rightUpward(row, col);
                 }
             }
         }
-        return results[0] - results[1];
+        return result;
     }
 
     public void printBoard() {

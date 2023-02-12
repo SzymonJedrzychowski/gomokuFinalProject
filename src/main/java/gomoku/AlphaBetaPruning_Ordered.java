@@ -29,11 +29,16 @@ public class AlphaBetaPruning_Ordered extends Player {
         game.hashInit();
 
         Timestamp timestamp1 = new Timestamp(System.currentTimeMillis());
-
-        ArrayList<Integer> sortedMoves = sortMoves(game);
+        
+        ArrayList<Integer> possibleMoves;
+        if(globalDepth>1){
+            possibleMoves = sortMoves(game);
+        }else{
+            possibleMoves = game.getLegalMoves();
+        }
         int alpha = Integer.MIN_VALUE;
         int beta = Integer.MAX_VALUE;
-        for (int moveIndex : sortedMoves) {
+        for (int moveIndex : possibleMoves) {
             try {
                 game.move(moveIndex);
             } catch (Exception e) {
@@ -96,7 +101,7 @@ public class AlphaBetaPruning_Ordered extends Player {
         boolean skipSimulation;
         boolean cutoff = false;
         ArrayList<Integer> movesArray;
-        if(globalDepth-depth <= 2){
+        if(globalDepth-depth <= Math.min(2, globalDepth-2)){
             movesArray = sortMoves(game);
         }else{
             movesArray = game.getLegalMoves();

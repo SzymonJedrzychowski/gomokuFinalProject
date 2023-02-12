@@ -59,7 +59,7 @@ public class AlphaBetaPruning extends Player {
 
             game.update(currentPlayer, moveIndex);
             game.undoMove(moveIndex);
-            System.out.printf("%d %d%n", moveIndex, newScore);
+            //System.out.printf("%d %d%n", moveIndex, newScore);
         }
 
         Timestamp timestamp2 = new Timestamp(System.currentTimeMillis());

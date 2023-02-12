@@ -5,8 +5,8 @@ import java.util.HashMap;
 public class App {
     public static void main(String[] args) {
         HashMap<Integer, Integer> result;
-        GameEnvironment game = new GameEnvironment(7, true);
-        Player player1 = new AlphaBetaPruning(5);
+        GameEnvironment game = new GameEnvironment(11, false);
+        Player player1 = new PVS(6);
         Player player2 = new BFM(1000);
         int move;
         while (true) {
@@ -22,12 +22,13 @@ public class App {
                 e.printStackTrace();
                 break;
             }
-            game.printBoard();
+            //game.printBoard();
             result = game.ifTerminal();
             if (result.get(0) != 0) {
                 System.out.printf("Player %d has won.", result.get(1));
                 break;
             }
+            break;
         }
     }
 }
