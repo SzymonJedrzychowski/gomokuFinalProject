@@ -52,13 +52,12 @@ public class Minimax extends Player {
             game.undoMove(moveIndex);
             game.update(currentPlayer, moveIndex);
             count += 1;
-            //System.out.printf("%d %d%n", moveIndex, newScore);
         }
 
         Timestamp timestamp2 = new Timestamp(System.currentTimeMillis());
 
-        System.out.printf("%-30s: %d time: %10d moveCount: %10d%n", "Minimax", currentPlayer,
-                timestamp2.getTime() - timestamp1.getTime(), count);
+        //System.out.printf("%-30s: %d time: %10d moveCount: %10d%n", "Minimax", currentPlayer,
+        //        timestamp2.getTime() - timestamp1.getTime(), count);
         transpositionTable.clear();
         return bestMovePlace.get((int) (Math.random() * bestMovePlace.size()));
     }

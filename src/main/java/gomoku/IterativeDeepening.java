@@ -47,8 +47,7 @@ public class IterativeDeepening extends Player {
             }
         } while (!results.containsKey(3));
 
-        System.out.printf("%-30s: %d time: %10d depth: %10d%n", "IterativeDeepening", game.getCurrentPlayer(), new Timestamp(System.currentTimeMillis()).getTime()-startTime,globalDepth - 1);
-        System.out.println(previousScores.get(game.getHash())[0]);
+        //System.out.printf("%-30s: %d time: %10d depth: %10d%n", "IterativeDeepening", game.getCurrentPlayer(), new Timestamp(System.currentTimeMillis()).getTime()-startTime,globalDepth - 1);
         
         transpositionTable.clear();
         return previousResult.get(2);

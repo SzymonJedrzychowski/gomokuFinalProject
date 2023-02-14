@@ -91,9 +91,8 @@ public class BFM extends Player {
             }
         }
         
-        System.out.printf("%-30s time: %10d moveCount: %10d %n", "RBFM",
-                new Timestamp(System.currentTimeMillis()).getTime() - timestamp1.getTime(), moveCount);
-        System.out.println(bestMoves);
+        //System.out.printf("%-30s time: %10d moveCount: %10d %n", "RBFM",
+        //        new Timestamp(System.currentTimeMillis()).getTime() - timestamp1.getTime(), moveCount);
         return bestMoves.firstEntry().getValue().get((int)(bestMoves.firstEntry().getValue().size()*Math.random()));
     }
 

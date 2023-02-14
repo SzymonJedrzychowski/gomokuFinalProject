@@ -1,34 +1,18 @@
 package gomoku;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
 public class App {
     public static void main(String[] args) {
-        HashMap<Integer, Integer> result;
-        GameEnvironment game = new GameEnvironment(11, false);
-        Player player1 = new PVS(6);
-        Player player2 = new BFM(1000);
-        int move;
-        while (true) {
-            try {
-                if (game.getCurrentPlayer() == 1) {
-                    move = player1.move(game);
-                } else {
-                    move = player2.move(game);
-                }
-                game.move(move);
-            } catch (Exception e) {
-                System.out.println(e);
-                e.printStackTrace();
-                break;
-            }
-            //game.printBoard();
-            result = game.ifTerminal();
-            if (result.get(0) != 0) {
-                System.out.printf("Player %d has won.", result.get(1));
-                break;
-            }
-            break;
-        }
+        Player player1 = new Minimax(4);
+        Player player2 = new Minimax(4);
+        PlayGames games;
+        ArrayList<Integer> results;
+        games = new PlayGames(100, player1, player2);
+        results = games.play(7);
+        System.out.println(results);
+        games = new PlayGames(100, player2, player1);
+        results = games.play(7);
+        System.out.println(results);
     }
 }

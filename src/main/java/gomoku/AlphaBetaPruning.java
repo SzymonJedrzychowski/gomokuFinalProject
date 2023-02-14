@@ -59,12 +59,11 @@ public class AlphaBetaPruning extends Player {
 
             game.update(currentPlayer, moveIndex);
             game.undoMove(moveIndex);
-            //System.out.printf("%d %d%n", moveIndex, newScore);
         }
 
         Timestamp timestamp2 = new Timestamp(System.currentTimeMillis());
-        System.out.printf("%-30s: %d time: %8d moveCount: %10d%n", "AlphaBetaPruning", currentPlayer,
-                timestamp2.getTime() - timestamp1.getTime(), count);
+        //System.out.printf("%-30s: %d time: %8d moveCount: %10d%n", "AlphaBetaPruning", currentPlayer,
+        //        timestamp2.getTime() - timestamp1.getTime(), count);
         
         transpositionTable.clear();
         return bestMovePlace.get((int) (Math.random() * bestMovePlace.size()));

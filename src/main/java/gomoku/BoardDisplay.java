@@ -10,7 +10,7 @@ public class BoardDisplay extends JPanel {
     private int windowSize=500;
     private int difference;
     private Graphics2D g2D;
-    private ArrayList<ArrayList<Integer>> gameBoard;
+    public ArrayList<ArrayList<Integer>> gameBoard;
 
     
     BoardDisplay(int boardSize) {

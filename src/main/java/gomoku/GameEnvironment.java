@@ -27,6 +27,7 @@ public class GameEnvironment {
     }
 
     public void resetState() {
+        this.gameBoard = new ArrayList<>();
         for (int i = 0; i < boardSize; i++) {
             ArrayList<Integer> temp = new ArrayList<>();
             for (int j = 0; j < boardSize; j++) {

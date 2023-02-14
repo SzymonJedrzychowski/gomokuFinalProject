@@ -69,8 +69,8 @@ public class AlphaBetaPruning_Ordered extends Player {
         }
 
         Timestamp timestamp2 = new Timestamp(System.currentTimeMillis());
-        System.out.printf("%-30s: %d time: %8d moveCount: %10d%n", "AlphaBetaPruning", currentPlayer,
-                timestamp2.getTime() - timestamp1.getTime(), count);
+        //System.out.printf("%-30s: %d time: %8d moveCount: %10d%n", "AlphaBetaPruning", currentPlayer,
+        //        timestamp2.getTime() - timestamp1.getTime(), count);
         transpositionTable.clear();
         return bestMovePlace.get((int) (Math.random() * bestMovePlace.size()));
     }
@@ -171,28 +171,38 @@ public class AlphaBetaPruning_Ordered extends Player {
     public ArrayList<Integer> sortMoves(GameEnvironment game) throws Exception{
         ArrayList<Integer> sortedMoves = new ArrayList<>();
         ArrayList<Integer> legalMoves = game.getLegalMoves();
-        TreeMap<Integer, ArrayList<Integer>> sortedMap;
-        if(game.getCurrentPlayer() == 1){
-            sortedMap = new TreeMap<>(Collections.reverseOrder()); 
-        }else{
-            sortedMap = new TreeMap<>(); 
-        }
+        int bestScore = game.getCurrentPlayer() == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        ArrayList<Integer> bestIndex = new ArrayList<>();
 
-        ArrayList<Integer> tempArray;
         int tempScore;
         for(int moveIndex: legalMoves){
             game.move(moveIndex);
-            
             tempScore = game.evaluateBoard();
-            tempArray = sortedMap.getOrDefault(tempScore, new ArrayList<>());
-            tempArray.add(moveIndex);
-            sortedMap.put(tempScore, tempArray);
-
             game.undoMove(moveIndex);
+            if(game.getCurrentPlayer() == 1){
+                if(tempScore > bestScore){
+                    bestScore = tempScore;
+                    bestIndex.clear();
+                    bestIndex.add(moveIndex);
+                }else if(tempScore == bestScore){
+                    bestIndex.add(moveIndex);
+                }
+            }else{
+                if(tempScore < bestScore){
+                    bestScore = tempScore;
+                    bestIndex.clear();
+                    bestIndex.add(moveIndex);
+                }else if(tempScore == bestScore){
+                    bestIndex.add(moveIndex);
+                }
+            }
         }
-
-        for(int score: sortedMap.keySet()){
-            sortedMoves.addAll(sortedMap.get(score));
+        int randomBest = bestIndex.get((int) (Math.random() * bestIndex.size()));
+        sortedMoves.add(randomBest);
+        for(int moveIndex:legalMoves){
+            if(moveIndex != randomBest){
+                sortedMoves.add(moveIndex);
+            }
         }
         return sortedMoves;
     } 
