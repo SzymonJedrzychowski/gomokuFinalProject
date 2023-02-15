@@ -1,7 +1,9 @@
 package gomoku;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 
 public class GameEnvironment {
@@ -59,15 +61,55 @@ public class GameEnvironment {
         moveCount -= 1;
     }
 
-    public ArrayList<Integer> getLegalMoves() {
-        ArrayList<Integer> result = new ArrayList<>();
+    public ArrayList<Integer> getLegalMoves(boolean getCloseMoves) {
+        ArrayList<Integer> legalMoves = new ArrayList<>();
         for (int row = 0; row < boardSize; row++) {
             for (int column = 0; column < boardSize; column++) {
                 if (gameBoard.get(row).get(column) == 0) {
-                    result.add(row * boardSize + column);
+                    legalMoves.add(row * boardSize + column);
                 }
             }
         }
+
+        if(getCloseMoves && legalMoves.size() != boardSize*boardSize){
+            return getCloseMoves();
+        }
+        Collections.shuffle(legalMoves);
+        return legalMoves;
+    }
+
+    public ArrayList<Integer> getCloseMoves() {
+        ArrayList<Integer> result = new ArrayList<>();
+        HashSet<Integer> closeMoves = new HashSet<>();
+        HashSet<Integer> playedMoves = new HashSet<>();
+        for (int row = 0; row < boardSize; row++) {
+            for (int column = 0; column < boardSize; column++) {
+                if (gameBoard.get(row).get(column) != 0) {
+                    playedMoves.add(row * boardSize + column);
+                }
+            }
+        }
+        
+        for(int move:playedMoves){
+            //N
+            if(move >= boardSize  && !playedMoves.contains(move-boardSize)) closeMoves.add(move-boardSize);
+            //NE
+            if(move >= boardSize && (move+1)%boardSize != 0 && !playedMoves.contains(move-boardSize+1)) closeMoves.add(move-boardSize+1);
+            //E
+            if((move+1)%boardSize != 0 && !playedMoves.contains(move+1)) closeMoves.add(move+1);
+            //SE
+            if((move+1)%boardSize != 0 && (move+boardSize+1)<boardSize*boardSize && !playedMoves.contains(move+boardSize+1)) closeMoves.add(move+boardSize+1);
+            //S
+            if(move+boardSize+1 < boardSize*boardSize && !playedMoves.contains(move+boardSize)) closeMoves.add(move+boardSize);
+            //SW
+            if(move+boardSize+1 < boardSize*boardSize && move%boardSize != 0 && !playedMoves.contains(move+boardSize-1)) closeMoves.add(move+boardSize-1);
+            //W
+            if(move%boardSize != 0 && !playedMoves.contains(move-1)) closeMoves.add(move-1);
+            //NW
+            if(move%boardSize != 0 && move >= boardSize && !playedMoves.contains(move-boardSize-1)) closeMoves.add(move-boardSize-1);
+        }
+        result.addAll(closeMoves);
+        Collections.shuffle(result);
         return result;
     }
 

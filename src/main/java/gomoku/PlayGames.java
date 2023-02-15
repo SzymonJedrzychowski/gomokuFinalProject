@@ -3,7 +3,6 @@ package gomoku;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 public class PlayGames {
     int gamesOnSide;
@@ -36,6 +35,7 @@ public class PlayGames {
                     e.printStackTrace();
                     break;
                 }
+                //game.printBoard();
                 result = game.ifTerminal();
                 if (result.get(0) != 0) {
                     if(result.get(1) == 1){
@@ -45,8 +45,8 @@ public class PlayGames {
                     }else{
                         results.set(1, results.get(1)+1);
                     }
-                    System.out.printf("Game %3d finished. ", currentGame);
-                    System.out.printf("Player %2d has won.\n", result.get(1));
+                    //System.out.printf("Game %3d finished. ", currentGame);
+                    //System.out.printf("Player %2d has won.\n", result.get(1));
                     break;
                 }
             }

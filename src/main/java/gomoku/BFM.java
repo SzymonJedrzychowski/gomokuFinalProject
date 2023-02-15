@@ -10,16 +10,23 @@ public class BFM extends Player {
     int timeLimit;
     Timestamp timestamp1;
     int moveCount;
+    boolean onlyCloseMoves;
 
     BFM(int timeLimit) {
         this.timeLimit = timeLimit;
+        this.onlyCloseMoves = false;
+    }
+
+    BFM(int timeLimit, boolean onlyCloseMoves) {
+        this.timeLimit = timeLimit;
+        this.onlyCloseMoves = onlyCloseMoves;
     }
 
     public int move(GameEnvironment state) throws Exception {
         moveCount = 0;
         GameEnvironment game = state.copy();
         int currentPlayer = game.getCurrentPlayer();
-        ArrayList<Integer> legalMoves = game.getLegalMoves();
+        ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
         TreeMap<Integer, ArrayList<Integer>> bestMoves;
         if (currentPlayer == 1) {
             bestMoves = new TreeMap<>(Collections.reverseOrder());
@@ -98,7 +105,7 @@ public class BFM extends Player {
 
     private int deepMove(GameEnvironment game, int alpha, int beta) throws Exception {
         int currentPlayer = game.getCurrentPlayer();
-        ArrayList<Integer> legalMoves = game.getLegalMoves();
+        ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
         TreeMap<Integer, ArrayList<Integer>> bestMoves;
         if (currentPlayer == 1) {
             bestMoves = new TreeMap<>(Collections.reverseOrder());

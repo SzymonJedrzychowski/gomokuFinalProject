@@ -8,33 +8,36 @@ public class MCTS_UCT extends Player {
     int timeLimit;
     float explorationValue;
     boolean simulationLimitIsMoves;
+    boolean onlyCloseMoves;
 
-    MCTS_UCT(int timeLimit, float explorationValue) {
+    MCTS_UCT(int timeLimit, float explorationValue, boolean onlyCloseMoves) {
         this.timeLimit = timeLimit;
         this.explorationValue = explorationValue;
+        this.onlyCloseMoves = onlyCloseMoves;
     }
 
-    MCTS_UCT(int timeLimit) {
+    MCTS_UCT(int timeLimit, boolean onlyCloseMoves) {
         this.timeLimit = timeLimit;
         this.explorationValue = 1.4f;
+        this.onlyCloseMoves = onlyCloseMoves;
     }
 
     public int move(GameEnvironment state) throws Exception {
-        Timestamp timestamp1 = new Timestamp(System.currentTimeMillis());
-        Timestamp timestamp2;
         int moveCount = 0;
+        Timestamp startTimestamp = new Timestamp(System.currentTimeMillis());
+        Timestamp endTimestamp;
 
-        MCTS_UCT_node currentNode = new MCTS_UCT_node(state, null);
+        MCTS_UCT_node currentNode = new MCTS_UCT_node(state, null, onlyCloseMoves);
         MCTS_UCT_node selectedNode;
 
         do {
-            timestamp2 = new Timestamp(System.currentTimeMillis());
+            endTimestamp = new Timestamp(System.currentTimeMillis());
             selectedNode = currentNode.select(explorationValue);
             while (selectedNode != null) {
                 selectedNode = selectedNode.select(explorationValue);
             }
             moveCount += 1;
-        } while (timestamp2.getTime() - timestamp1.getTime() < timeLimit);
+        } while (endTimestamp.getTime() - startTimestamp.getTime() < timeLimit);
         HashMap<Integer, Float> UCB = new HashMap<>();
         MCTS_UCT_node child;
 
@@ -62,9 +65,9 @@ public class MCTS_UCT extends Player {
             }
         }
 
-        timestamp2 = new Timestamp(System.currentTimeMillis());
-        System.out.printf("%-30s time: %10d moveCount: %10d %n", "MCTS_UCT",
-                timestamp2.getTime() - timestamp1.getTime(), moveCount);
+        endTimestamp = new Timestamp(System.currentTimeMillis());
+        //System.out.printf("%-30s time: %10d moveCount: %10d %n", "MCTS_UCT",
+        //endTimestamp.getTime() - startTimestamp.getTime(), moveCount);
 
         return moves.get((int) (Math.random() * moves.size()));
     }

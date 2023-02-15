@@ -6,9 +6,16 @@ import java.util.HashMap;
 public class MCTS extends Player {
     int timeLimit;
     float explorationValue;
+    boolean onlyCloseMoves;
 
     MCTS(int timeLimit) {
         this.timeLimit = timeLimit;
+        this.onlyCloseMoves = false;
+    }
+
+    MCTS(int timeLimit, boolean onlyCloseMoves) {
+        this.timeLimit = timeLimit;
+        this.onlyCloseMoves = onlyCloseMoves;
     }
 
     public int move(GameEnvironment state) throws Exception {
@@ -16,7 +23,7 @@ public class MCTS extends Player {
         Timestamp timestamp2;
         int moveCount = 0;
 
-        MCTS_node currentNode = new MCTS_node(state, null);
+        MCTS_node currentNode = new MCTS_node(state, null, onlyCloseMoves);
         MCTS_node selectedNode;
         do {
             timestamp2 = new Timestamp(System.currentTimeMillis());
@@ -52,8 +59,8 @@ public class MCTS extends Player {
         }
 
         timestamp2 = new Timestamp(System.currentTimeMillis());
-        System.out.printf("%-30s time: %10d moveCount: %10d %n", "MCTS",
-                timestamp2.getTime() - timestamp1.getTime(), moveCount);
+        //System.out.printf("%-30s time: %10d moveCount: %10d %n", "MCTS",
+        //        timestamp2.getTime() - timestamp1.getTime(), moveCount);
 
         return bestMovePlace;
     }

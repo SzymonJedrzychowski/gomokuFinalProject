@@ -9,6 +9,8 @@ public class IterativeDeepening extends Player {
     int globalDepth;
     HashMap<Long, ArrayList<Integer>> transpositionTable = new HashMap<>();
     HashMap<Long, Integer[]> previousScores = new HashMap<>();
+    int moveCount;
+    boolean onlyCloseMoves;
 
     int simulationLimit;
     long startTime;
@@ -17,6 +19,13 @@ public class IterativeDeepening extends Player {
     IterativeDeepening(int simulationLimit, boolean isLimitTime) {
         this.simulationLimit = simulationLimit;
         this.isLimitTime = isLimitTime;
+        this.onlyCloseMoves = false;
+    }
+
+    IterativeDeepening(int simulationLimit, boolean isLimitTime, boolean onlyCloseMoves) {
+        this.simulationLimit = simulationLimit;
+        this.isLimitTime = isLimitTime;
+        this.onlyCloseMoves = onlyCloseMoves;
     }
 
     public int move(GameEnvironment gameState) throws Exception {
@@ -26,7 +35,6 @@ public class IterativeDeepening extends Player {
         HashMap<Integer, Integer> results = new HashMap<>();
         HashMap<Integer, Integer> previousResult = new HashMap<>();
 
-        previousScores.clear();
         previousResult.put(2, -1);
 
         game.hashInit();
@@ -46,23 +54,32 @@ public class IterativeDeepening extends Player {
                 break;
             }
         } while (!results.containsKey(3));
-
-        //System.out.printf("%-30s: %d time: %10d depth: %10d%n", "IterativeDeepening", game.getCurrentPlayer(), new Timestamp(System.currentTimeMillis()).getTime()-startTime,globalDepth - 1);
+        moveCount = previousResult.get(4);
         
+        //System.out.printf("%-30s: player %2d time: %8d moveCount: %10d depth: %10d %n", "IterativeDeepening",
+        //        game.getCurrentPlayer(), new Timestamp(System.currentTimeMillis()).getTime() - startTime,
+        //        moveCount, globalDepth - 1);
+        previousScores.clear();
+
         transpositionTable.clear();
         return previousResult.get(2);
     }
 
     public HashMap<Integer, Integer> iterativeMove(GameEnvironment gameState, int depth) throws Exception {
+        moveCount = 0;
+
         GameEnvironment game = gameState.copy();
         int currentPlayer = game.getCurrentPlayer();
 
-        ArrayList<Integer> bestMovePlace = new ArrayList<>();
-        int bestScore = currentPlayer == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        int bestScore = Integer.MIN_VALUE;
+        int bestMovePlace = -1;
         int newScore;
+        int alpha = Integer.MIN_VALUE + 1;
+        int beta = Integer.MAX_VALUE;
 
-        HashMap<Integer, Integer> results = game.ifTerminal();
+        game.hashInit();
 
+        HashMap<Integer, Integer> results = new HashMap<>();
         if (isLimitTime) {
             if (new Timestamp(System.currentTimeMillis()).getTime() - simulationLimit + 10 > startTime) {
                 results.put(3, 1);
@@ -70,9 +87,8 @@ public class IterativeDeepening extends Player {
             }
         }
 
-        ArrayList<Integer> legalMoves = getMoves(game);
-        int alpha = Integer.MIN_VALUE;
-        int beta = Integer.MAX_VALUE;
+        ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
+
         for (int moveIndex : legalMoves) {
             try {
                 game.move(moveIndex);
@@ -82,65 +98,76 @@ public class IterativeDeepening extends Player {
 
             game.update(currentPlayer, moveIndex);
 
-            results = iterativeDeepMove(game, depth - 1, alpha, beta);
+            results = deepMove(game, depth - 1, -beta, -alpha);
             if (results.containsKey(3)) {
                 return results;
             }
-            newScore = results.get(2);
+            newScore = -results.get(2);
+            moveCount += 1;
 
-            if ((newScore > bestScore && currentPlayer == 1)
-                    || (newScore < bestScore && currentPlayer == -1)) {
+            if (newScore > bestScore) {
                 bestScore = newScore;
-                bestMovePlace.clear();
-                bestMovePlace.add(moveIndex);
-            } else if ((newScore == bestScore && currentPlayer == 1)
-                    || (newScore == bestScore && currentPlayer == -1)) {
-                bestMovePlace.add(moveIndex);
+                bestMovePlace = moveIndex;
             }
 
-            if (currentPlayer == 1) {
-                alpha = Math.max(alpha, newScore);
-            } else {
-                beta = Math.min(beta, newScore);
-            }
+            alpha = Math.max(alpha, newScore);
 
-            game.undoMove(moveIndex);
             game.update(currentPlayer, moveIndex);
-            //System.out.printf("%d %d%n", moveIndex, new Timestamp(System.currentTimeMillis()).getTime()-startTime);
+            game.undoMove(moveIndex);
         }
+        results.put(2, bestMovePlace);
+        results.put(4, moveCount);
 
-        results.put(2, bestMovePlace.get((int) (Math.random() * bestMovePlace.size())));
 
         Integer[] tempData = { bestScore, results.get(2) };
         previousScores.put(game.getHash(), tempData);
 
+        transpositionTable.clear();
         return results;
     }
 
-    public HashMap<Integer, Integer> iterativeDeepMove(GameEnvironment game, int depth, int alpha, int beta)
-            throws Exception {
+    public HashMap<Integer, Integer> deepMove(GameEnvironment game, int depth, int alpha, int beta) throws Exception {
         int currentPlayer = game.getCurrentPlayer();
 
-        ArrayList<Integer> bestMovePlace = new ArrayList<>();
-        int bestScore = currentPlayer == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-        int newScore = -1;
+        int bestScore = Integer.MIN_VALUE;
+        int newScore;
+        HashMap<Integer, Integer> results = new HashMap<>();
+        int bestMovePlace = -1;
 
         long hash = game.getHash();
+        ArrayList<Integer> tempArray;
+        int flag;
+        if (transpositionTable.containsKey(hash)) {
+            tempArray = transpositionTable.get(hash);
+            flag = tempArray.get(1);
+            newScore = tempArray.get(0);
+            if (flag == 0) {
+                results.put(2, newScore);
+                return results;
+            } else if (flag == 1) {
+                alpha = Math.max(alpha, newScore);
+            } else if (flag == 2) {
+                beta = Math.min(beta, newScore);
+            }
+            if (alpha >= beta) {
+                results.put(2, newScore);
+                return results;
+            }
+        }
 
-        HashMap<Integer, Integer> results = game.ifTerminal();
+        results = game.ifTerminal();
 
         if (results.get(0) == 1) {
             if (results.get(1) == 0) {
                 results.put(2, 0);
-            } else {
-                results.put(2, results.get(1) == 1 ? Integer.MAX_VALUE - (globalDepth - depth) * 10
-                        : Integer.MIN_VALUE + (globalDepth - depth) * 10);
+                return results;
             }
+            results.put(2, Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10);
             return results;
         }
 
         if (depth == 0) {
-            results.put(2, game.evaluateBoard());
+            results.put(2, currentPlayer * game.evaluateBoard());
             return results;
         }
 
@@ -151,99 +178,69 @@ public class IterativeDeepening extends Player {
             }
         }
 
-        ArrayList<Integer> legalMoves = getMoves(game);
-        ArrayList<Integer> tempArray;
-        int flag;
-        boolean skipSimulation;
-        boolean cutoff = false;
+        ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
+
         for (int moveIndex : legalMoves) {
-            skipSimulation = false;
             try {
                 game.move(moveIndex);
             } catch (Exception e) {
-                throw new Exception("IterativeDeepening: " + e);
+                throw new Exception("Minimax: " + e);
             }
 
-            hash = game.update(currentPlayer, moveIndex);
+            game.update(currentPlayer, moveIndex);
 
-            if (transpositionTable.containsKey(hash)) {
-                tempArray = transpositionTable.get(hash);
-                flag = tempArray.get(1);
-                newScore = tempArray.get(0);
-                if (flag == 0) {
-                    skipSimulation = true;
-                }else if(flag == 1 && newScore >= beta){
-                    skipSimulation = true;
-                }else if(flag == 2 && newScore <= alpha){
-                    skipSimulation = true;
-                }else if(beta <= alpha){
-                    skipSimulation = true;
-                }
+            results = deepMove(game, depth - 1, -beta, -alpha);
+            if (results.containsKey(3)) {
+                return results;
             }
-            if (!skipSimulation) {
-                results = iterativeDeepMove(game, depth - 1, alpha, beta);
-                if (results.containsKey(3)) {
-                    return results;
-                }
-                newScore = results.get(2);
-            }
+            newScore = -results.get(2);
+            moveCount += 1;
 
-            if ((newScore > bestScore && currentPlayer == 1)
-                    || (newScore < bestScore && currentPlayer == -1)) {
+            if (newScore > bestScore) {
                 bestScore = newScore;
-                bestMovePlace.clear();
-                bestMovePlace.add(moveIndex);
-            } else if ((newScore == bestScore && currentPlayer == 1)
-                    || (newScore == bestScore && currentPlayer == -1)) {
-                bestMovePlace.add(moveIndex);
+                bestMovePlace = moveIndex;
             }
 
             game.undoMove(moveIndex);
+            game.update(currentPlayer, moveIndex);
 
-            flag = 0;
-            if (currentPlayer == 1) {
-                alpha = Math.max(alpha, newScore);
-                if (newScore > beta) {
-                    flag = 2;
-                    cutoff = true;
-                }
-            } else {
-                beta = Math.min(beta, newScore);
-                if (newScore < alpha) {
-                    flag = 1;
-                    cutoff = true;
-                }
-            }
-            transpositionTable.put(hash, new ArrayList<>(Arrays.asList(newScore, flag)));
-            hash = game.update(currentPlayer, moveIndex);
+            alpha = Math.max(alpha, newScore);
 
-            if (cutoff) {
+            if (alpha >= beta) {
                 break;
             }
         }
 
+        if (bestScore <= alpha) {
+            flag = 2;
+        } else if (bestScore >= beta) {
+            flag = 1;
+        } else {
+            flag = 0;
+        }
+        transpositionTable.put(game.getHash(), new ArrayList<>(Arrays.asList(bestScore, flag)));
         results.put(2, bestScore);
-        Integer[] tempData = { bestScore, bestMovePlace.get((int) (Math.random() * bestMovePlace.size())) };
+        Integer[] tempData = { bestScore, bestMovePlace };
         previousScores.put(game.getHash(), tempData);
 
         return results;
     }
 
     public ArrayList<Integer> getMoves(GameEnvironment game) {
+        ArrayList<Integer> legalMoves = new ArrayList<>();
         if (!previousScores.containsKey(game.getHash())) {
-            return game.getLegalMoves();
+            return legalMoves;
         }
 
-        ArrayList<Integer> legalMoves = new ArrayList<>();
-
-        legalMoves.add(previousScores.get(game.getHash())[1]);
-        for (int moveIndex : game.getLegalMoves()) {
-            if (legalMoves.get(0) != moveIndex) {
-                legalMoves.add(moveIndex);
+        ArrayList<Integer> sortedMoves = new ArrayList<>();
+        sortedMoves.add(previousScores.get(game.getHash())[1]);
+        for (int moveIndex : legalMoves) {
+            if (sortedMoves.get(0) != moveIndex) {
+                sortedMoves.add(moveIndex);
             }
         }
 
-        return legalMoves;
+        return sortedMoves;
     }
 
 }

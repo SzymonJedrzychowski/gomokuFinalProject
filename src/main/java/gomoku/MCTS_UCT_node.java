@@ -10,14 +10,16 @@ public class MCTS_UCT_node{
     HashMap<Integer, MCTS_UCT_node> children = new HashMap<>();
     int[] stats = {0,0,0};
     int visits = 0;
+    boolean onlyCloseMoves;
 
-    MCTS_UCT_node(GameEnvironment state, MCTS_UCT_node parent) {
+    MCTS_UCT_node(GameEnvironment state, MCTS_UCT_node parent, boolean onlyCloseMoves) {
         this.state = state;
         this.parent = parent;
+        this.onlyCloseMoves = onlyCloseMoves;
     }
 
     public MCTS_UCT_node select(float explorationValue) throws Exception {
-        ArrayList<Integer> legalMoves = state.getLegalMoves();
+        ArrayList<Integer> legalMoves = state.getLegalMoves(onlyCloseMoves);
         if (children.size() < legalMoves.size()) {
             expand();
             return null;
@@ -58,7 +60,7 @@ public class MCTS_UCT_node{
         GameEnvironment stateCopy;
         MCTS_UCT_node newNode;
 
-        ArrayList<Integer> legalMoves = state.getLegalMoves();
+        ArrayList<Integer> legalMoves = state.getLegalMoves(onlyCloseMoves);
         ArrayList<Integer> possibleMoves = new ArrayList<>();
 
         for (int move : legalMoves) {
@@ -71,7 +73,7 @@ public class MCTS_UCT_node{
         stateCopy = state.copy();
         stateCopy.move(move);
 
-        newNode = new MCTS_UCT_node(stateCopy, this);
+        newNode = new MCTS_UCT_node(stateCopy, this, onlyCloseMoves);
         newNode.randomPolicy();
 
         children.put(move, newNode);
@@ -96,7 +98,7 @@ public class MCTS_UCT_node{
             int moveIndex;
             GameEnvironment thisState = state.copy();
             while (results.get(0) == 0) {
-                legalMoves = thisState.getLegalMoves();
+                legalMoves = thisState.getLegalMoves(onlyCloseMoves);
                 randomNum = ThreadLocalRandom.current().nextInt(0, legalMoves.size());
                 moveIndex = 0;
                 for (Integer move : legalMoves) {

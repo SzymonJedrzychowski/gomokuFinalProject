@@ -7,28 +7,34 @@ import java.sql.Timestamp;
 public class Minimax extends Player {
     int globalDepth;
     HashMap<Long, Integer> transpositionTable = new HashMap<>();
-    int count;
+    int moveCount;
+    boolean onlyCloseMoves;
 
     Minimax(int globalDepth) {
         this.globalDepth = globalDepth;
+        this.onlyCloseMoves = false;
+    }
+
+    Minimax(int globalDepth, boolean onlyCloseMoves) {
+        this.globalDepth = globalDepth;
+        this.onlyCloseMoves = onlyCloseMoves;
     }
 
     public int move(GameEnvironment gameState) throws Exception {
-        count = 0;
-        
+        moveCount = 0;
+
         GameEnvironment game = gameState.copy();
         int currentPlayer = game.getCurrentPlayer();
-        
-        ArrayList<Integer> bestMovePlace = new ArrayList<>();
-        int bestScore = currentPlayer == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+
+        int bestMovePlace = -1;
+        int bestScore = Integer.MIN_VALUE;
         int newScore;
-        
+
         game.hashInit();
 
-        Timestamp timestamp1 = new Timestamp(System.currentTimeMillis());
+        Timestamp startTimestamp = new Timestamp(System.currentTimeMillis());
 
-        ArrayList<Integer> legalMoves = game.getLegalMoves();
-
+        ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
         for (int moveIndex : legalMoves) {
             try {
                 game.move(moveIndex);
@@ -38,52 +44,53 @@ public class Minimax extends Player {
 
             game.update(currentPlayer, moveIndex);
 
-            newScore = deepMove(game, globalDepth - 1);
-            if ((newScore > bestScore && currentPlayer == 1)
-                    || (newScore < bestScore && currentPlayer == -1)) {
+            newScore = -deepMove(game, globalDepth - 1);
+            moveCount += 1;
+            
+            if (newScore > bestScore) {
                 bestScore = newScore;
-                bestMovePlace.clear();
-                bestMovePlace.add(moveIndex);
-            } else if ((newScore == bestScore && currentPlayer == 1)
-                    || (newScore == bestScore && currentPlayer == -1)) {
-                bestMovePlace.add(moveIndex);
+                bestMovePlace = moveIndex;
             }
 
             game.undoMove(moveIndex);
             game.update(currentPlayer, moveIndex);
-            count += 1;
         }
 
-        Timestamp timestamp2 = new Timestamp(System.currentTimeMillis());
+        Timestamp endTimestamp = new Timestamp(System.currentTimeMillis());
 
-        //System.out.printf("%-30s: %d time: %10d moveCount: %10d%n", "Minimax", currentPlayer,
-        //        timestamp2.getTime() - timestamp1.getTime(), count);
+        System.out.printf("%-30s: player %2d time: %10d moveCount: %10d%n", "Minimax",
+        currentPlayer,
+        endTimestamp.getTime() - startTimestamp.getTime(), moveCount);
         transpositionTable.clear();
-        return bestMovePlace.get((int) (Math.random() * bestMovePlace.size()));
+        return bestMovePlace;
     }
 
     public int deepMove(GameEnvironment game, int depth) throws Exception {
         int currentPlayer = game.getCurrentPlayer();
-        
-        int bestScore = currentPlayer == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+
+        int bestScore = Integer.MIN_VALUE;
         int newScore;
-        
-        long hash;
+
+        long hash = game.getHash();
+        if (transpositionTable.containsKey(hash)) {
+            newScore = transpositionTable.get(hash);
+            return newScore;
+        }
 
         HashMap<Integer, Integer> results = game.ifTerminal();
 
         if (results.get(0) == 1) {
-            if(results.get(1) == 0){
+            if (results.get(1) == 0) {
                 return 0;
             }
-            return results.get(1) == 1 ? Integer.MAX_VALUE-(globalDepth-depth)*10 : Integer.MIN_VALUE+(globalDepth-depth)*10;
+            return Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10;
         }
 
         if (depth == 0) {
-            return game.evaluateBoard();
+            return currentPlayer * game.evaluateBoard();
         }
 
-        ArrayList<Integer> legalMoves = game.getLegalMoves();
+        ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
 
         for (int moveIndex : legalMoves) {
             try {
@@ -91,26 +98,22 @@ public class Minimax extends Player {
             } catch (Exception e) {
                 throw new Exception("Minimax: " + e);
             }
-            
-            hash = game.update(currentPlayer, moveIndex);
 
-            if (transpositionTable.containsKey(hash)) {
-                newScore = transpositionTable.get(hash);
-            } else {
-                newScore = deepMove(game, depth - 1);
-                transpositionTable.put(hash, newScore);
-                count += 1;
-            }
-            
-            if ((newScore > bestScore && currentPlayer == 1)
-                    || (newScore < bestScore && currentPlayer == -1)) {
+            game.update(currentPlayer, moveIndex);
+
+            newScore = -deepMove(game, depth - 1);
+            moveCount += 1;
+
+            if (newScore > bestScore) {
                 bestScore = newScore;
             }
-            
-            hash = game.update(currentPlayer, moveIndex);
+
+            game.update(currentPlayer, moveIndex);
             game.undoMove(moveIndex);
         }
-        
+
+        transpositionTable.put(game.getHash(), bestScore);
+
         return bestScore;
     }
 

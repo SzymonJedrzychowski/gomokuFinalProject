@@ -8,29 +8,37 @@ import java.sql.Timestamp;
 public class AlphaBetaPruning extends Player {
     int globalDepth;
     HashMap<Long, ArrayList<Integer>> transpositionTable = new HashMap<>();
-    int count;
+    int moveCount;
+    boolean onlyCloseMoves;
 
     AlphaBetaPruning(int globalDepth) {
         this.globalDepth = globalDepth;
+        this.onlyCloseMoves = false;
+    }
+
+    AlphaBetaPruning(int globalDepth, boolean onlyCloseMoves) {
+        this.globalDepth = globalDepth;
+        this.onlyCloseMoves = onlyCloseMoves;
     }
 
     public int move(GameEnvironment gameState) throws Exception {
-        count = 0;
+        moveCount = 0;
 
         GameEnvironment game = gameState.copy();
         int currentPlayer = game.getCurrentPlayer();
 
-        int bestScore = currentPlayer == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-        ArrayList<Integer> bestMovePlace = new ArrayList<>();
+        int bestScore = Integer.MIN_VALUE;
+        int bestMovePlace = -1;
         int newScore;
+        int alpha = Integer.MIN_VALUE + 1;
+        int beta = Integer.MAX_VALUE;
 
         game.hashInit();
 
-        Timestamp timestamp1 = new Timestamp(System.currentTimeMillis());
+        Timestamp startTimestamp = new Timestamp(System.currentTimeMillis());
 
-        ArrayList<Integer> legalMoves = game.getLegalMoves();
-        int alpha = Integer.MIN_VALUE;
-        int beta = Integer.MAX_VALUE;
+        ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
+
         for (int moveIndex : legalMoves) {
             try {
                 game.move(moveIndex);
@@ -40,42 +48,52 @@ public class AlphaBetaPruning extends Player {
 
             game.update(currentPlayer, moveIndex);
 
-            newScore = deepMove(game, globalDepth - 1, alpha, beta);
-            if ((newScore > bestScore && currentPlayer == 1)
-                    || (newScore < bestScore && currentPlayer == -1)) {
+            newScore = -deepMove(game, globalDepth - 1, -beta, -alpha);
+            moveCount += 1;
+
+            if (newScore > bestScore) {
                 bestScore = newScore;
-                bestMovePlace.clear();
-                bestMovePlace.add(moveIndex);
-            } else if ((newScore == bestScore && currentPlayer == 1)
-                    || (newScore == bestScore && currentPlayer == -1)) {
-                bestMovePlace.add(moveIndex);
+                bestMovePlace = moveIndex;
             }
 
-            if (currentPlayer == 1) {
-                alpha = Math.max(alpha, newScore);
-            } else {
-                beta = Math.min(beta, newScore);
-            }
+            alpha = Math.max(alpha, newScore);
 
             game.update(currentPlayer, moveIndex);
-            game.undoMove(moveIndex);
+            game.undoMove(moveIndex); 
         }
 
-        Timestamp timestamp2 = new Timestamp(System.currentTimeMillis());
-        //System.out.printf("%-30s: %d time: %8d moveCount: %10d%n", "AlphaBetaPruning", currentPlayer,
-        //        timestamp2.getTime() - timestamp1.getTime(), count);
-        
+        Timestamp endTimestamp = new Timestamp(System.currentTimeMillis());
+        System.out.printf("%-30s: %d time: %8d moveCount: %10d%n", "AlphaBetaPruning", currentPlayer,
+                endTimestamp.getTime() - startTimestamp.getTime(), moveCount);
+
         transpositionTable.clear();
-        return bestMovePlace.get((int) (Math.random() * bestMovePlace.size()));
+        return bestMovePlace;
     }
 
     public int deepMove(GameEnvironment game, int depth, int alpha, int beta) throws Exception {
         int currentPlayer = game.getCurrentPlayer();
 
-        int bestScore = currentPlayer == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-        int newScore = -1;
+        int bestScore = Integer.MIN_VALUE;
+        int newScore;
 
-        long hash;
+        long hash = game.getHash();
+        ArrayList<Integer> tempArray;
+        int flag;
+        if (transpositionTable.containsKey(hash)) {
+            tempArray = transpositionTable.get(hash);
+            flag = tempArray.get(1);
+            newScore = tempArray.get(0);
+            if (flag == 0) {
+                return newScore;
+            } else if (flag == 1) {
+                alpha = Math.max(alpha, newScore);
+            } else if (flag == 2) {
+                beta = Math.min(beta, newScore);
+            }
+            if (alpha >= beta) {
+                return newScore;
+            }
+        }
 
         HashMap<Integer, Integer> results = game.ifTerminal();
 
@@ -83,75 +101,49 @@ public class AlphaBetaPruning extends Player {
             if (results.get(1) == 0) {
                 return 0;
             }
-            return results.get(1) == 1 ? Integer.MAX_VALUE - (globalDepth - depth) * 10
-                    : Integer.MIN_VALUE + (globalDepth - depth) * 10;
+            return Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10;
         }
 
         if (depth == 0) {
-            return game.evaluateBoard();
+            return currentPlayer * game.evaluateBoard();
         }
-        ArrayList<Integer> tempArray;
-        int flag;
-        ArrayList<Integer> legalMoves = game.getLegalMoves();
-        boolean skipSimulation;
-        boolean cutoff = false;
+
+        ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
+
         for (int moveIndex : legalMoves) {
-            skipSimulation = false;
             try {
                 game.move(moveIndex);
             } catch (Exception e) {
                 throw new Exception("Minimax: " + e);
             }
 
-            hash = game.update(currentPlayer, moveIndex);
+            game.update(currentPlayer, moveIndex);
 
-            if (transpositionTable.containsKey(hash)) {
-                tempArray = transpositionTable.get(hash);
-                flag = tempArray.get(1);
-                newScore = tempArray.get(0);
-                if (flag == 0) {
-                    skipSimulation = true;
-                }else if(flag == 1 && newScore >= beta){
-                    skipSimulation = true;
-                }else if(flag == 2 && newScore <= alpha){
-                    skipSimulation = true;
-                }else if(beta <= alpha){
-                    skipSimulation = true;
-                }
-            }
-            if (!skipSimulation) {
-                count += 1;
-                newScore = deepMove(game, depth - 1, alpha, beta);
-            }
+            newScore = -deepMove(game, depth - 1, -beta, -alpha);
+            moveCount += 1;
 
-            if ((newScore > bestScore && currentPlayer == 1)
-                    || (newScore < bestScore && currentPlayer == -1)) {
+            if (newScore > bestScore) {
                 bestScore = newScore;
             }
 
             game.undoMove(moveIndex);
+            game.update(currentPlayer, moveIndex);
 
-            flag = 0;
-            if (currentPlayer == 1) {
-                alpha = Math.max(alpha, newScore);
-                if (newScore > beta) {
-                    flag = 2;
-                    cutoff = true;
-                }
-            } else {
-                beta = Math.min(beta, newScore);
-                if (newScore < alpha) {
-                    flag = 1;
-                    cutoff = true;
-                }
-            }
-            transpositionTable.put(hash, new ArrayList<>(Arrays.asList(newScore, flag)));
-            hash = game.update(currentPlayer, moveIndex);
+            alpha = Math.max(alpha, newScore);
 
-            if(cutoff){
+            if (alpha >= beta) {
                 break;
             }
         }
+
+        if (bestScore <= alpha) {
+            flag = 2;
+        } else if (bestScore >= beta) {
+            flag = 1;
+        } else {
+            flag = 0;
+        }
+        transpositionTable.put(game.getHash(), new ArrayList<>(Arrays.asList(bestScore, flag)));
 
         return bestScore;
     }
