@@ -1,13 +1,12 @@
 package gomoku;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class App {
     public static void main(String[] args) {
         int limit = 4;
-        Player player1 = new Minimax(limit);
-        Player player2 = new AlphaBetaPruning(limit, false);
+        Player player1 = new PVS(limit, false);
+        Player player2 = new AlphaBetaPruning_Ordered(limit, false);
         HashMap<Integer, Integer> result;
         int move;
         GameEnvironment game = new GameEnvironment(7, false);
@@ -24,14 +23,13 @@ public class App {
                 e.printStackTrace();
                 break;
             }
-            // game.printBoard();
+            game.printBoard();
             result = game.ifTerminal();
             if (result.get(0) != 0) {
                 // System.out.printf("Game %3d finished. ", currentGame);
-                // System.out.printf("Player %2d has won.\n", result.get(1));
+                System.out.printf("Player %2d has won.\n", result.get(1));
                 break;
             }
-            break;
         }
         // PlayGames games;
         // ArrayList<Integer> results;

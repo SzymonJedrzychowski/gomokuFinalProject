@@ -28,7 +28,7 @@ public class PVS extends Player {
         int currentPlayer = game.getCurrentPlayer();
 
         int bestScore = Integer.MIN_VALUE;
-        ArrayList<Integer> bestMovePlace = new ArrayList<>();
+        int bestMovePlace = -1;
         int newScore;
 
         game.hashInit();
@@ -60,8 +60,7 @@ public class PVS extends Player {
 
             if (newScore > bestScore) {
                 bestScore = newScore;
-                bestMovePlace.clear();
-                bestMovePlace.add(moveIndex);
+                bestMovePlace = moveIndex;
             }
 
             if (newScore > alpha) {
@@ -74,11 +73,11 @@ public class PVS extends Player {
         }
 
         Timestamp endTimestamp = new Timestamp(System.currentTimeMillis());
-        //System.out.printf("%-30s: player %2d time: %8d moveCount: %10d%n", "PVS",
-        //currentPlayer,
-        //endTimestamp.getTime() - startTimestamp.getTime(), count);
+        System.out.printf("%-30s: player %2d time: %8d moveCount: %10d%n", "PVS",
+        currentPlayer,
+        endTimestamp.getTime() - startTimestamp.getTime(), count);
         transpositionTable.clear();
-        return bestMovePlace.get((int) (Math.random() * bestMovePlace.size()));
+        return bestMovePlace;
     }
 
     public int deepMove(GameEnvironment game, int depth, int alpha, int beta) throws Exception {
@@ -146,7 +145,7 @@ public class PVS extends Player {
                 alpha = newScore;
             }
             count += 1;
-            if(alpha > beta){
+            if(alpha >= beta){
                 break;
             }
             b = alpha+1;

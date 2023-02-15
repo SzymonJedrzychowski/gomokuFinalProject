@@ -46,7 +46,7 @@ public class Minimax extends Player {
 
             newScore = -deepMove(game, globalDepth - 1);
             moveCount += 1;
-            
+
             if (newScore > bestScore) {
                 bestScore = newScore;
                 bestMovePlace = moveIndex;
@@ -59,8 +59,8 @@ public class Minimax extends Player {
         Timestamp endTimestamp = new Timestamp(System.currentTimeMillis());
 
         System.out.printf("%-30s: player %2d time: %10d moveCount: %10d%n", "Minimax",
-        currentPlayer,
-        endTimestamp.getTime() - startTimestamp.getTime(), moveCount);
+                currentPlayer,
+                endTimestamp.getTime() - startTimestamp.getTime(), moveCount);
         transpositionTable.clear();
         return bestMovePlace;
     }
@@ -72,10 +72,6 @@ public class Minimax extends Player {
         int newScore;
 
         long hash = game.getHash();
-        if (transpositionTable.containsKey(hash)) {
-            newScore = transpositionTable.get(hash);
-            return newScore;
-        }
 
         HashMap<Integer, Integer> results = game.ifTerminal();
 
@@ -99,10 +95,14 @@ public class Minimax extends Player {
                 throw new Exception("Minimax: " + e);
             }
 
-            game.update(currentPlayer, moveIndex);
-
-            newScore = -deepMove(game, depth - 1);
-            moveCount += 1;
+            hash = game.update(currentPlayer, moveIndex);
+            if (transpositionTable.containsKey(hash)) {
+                newScore = transpositionTable.get(hash);
+            } else {
+                newScore = -deepMove(game, depth - 1);
+                moveCount += 1;
+                transpositionTable.put(hash, bestScore);
+            }
 
             if (newScore > bestScore) {
                 bestScore = newScore;
@@ -111,8 +111,6 @@ public class Minimax extends Player {
             game.update(currentPlayer, moveIndex);
             game.undoMove(moveIndex);
         }
-
-        transpositionTable.put(game.getHash(), bestScore);
 
         return bestScore;
     }

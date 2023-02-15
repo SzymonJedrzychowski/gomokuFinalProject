@@ -63,8 +63,8 @@ public class AlphaBetaPruning extends Player {
         }
 
         Timestamp endTimestamp = new Timestamp(System.currentTimeMillis());
-        System.out.printf("%-30s: %d time: %8d moveCount: %10d%n", "AlphaBetaPruning", currentPlayer,
-                endTimestamp.getTime() - startTimestamp.getTime(), moveCount);
+        //System.out.printf("%-30s: %d time: %8d moveCount: %10d%n", "AlphaBetaPruning", currentPlayer,
+        //        endTimestamp.getTime() - startTimestamp.getTime(), moveCount);
 
         transpositionTable.clear();
         return bestMovePlace;
