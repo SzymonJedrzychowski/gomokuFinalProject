@@ -22,6 +22,7 @@ public class PlayGames {
         GameEnvironment game = new GameEnvironment(boardSize, false);
         int currentGame = 0;
         while(currentGame < gamesOnSide){
+            game.resetState();
             while (true) {
                 try {
                     if (game.getCurrentPlayer() == 1) {
@@ -45,12 +46,11 @@ public class PlayGames {
                     }else{
                         results.set(1, results.get(1)+1);
                     }
-                    //System.out.printf("Game %3d finished. ", currentGame);
-                    //System.out.printf("Player %2d has won.\n", result.get(1));
+                    System.out.printf("Game %3d finished. ", currentGame);
+                    System.out.printf("Player %2d has won.\n", result.get(1));
                     break;
                 }
             }
-            game.resetState();
             currentGame += 1;
         }
         return results;

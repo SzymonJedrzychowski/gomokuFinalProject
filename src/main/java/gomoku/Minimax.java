@@ -27,6 +27,7 @@ public class Minimax extends Player {
         int currentPlayer = game.getCurrentPlayer();
 
         int bestMovePlace = -1;
+        ArrayList<Integer> bestMoves = new ArrayList<>();
         int bestScore = Integer.MIN_VALUE;
         int newScore;
 
@@ -50,6 +51,10 @@ public class Minimax extends Player {
             if (newScore > bestScore) {
                 bestScore = newScore;
                 bestMovePlace = moveIndex;
+                bestMoves.clear();
+                bestMoves.add(moveIndex);
+            }else if(newScore == bestScore){
+                bestMoves.add(moveIndex);
             }
 
             game.undoMove(moveIndex);
@@ -58,9 +63,9 @@ public class Minimax extends Player {
 
         Timestamp endTimestamp = new Timestamp(System.currentTimeMillis());
 
-        System.out.printf("%-30s: player %2d time: %10d moveCount: %10d%n", "Minimax",
-                currentPlayer,
-                endTimestamp.getTime() - startTimestamp.getTime(), moveCount);
+        //System.out.printf("%-30s: player %2d time: %10d moveCount: %10d%n", "Minimax",
+        //        currentPlayer,
+        //        endTimestamp.getTime() - startTimestamp.getTime(), moveCount);
         transpositionTable.clear();
         return bestMovePlace;
     }
@@ -101,7 +106,7 @@ public class Minimax extends Player {
             } else {
                 newScore = -deepMove(game, depth - 1);
                 moveCount += 1;
-                transpositionTable.put(hash, bestScore);
+                transpositionTable.put(hash, newScore);
             }
 
             if (newScore > bestScore) {

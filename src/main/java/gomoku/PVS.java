@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 public class PVS extends Player {
     int globalDepth;
     HashMap<Long, ArrayList<Integer>> transpositionTable = new HashMap<>();
-    int count;
+    int moveCount;
     boolean onlyCloseMoves;
 
     PVS(int globalDepth) {
@@ -22,7 +22,7 @@ public class PVS extends Player {
     }
 
     public int move(GameEnvironment gameState) throws Exception {
-        count = 0;
+        moveCount = 0;
 
         GameEnvironment game = gameState.copy();
         int currentPlayer = game.getCurrentPlayer();
@@ -67,15 +67,15 @@ public class PVS extends Player {
                 alpha = newScore;
             }
             b = alpha+1;
-            count += 1;
+            moveCount += 1;
             game.update(currentPlayer, moveIndex);
             game.undoMove(moveIndex);
         }
 
         Timestamp endTimestamp = new Timestamp(System.currentTimeMillis());
-        System.out.printf("%-30s: player %2d time: %8d moveCount: %10d%n", "PVS",
-        currentPlayer,
-        endTimestamp.getTime() - startTimestamp.getTime(), count);
+        //System.out.printf("%-30s: player %2d time: %8d moveCount: %10d%n", "PVS",
+        //currentPlayer,
+        //endTimestamp.getTime() - startTimestamp.getTime(), moveCount);
         transpositionTable.clear();
         return bestMovePlace;
     }
@@ -149,7 +149,7 @@ public class PVS extends Player {
             if (newScore > alpha) {
                 alpha = newScore;
             }
-            count += 1;
+            moveCount += 1;
             if(alpha >= beta){
                 break;
             }
