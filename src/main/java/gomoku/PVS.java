@@ -55,7 +55,7 @@ public class PVS extends Player {
 
             newScore = -deepMove(game, globalDepth - 1, -b, -alpha);
             if (newScore > alpha && newScore < beta && possibleMoves.get(0) != moveIndex) {
-                newScore = -deepMove(game, globalDepth - 1, -beta, -newScore);
+                newScore = -deepMove(game, globalDepth - 1, -beta, -alpha);
             }
 
             if (newScore > bestScore) {
@@ -119,7 +119,12 @@ public class PVS extends Player {
             return currentPlayer * game.evaluateBoard();
         }
 
-        ArrayList<Integer> possibleMoves = game.getLegalMoves(onlyCloseMoves);
+        ArrayList<Integer> possibleMoves;
+        if (globalDepth - depth <= Math.min(2, globalDepth - 2)) {
+            possibleMoves = sortMoves(game);
+        } else {
+            possibleMoves = game.getLegalMoves(onlyCloseMoves);
+        }
         int b = beta;
         for (int moveIndex : possibleMoves) {
             try {
@@ -132,7 +137,7 @@ public class PVS extends Player {
 
             newScore = -deepMove(game, depth - 1, -b, -alpha);
             if (newScore > alpha && newScore < beta && possibleMoves.get(0) != moveIndex) {
-                newScore = -deepMove(game, depth - 1, -beta, -newScore);
+                newScore = -deepMove(game, depth - 1, -beta, -alpha);
             }
 
             if (newScore > bestScore) {
@@ -167,42 +172,28 @@ public class PVS extends Player {
         return possibleMoves;
     }
 
-    public ArrayList<Integer> sortMoves(GameEnvironment game) throws Exception{
+    public ArrayList<Integer> sortMoves(GameEnvironment game) throws Exception {
         ArrayList<Integer> sortedMoves = new ArrayList<>();
         ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
-        int bestScore = game.getCurrentPlayer() == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-        ArrayList<Integer> bestIndex = new ArrayList<>();
+        int bestScore = Integer.MIN_VALUE;
+        int bestIndex = -1;
 
         int tempScore;
-        for(int moveIndex: legalMoves){
+        for (int moveIndex : legalMoves) {
             game.move(moveIndex);
             tempScore = game.evaluateBoard();
             game.undoMove(moveIndex);
-            if(game.getCurrentPlayer() == 1){
-                if(tempScore > bestScore){
-                    bestScore = tempScore;
-                    bestIndex.clear();
-                    bestIndex.add(moveIndex);
-                }else if(tempScore == bestScore){
-                    bestIndex.add(moveIndex);
-                }
-            }else{
-                if(tempScore < bestScore){
-                    bestScore = tempScore;
-                    bestIndex.clear();
-                    bestIndex.add(moveIndex);
-                }else if(tempScore == bestScore){
-                    bestIndex.add(moveIndex);
-                }
+            if (game.getCurrentPlayer() * tempScore > bestScore) {
+                bestScore = tempScore;
+                bestIndex = moveIndex;
             }
         }
-        int randomBest = bestIndex.get((int) (Math.random() * bestIndex.size()));
-        sortedMoves.add(randomBest);
-        for(int moveIndex:legalMoves){
-            if(moveIndex != randomBest){
+        sortedMoves.add(bestIndex);
+        for (int moveIndex : legalMoves) {
+            if (moveIndex != bestIndex) {
                 sortedMoves.add(moveIndex);
             }
         }
         return sortedMoves;
-    } 
+    }
 }
