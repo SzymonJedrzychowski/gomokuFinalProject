@@ -75,6 +75,7 @@ public class AlphaBetaPruning extends Player {
 
         int bestScore = Integer.MIN_VALUE;
         int newScore;
+        int startAlpha = alpha;
 
         long hash = game.getHash();
         ArrayList<Integer> tempArray;
@@ -136,7 +137,7 @@ public class AlphaBetaPruning extends Player {
             }
         }
 
-        if (bestScore <= alpha) {
+        if (bestScore <= startAlpha) {
             flag = 2;
         } else if (bestScore >= beta) {
             flag = 1;

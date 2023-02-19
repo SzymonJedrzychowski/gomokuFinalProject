@@ -70,7 +70,7 @@ public class AlphaBetaPruning_Ordered extends Player {
         Timestamp endTimestamp = new Timestamp(System.currentTimeMillis());
         //System.out.printf("%-30s: player %2d time: %8d moveCount: %10d%n", "AlphaBetaPruning_Ordered", currentPlayer,
         //        endTimestamp.getTime() - startTimestamp.getTime(), moveCount);
-
+        
         transpositionTable.clear();
         return bestMovePlace;
     }
@@ -80,6 +80,7 @@ public class AlphaBetaPruning_Ordered extends Player {
 
         int bestScore = Integer.MIN_VALUE;
         int newScore;
+        int startAlpha = alpha;
 
         long hash = game.getHash();
         ArrayList<Integer> tempArray;
@@ -146,7 +147,7 @@ public class AlphaBetaPruning_Ordered extends Player {
             }
         }
 
-        if (bestScore <= alpha) {
+        if (bestScore <= startAlpha) {
             flag = 2;
         } else if (bestScore >= beta) {
             flag = 1;

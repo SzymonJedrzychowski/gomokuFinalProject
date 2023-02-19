@@ -16,7 +16,7 @@ public class GameEnvironment {
     private boolean useGraphicalInterface;
     GraphicsBoard graphicsBoard;
     int moveCount;
-    int[] scoreTable = { 0, 0, 1, 10, 50, 0 };
+    int[] scoreTable = { 0, 0, 1, 10, 50, 10000 };
 
     GameEnvironment(int boardSize, boolean useGraphicalInterface) {
         this.boardSize = boardSize;
@@ -332,7 +332,7 @@ public class GameEnvironment {
                 return 0;
             }
         }
-        if (col + 5 < boardSize && row - 5 > 0) {
+        if (col + 5 < boardSize && row - 5 >= 0) {
             if (gameBoard.get(row - 5).get(col + 5) == checkPlayer) {
                 return 0;
             }
