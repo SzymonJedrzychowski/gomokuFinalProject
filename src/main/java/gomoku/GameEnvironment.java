@@ -206,7 +206,7 @@ public class GameEnvironment {
                 return false;
             }
         }
-        if (col + 5 < boardSize && row - 5 > 0) {
+        if (col + 5 < boardSize && row - 5 >= 0) {
             if (gameBoard.get(row - 5).get(col + 5) == checkPlayer) {
                 return false;
             }

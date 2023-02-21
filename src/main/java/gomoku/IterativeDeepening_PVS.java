@@ -56,9 +56,9 @@ public class IterativeDeepening_PVS extends Player {
         } while (!results.containsKey(3));
         moveCount = previousResult.get(4);
         
-        System.out.printf("%-30s: player %2d time: %8d moveCount: %10d depth: %10d %n", "IterativeDeepening_PVS",
-                game.getCurrentPlayer(), new Timestamp(System.currentTimeMillis()).getTime() - startTime,
-                moveCount, globalDepth - 1);
+        //System.out.printf("%-30s: player %2d time: %8d moveCount: %10d depth: %10d %n", "IterativeDeepening_PVS",
+        //        game.getCurrentPlayer(), new Timestamp(System.currentTimeMillis()).getTime() - startTime,
+        //        moveCount, globalDepth - 1);
         previousScores.clear();
 
         transpositionTable.clear();
@@ -89,7 +89,6 @@ public class IterativeDeepening_PVS extends Player {
         }
 
         ArrayList<Integer> legalMoves = getMoves(game);
-
         for (int moveIndex : legalMoves) {
             try {
                 game.move(moveIndex);
@@ -124,6 +123,7 @@ public class IterativeDeepening_PVS extends Player {
             game.update(currentPlayer, moveIndex);
             game.undoMove(moveIndex);
         }
+        results.put(1, bestScore);
         results.put(2, bestMovePlace);
         results.put(4, moveCount);
 

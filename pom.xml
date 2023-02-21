@@ -72,5 +72,5 @@
       </plugins>
     </pluginManagement>
   </build>
-    <description>-Xmx12g</description>
+    <description>-Xmx16g</description>
 </project>
