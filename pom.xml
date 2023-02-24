@@ -25,6 +25,11 @@
       <version>4.11</version>
       <scope>test</scope>
     </dependency>
+    <dependency> 
+    <groupId>org.openjdk.jol</groupId> 
+    <artifactId>jol-core</artifactId>    
+    <version>0.10</version> 
+</dependency>
   </dependencies>
 
   <build>
@@ -72,5 +77,5 @@
       </plugins>
     </pluginManagement>
   </build>
-    <description>-Xmx16g</description>
+    <description>-Xmx512m</description>
 </project>

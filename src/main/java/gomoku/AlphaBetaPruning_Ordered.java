@@ -3,11 +3,11 @@ package gomoku;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.sql.Timestamp;
+import org.openjdk.jol.info.GraphLayout;
 
 public class AlphaBetaPruning_Ordered extends Player {
     int globalDepth;
-    HashMap<Long, ArrayList<Integer>> transpositionTable = new HashMap<>();
+    HashMap<Long, ArrayList<Integer>> transpositionTable;
     int moveCount;
     boolean onlyCloseMoves;
 
@@ -21,7 +21,9 @@ public class AlphaBetaPruning_Ordered extends Player {
         this.onlyCloseMoves = onlyCloseMoves;
     }
 
-    public int move(GameEnvironment gameState) throws Exception {
+    public MoveData move(GameEnvironment gameState) throws Exception {
+        long startTimestamp = System.nanoTime();
+        transpositionTable = new HashMap<>();
         moveCount = 0;
 
         GameEnvironment game = gameState.copy();
@@ -34,8 +36,6 @@ public class AlphaBetaPruning_Ordered extends Player {
         int beta = Integer.MAX_VALUE;
 
         game.hashInit();
-
-        Timestamp startTimestamp = new Timestamp(System.currentTimeMillis());
 
         ArrayList<Integer> legalMoves;
         if (globalDepth > 1) {
@@ -67,12 +67,13 @@ public class AlphaBetaPruning_Ordered extends Player {
             game.undoMove(moveIndex);
         }
 
-        Timestamp endTimestamp = new Timestamp(System.currentTimeMillis());
-        //System.out.printf("%-30s: player %2d time: %8d moveCount: %10d%n", "AlphaBetaPruning_Ordered", currentPlayer,
-        //        endTimestamp.getTime() - startTimestamp.getTime(), moveCount);
-        
-        transpositionTable.clear();
-        return bestMovePlace;
+        long endTimestamp = System.nanoTime();
+        MoveData moveData = new MoveData(endTimestamp - startTimestamp, moveCount, bestMovePlace,
+                // GraphLayout.parseInstance(this).totalSize(),
+                0,
+                bestScore);
+        transpositionTable = null;
+        return moveData;
     }
 
     public int deepMove(GameEnvironment game, int depth, int alpha, int beta) throws Exception {
@@ -105,13 +106,18 @@ public class AlphaBetaPruning_Ordered extends Player {
 
         if (results.get(0) == 1) {
             if (results.get(1) == 0) {
+                transpositionTable.put(hash, new ArrayList<>(Arrays.asList(0, 0)));
                 return 0;
             }
+            transpositionTable.put(hash,
+                    new ArrayList<>(Arrays.asList(Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10, 0)));
             return Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10;
         }
 
         if (depth == 0) {
-            return currentPlayer * game.evaluateBoard();
+            int evaluationScore = currentPlayer * game.evaluateBoard();
+            transpositionTable.put(hash, new ArrayList<>(Arrays.asList(evaluationScore, 0)));
+            return evaluationScore;
         }
 
         ArrayList<Integer> legalMoves;

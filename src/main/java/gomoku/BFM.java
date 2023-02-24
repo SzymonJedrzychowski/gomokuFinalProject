@@ -22,7 +22,8 @@ public class BFM extends Player {
         this.onlyCloseMoves = onlyCloseMoves;
     }
 
-    public int move(GameEnvironment state) throws Exception {
+    public MoveData move(GameEnvironment state) throws Exception {
+        Timestamp startTimestamp = new Timestamp(System.currentTimeMillis());
         moveCount = 0;
         GameEnvironment game = state.copy();
         int currentPlayer = game.getCurrentPlayer();
@@ -60,13 +61,14 @@ public class BFM extends Player {
             game.undoMove(move);
             moveCount += 1;
         }
-        timestamp1 = new Timestamp(System.currentTimeMillis());
 
         int randomIndex;
         int newScore;
         int currentMove;
         int secondBest;
-        while (new Timestamp(System.currentTimeMillis()).getTime() - timestamp1.getTime() < timeLimit && !((currentPlayer == 1 && bestMoves.firstKey() == Integer.MAX_VALUE) || (currentPlayer == -1 && bestMoves.firstKey() == Integer.MIN_VALUE))) {
+        while (new Timestamp(System.currentTimeMillis()).getTime() - startTimestamp.getTime() < timeLimit
+                && !((currentPlayer == 1 && bestMoves.firstKey() == Integer.MAX_VALUE)
+                        || (currentPlayer == -1 && bestMoves.firstKey() == Integer.MIN_VALUE))) {
             if (bestMoves.firstEntry().getValue().size() > 1) {
                 secondBest = bestMoves.firstKey();
             } else if (bestMoves.size() == 1) {
@@ -75,14 +77,14 @@ public class BFM extends Player {
                 secondBest = currentPlayer == 1 ? bestMoves.ceilingKey(bestMoves.firstKey() - 1)
                         : bestMoves.floorKey(bestMoves.firstKey() + 1);
             }
-            
+
             randomIndex = (int) (bestMoves.firstEntry().getValue().size() * Math.random());
             currentMove = bestMoves.firstEntry().getValue().get(randomIndex);
             game.move(currentMove);
-            
-            if(currentPlayer == 1){
+
+            if (currentPlayer == 1) {
                 newScore = deepMove(game, Math.max(secondBest, Integer.MIN_VALUE), Integer.MAX_VALUE);
-            }else{
+            } else {
                 newScore = deepMove(game, Integer.MAX_VALUE, Math.min(secondBest, Integer.MAX_VALUE));
             }
             game.undoMove(currentMove);
@@ -97,10 +99,13 @@ public class BFM extends Player {
                 bestMoves.put(newScore, tempArray);
             }
         }
-        
-        //System.out.printf("%-30s time: %10d moveCount: %10d %n", "RBFM",
-        //        new Timestamp(System.currentTimeMillis()).getTime() - timestamp1.getTime(), moveCount);
-        return bestMoves.firstEntry().getValue().get((int)(bestMoves.firstEntry().getValue().size()*Math.random()));
+
+        Timestamp endTimestamp = new Timestamp(System.currentTimeMillis());
+        MoveData moveData = new MoveData(endTimestamp.getTime() - startTimestamp.getTime(), moveCount,
+                bestMoves.firstEntry().getValue().get((int) (bestMoves.firstEntry().getValue().size() * Math.random())),
+                0, bestMoves.firstKey());
+        bestMoves = null;
+        return moveData;
     }
 
     private int deepMove(GameEnvironment game, int alpha, int beta) throws Exception {
@@ -153,7 +158,6 @@ public class BFM extends Player {
             }
         }
 
-
         int secondBest;
         int randomIndex;
         int currentMove;
@@ -173,9 +177,9 @@ public class BFM extends Player {
             currentMove = bestMoves.firstEntry().getValue().get(randomIndex);
             game.move(currentMove);
 
-            if(currentPlayer == 1){
+            if (currentPlayer == 1) {
                 newScore = deepMove(game, Math.max(alpha, secondBest), beta);
-            }else{
+            } else {
                 newScore = deepMove(game, alpha, Math.min(beta, secondBest));
             }
             game.undoMove(currentMove);
@@ -199,7 +203,7 @@ public class BFM extends Player {
             }
 
         }
-        
+
         return bestMoves.firstKey();
     }
 }

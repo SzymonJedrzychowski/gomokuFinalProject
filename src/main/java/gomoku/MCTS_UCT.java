@@ -22,7 +22,7 @@ public class MCTS_UCT extends Player {
         this.onlyCloseMoves = onlyCloseMoves;
     }
 
-    public int move(GameEnvironment state) throws Exception {
+    public MoveData move(GameEnvironment state) throws Exception {
         int moveCount = 0;
         Timestamp startTimestamp = new Timestamp(System.currentTimeMillis());
         Timestamp endTimestamp;
@@ -66,9 +66,10 @@ public class MCTS_UCT extends Player {
         }
 
         endTimestamp = new Timestamp(System.currentTimeMillis());
-        //System.out.printf("%-30s time: %10d moveCount: %10d %n", "MCTS_UCT",
-        //endTimestamp.getTime() - startTimestamp.getTime(), moveCount);
-
-        return moves.get((int) (Math.random() * moves.size()));
+        // System.out.printf("%-30s time: %10d moveCount: %10d %n", "MCTS_UCT",
+        // endTimestamp.getTime() - startTimestamp.getTime(), moveCount);
+        MoveData moveData = new MoveData(endTimestamp.getTime() - startTimestamp.getTime(), moveCount,
+                moves.get((int) (Math.random() * moves.size())), 0, 0);
+        return moveData;
     }
 }

@@ -18,21 +18,21 @@ public class MCTS extends Player {
         this.onlyCloseMoves = onlyCloseMoves;
     }
 
-    public int move(GameEnvironment state) throws Exception {
-        Timestamp timestamp1 = new Timestamp(System.currentTimeMillis());
-        Timestamp timestamp2;
+    public MoveData move(GameEnvironment state) throws Exception {
+        Timestamp startTimestamp = new Timestamp(System.currentTimeMillis());
+        Timestamp endTimestamp;
         int moveCount = 0;
 
         MCTS_node currentNode = new MCTS_node(state, null, onlyCloseMoves);
         MCTS_node selectedNode;
         do {
-            timestamp2 = new Timestamp(System.currentTimeMillis());
+            endTimestamp = new Timestamp(System.currentTimeMillis());
             selectedNode = currentNode.select();
             while (selectedNode != null) {
                 selectedNode = selectedNode.select();
             }
             moveCount += 1;
-        } while (timestamp2.getTime() - timestamp1.getTime() < timeLimit);
+        } while (endTimestamp.getTime() - endTimestamp.getTime() < timeLimit);
 
         HashMap<Integer, Float> scores = new HashMap<>();
         MCTS_node child;
@@ -58,10 +58,10 @@ public class MCTS extends Player {
             }
         }
 
-        timestamp2 = new Timestamp(System.currentTimeMillis());
-        //System.out.printf("%-30s time: %10d moveCount: %10d %n", "MCTS",
-        //        timestamp2.getTime() - timestamp1.getTime(), moveCount);
+        endTimestamp = new Timestamp(System.currentTimeMillis());
 
-        return bestMovePlace;
+        MoveData moveData = new MoveData(endTimestamp.getTime() - startTimestamp.getTime(), moveCount, bestMovePlace, 0,
+                0);
+        return moveData;
     }
 }

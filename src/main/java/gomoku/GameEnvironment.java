@@ -8,44 +8,23 @@ import java.util.Random;
 
 public class GameEnvironment {
 
-    private int boardSize;
-    private ArrayList<ArrayList<Integer>> gameBoard;
+    private final int boardSize;
+    private int[][] gameBoard;
     private int currentPlayer;
     private long[][][] hashArray;
     private long hash;
-    private boolean useGraphicalInterface;
-    GraphicsBoard graphicsBoard;
     int moveCount;
     int[] scoreTable = { 0, 0, 1, 10, 50, 10000 };
 
     GameEnvironment(int boardSize, boolean useGraphicalInterface) {
         this.boardSize = boardSize;
-        this.gameBoard = new ArrayList<>();
-        this.useGraphicalInterface = useGraphicalInterface;
-        if (useGraphicalInterface) {
-            graphicsBoard = new GraphicsBoard(boardSize);
-        }
-        this.gameBoard = new ArrayList<>();
-        for (int i = 0; i < boardSize; i++) {
-            ArrayList<Integer> temp = new ArrayList<>();
-            for (int j = 0; j < boardSize; j++) {
-                temp.add(0);
-            }
-            this.gameBoard.add(temp);
-        }
+        this.gameBoard = new int[boardSize][boardSize];
         moveCount = 0;
         currentPlayer = 1;
     }
 
     public void resetState() {
-        this.gameBoard = new ArrayList<>();
-        for (int i = 0; i < boardSize; i++) {
-            ArrayList<Integer> temp = new ArrayList<>();
-            for (int j = 0; j < boardSize; j++) {
-                temp.add(0);
-            }
-            this.gameBoard.add(temp);
-        }
+        this.gameBoard = new int[boardSize][boardSize];
         moveCount = 0;
         currentPlayer = 1;
     }
@@ -53,20 +32,17 @@ public class GameEnvironment {
     public void move(int move) throws Exception {
         if (move < 0 || move > boardSize * boardSize - 1) {
             throw new Exception("Space out of bound.");
-        } else if (gameBoard.get(move / boardSize).get(move % boardSize) != 0) {
+        } else if (gameBoard[move / boardSize][move % boardSize] != 0) {
             throw new Exception("Already occupied space.");
         }
-        gameBoard.get(move / boardSize).set(move % boardSize, currentPlayer);
-        if (useGraphicalInterface) {
-            graphicsBoard.makeMove(gameBoard);
-        }
+        gameBoard[move / boardSize][move % boardSize] = currentPlayer;
         currentPlayer *= -1;
         moveCount += 1;
     }
 
     public void undoMove(int move) {
         currentPlayer *= -1;
-        gameBoard.get(move / boardSize).set(move % boardSize, 0);
+        gameBoard[move / boardSize][move % boardSize] = 0;
         moveCount -= 1;
     }
 
@@ -74,13 +50,13 @@ public class GameEnvironment {
         ArrayList<Integer> legalMoves = new ArrayList<>();
         for (int row = 0; row < boardSize; row++) {
             for (int column = 0; column < boardSize; column++) {
-                if (gameBoard.get(row).get(column) == 0) {
+                if (gameBoard[row][column] == 0) {
                     legalMoves.add(row * boardSize + column);
                 }
             }
         }
 
-        if(getCloseMoves && legalMoves.size() != boardSize*boardSize){
+        if (getCloseMoves && legalMoves.size() != boardSize * boardSize) {
             return getCloseMoves();
         }
         Collections.shuffle(legalMoves);
@@ -93,29 +69,39 @@ public class GameEnvironment {
         HashSet<Integer> playedMoves = new HashSet<>();
         for (int row = 0; row < boardSize; row++) {
             for (int column = 0; column < boardSize; column++) {
-                if (gameBoard.get(row).get(column) != 0) {
+                if (gameBoard[row][column] != 0) {
                     playedMoves.add(row * boardSize + column);
                 }
             }
         }
-        
-        for(int move:playedMoves){
-            //N
-            if(move >= boardSize  && !playedMoves.contains(move-boardSize)) closeMoves.add(move-boardSize);
-            //NE
-            if(move >= boardSize && (move+1)%boardSize != 0 && !playedMoves.contains(move-boardSize+1)) closeMoves.add(move-boardSize+1);
-            //E
-            if((move+1)%boardSize != 0 && !playedMoves.contains(move+1)) closeMoves.add(move+1);
-            //SE
-            if((move+1)%boardSize != 0 && (move+boardSize+1)<boardSize*boardSize && !playedMoves.contains(move+boardSize+1)) closeMoves.add(move+boardSize+1);
-            //S
-            if(move+boardSize+1 < boardSize*boardSize && !playedMoves.contains(move+boardSize)) closeMoves.add(move+boardSize);
-            //SW
-            if(move+boardSize+1 < boardSize*boardSize && move%boardSize != 0 && !playedMoves.contains(move+boardSize-1)) closeMoves.add(move+boardSize-1);
-            //W
-            if(move%boardSize != 0 && !playedMoves.contains(move-1)) closeMoves.add(move-1);
-            //NW
-            if(move%boardSize != 0 && move >= boardSize && !playedMoves.contains(move-boardSize-1)) closeMoves.add(move-boardSize-1);
+
+        for (int move : playedMoves) {
+            // N
+            if (move >= boardSize && !playedMoves.contains(move - boardSize))
+                closeMoves.add(move - boardSize);
+            // NE
+            if (move >= boardSize && (move + 1) % boardSize != 0 && !playedMoves.contains(move - boardSize + 1))
+                closeMoves.add(move - boardSize + 1);
+            // E
+            if ((move + 1) % boardSize != 0 && !playedMoves.contains(move + 1))
+                closeMoves.add(move + 1);
+            // SE
+            if ((move + 1) % boardSize != 0 && (move + boardSize + 1) < boardSize * boardSize
+                    && !playedMoves.contains(move + boardSize + 1))
+                closeMoves.add(move + boardSize + 1);
+            // S
+            if (move + boardSize + 1 < boardSize * boardSize && !playedMoves.contains(move + boardSize))
+                closeMoves.add(move + boardSize);
+            // SW
+            if (move + boardSize + 1 < boardSize * boardSize && move % boardSize != 0
+                    && !playedMoves.contains(move + boardSize - 1))
+                closeMoves.add(move + boardSize - 1);
+            // W
+            if (move % boardSize != 0 && !playedMoves.contains(move - 1))
+                closeMoves.add(move - 1);
+            // NW
+            if (move % boardSize != 0 && move >= boardSize && !playedMoves.contains(move - boardSize - 1))
+                closeMoves.add(move - boardSize - 1);
         }
         result.addAll(closeMoves);
         Collections.shuffle(result);
@@ -140,17 +126,17 @@ public class GameEnvironment {
 
     public boolean checkRight(int row, int col, int checkPlayer) {
         for (int i = 0; i < 5; i++) {
-            if (gameBoard.get(row).get(col + i) != checkPlayer) {
+            if (gameBoard[row][col + i] != checkPlayer) {
                 return false;
             }
         }
         if (col > 0) {
-            if (gameBoard.get(row).get(col - 1) == checkPlayer) {
+            if (gameBoard[row][col - 1] == checkPlayer) {
                 return false;
             }
         }
         if (col + 5 < boardSize) {
-            if (gameBoard.get(row).get(col + 5) == checkPlayer) {
+            if (gameBoard[row][col + 5] == checkPlayer) {
                 return false;
             }
         }
@@ -159,17 +145,17 @@ public class GameEnvironment {
 
     public boolean checkDown(int row, int col, int checkPlayer) {
         for (int i = 0; i < 5; i++) {
-            if (gameBoard.get(row + i).get(col) != checkPlayer) {
+            if (gameBoard[row + i][col] != checkPlayer) {
                 return false;
             }
         }
         if (row > 0) {
-            if (gameBoard.get(row - 1).get(col) == checkPlayer) {
+            if (gameBoard[row - 1][col] == checkPlayer) {
                 return false;
             }
         }
         if (row + 5 < boardSize) {
-            if (gameBoard.get(row + 5).get(col) == checkPlayer) {
+            if (gameBoard[row + 5][col] == checkPlayer) {
                 return false;
             }
         }
@@ -178,17 +164,17 @@ public class GameEnvironment {
 
     public boolean checkRightBottom(int row, int col, int checkPlayer) {
         for (int i = 0; i < 5; i++) {
-            if (gameBoard.get(row + i).get(col + i) != checkPlayer) {
+            if (gameBoard[row + i][col + i] != checkPlayer) {
                 return false;
             }
         }
         if (col > 0 && row > 0) {
-            if (gameBoard.get(row - 1).get(col - 1) == checkPlayer) {
+            if (gameBoard[row - 1][col - 1] == checkPlayer) {
                 return false;
             }
         }
         if (col + 5 < boardSize && row + 5 < boardSize) {
-            if (gameBoard.get(row + 5).get(col + 5) == checkPlayer) {
+            if (gameBoard[row + 5][col + 5] == checkPlayer) {
                 return false;
             }
         }
@@ -197,17 +183,17 @@ public class GameEnvironment {
 
     public boolean checkRightUpward(int row, int col, int checkPlayer) {
         for (int i = 0; i < 5; i++) {
-            if (gameBoard.get(row - i).get(col + i) != checkPlayer) {
+            if (gameBoard[row - i][col + i] != checkPlayer) {
                 return false;
             }
         }
         if (col > 0 && row + 1 < boardSize) {
-            if (gameBoard.get(row + 1).get(col - 1) == checkPlayer) {
+            if (gameBoard[row + 1][col - 1] == checkPlayer) {
                 return false;
             }
         }
         if (col + 5 < boardSize && row - 5 >= 0) {
-            if (gameBoard.get(row - 5).get(col + 5) == checkPlayer) {
+            if (gameBoard[row - 5][col + 5] == checkPlayer) {
                 return false;
             }
         }
@@ -220,11 +206,11 @@ public class GameEnvironment {
         int checkPlayer = 0;
         for (int i = 0; i < 5; i++) {
             if (checkPlayer == 0) {
-                checkPlayer = gameBoard.get(row).get(col + i);
+                checkPlayer = gameBoard[row][col + i];
             } else {
-                if (gameBoard.get(row).get(col + i) == -checkPlayer) {
+                if (gameBoard[row][col + i] == -checkPlayer) {
                     return 0;
-                } else if (gameBoard.get(row).get(col + i) == checkPlayer) {
+                } else if (gameBoard[row][col + i] == checkPlayer) {
                     result += 1;
                     maxResult = Math.max(result, maxResult);
                 } else {
@@ -235,12 +221,12 @@ public class GameEnvironment {
         if (checkPlayer == 0)
             return 0;
         if (col > 0) {
-            if (gameBoard.get(row).get(col - 1) == checkPlayer) {
+            if (gameBoard[row][col - 1] == checkPlayer) {
                 return 0;
             }
         }
         if (col + 5 < boardSize) {
-            if (gameBoard.get(row).get(col + 5) == checkPlayer) {
+            if (gameBoard[row][col + 5] == checkPlayer) {
                 return 0;
             }
         }
@@ -253,11 +239,11 @@ public class GameEnvironment {
         int checkPlayer = 0;
         for (int i = 0; i < 5; i++) {
             if (checkPlayer == 0) {
-                checkPlayer = gameBoard.get(row + i).get(col);
+                checkPlayer = gameBoard[row + i][col];
             } else {
-                if (gameBoard.get(row + i).get(col) == -checkPlayer) {
+                if (gameBoard[row + i][col] == -checkPlayer) {
                     return 0;
-                } else if (gameBoard.get(row + i).get(col) == checkPlayer) {
+                } else if (gameBoard[row + i][col] == checkPlayer) {
                     result += 1;
                     maxResult = Math.max(result, maxResult);
                 } else {
@@ -266,12 +252,12 @@ public class GameEnvironment {
             }
         }
         if (row > 0) {
-            if (gameBoard.get(row - 1).get(col) == checkPlayer) {
+            if (gameBoard[row - 1][col] == checkPlayer) {
                 return 0;
             }
         }
         if (row + 5 < boardSize) {
-            if (gameBoard.get(row + 5).get(col) == checkPlayer) {
+            if (gameBoard[row + 5][col] == checkPlayer) {
                 return 0;
             }
         }
@@ -284,11 +270,11 @@ public class GameEnvironment {
         int checkPlayer = 0;
         for (int i = 0; i < 5; i++) {
             if (checkPlayer == 0) {
-                checkPlayer = gameBoard.get(row + i).get(col + i);
+                checkPlayer = gameBoard[row + i][col + i];
             } else {
-                if (gameBoard.get(row + i).get(col + i) == -checkPlayer) {
+                if (gameBoard[row + i][col + i] == -checkPlayer) {
                     return 0;
-                } else if (gameBoard.get(row + i).get(col + i) == checkPlayer) {
+                } else if (gameBoard[row + i][col + i] == checkPlayer) {
                     result += 1;
                     maxResult = Math.max(result, maxResult);
                 } else {
@@ -297,12 +283,12 @@ public class GameEnvironment {
             }
         }
         if (col > 0 && row > 0) {
-            if (gameBoard.get(row - 1).get(col - 1) == checkPlayer) {
+            if (gameBoard[row - 1][col - 1] == checkPlayer) {
                 return 0;
             }
         }
         if (col + 5 < boardSize && row + 5 < boardSize) {
-            if (gameBoard.get(row + 5).get(col + 5) == checkPlayer) {
+            if (gameBoard[row + 5][col + 5] == checkPlayer) {
                 return 0;
             }
         }
@@ -315,11 +301,11 @@ public class GameEnvironment {
         int checkPlayer = 0;
         for (int i = 0; i < 5; i++) {
             if (checkPlayer == 0) {
-                checkPlayer = gameBoard.get(row - i).get(col + i);
+                checkPlayer = gameBoard[row - i][col + i];
             } else {
-                if (gameBoard.get(row - i).get(col + i) == -checkPlayer) {
+                if (gameBoard[row - i][col + i] == -checkPlayer) {
                     return 0;
-                } else if (gameBoard.get(row - i).get(col + i) == checkPlayer) {
+                } else if (gameBoard[row - i][col + i] == checkPlayer) {
                     result += 1;
                     maxResult = Math.max(result, maxResult);
                 } else {
@@ -328,12 +314,12 @@ public class GameEnvironment {
             }
         }
         if (col > 0 && row + 1 < boardSize) {
-            if (gameBoard.get(row + 1).get(col - 1) == checkPlayer) {
+            if (gameBoard[row + 1][col - 1] == checkPlayer) {
                 return 0;
             }
         }
         if (col + 5 < boardSize && row - 5 >= 0) {
-            if (gameBoard.get(row - 5).get(col + 5) == checkPlayer) {
+            if (gameBoard[row - 5][col + 5] == checkPlayer) {
                 return 0;
             }
         }
@@ -347,7 +333,7 @@ public class GameEnvironment {
         results.put(1, 0);
         for (int row = 0; row < boardSize; row++) {
             for (int col = 0; col < boardSize; col++) {
-                checkPlayer = gameBoard.get(row).get(col);
+                checkPlayer = gameBoard[row][col];
                 if (checkPlayer == 0) {
                     continue;
                 }
@@ -409,7 +395,7 @@ public class GameEnvironment {
         System.out.printf("%n");
         for (int row = 0; row < boardSize; row++) {
             for (int col = 0; col < boardSize; col++) {
-                switch (gameBoard.get(row).get(col)) {
+                switch (gameBoard[row][col]) {
                     case 1 ->
                         System.out.printf("O ");
                     case -1 ->
@@ -428,17 +414,13 @@ public class GameEnvironment {
         GameEnvironment newGame = new GameEnvironment(boardSize, false);
         newGame.hashArray = hashArray;
         newGame.hash = hash;
-        for (int row = 0; row < boardSize; row++) {
-            for (int col = 0; col < boardSize; col++) {
-                newGame.gameBoard.get(row).set(col, gameBoard.get(row).get(col));
-            }
-        }
+        System.arraycopy(gameBoard, 0, newGame.gameBoard, 0, boardSize);
         newGame.moveCount = moveCount;
         newGame.currentPlayer = currentPlayer;
         return newGame;
     }
 
-    public ArrayList<ArrayList<Integer>> getBoard() {
+    public int[][] getBoard() {
         return gameBoard;
     }
 
@@ -467,9 +449,9 @@ public class GameEnvironment {
         hash = 0;
         for (int i = 0; i < boardSize; i++) {
             for (int j = 0; j < boardSize; j++) {
-                if (gameBoard.get(i).get(j) == 1) {
+                if (gameBoard[i][j] == 1) {
                     hash ^= hashArray[0][i][j];
-                } else if (gameBoard.get(i).get(j) == -1) {
+                } else if (gameBoard[i][j] == -1) {
                     hash ^= hashArray[1][i][j];
                 }
             }

@@ -2,11 +2,12 @@ package gomoku;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.sql.Timestamp;
+
+import org.openjdk.jol.info.GraphLayout;
 
 public class Minimax extends Player {
     int globalDepth;
-    HashMap<Long, Integer> transpositionTable = new HashMap<>();
+    HashMap<Long, Integer> transpositionTable;
     int moveCount;
     boolean onlyCloseMoves;
 
@@ -20,7 +21,9 @@ public class Minimax extends Player {
         this.onlyCloseMoves = onlyCloseMoves;
     }
 
-    public int move(GameEnvironment gameState) throws Exception {
+    public MoveData move(GameEnvironment gameState) throws Exception {
+        long startTimestamp = System.nanoTime();
+        transpositionTable = new HashMap<>();
         moveCount = 0;
 
         GameEnvironment game = gameState.copy();
@@ -32,8 +35,6 @@ public class Minimax extends Player {
         int newScore;
 
         game.hashInit();
-
-        Timestamp startTimestamp = new Timestamp(System.currentTimeMillis());
 
         ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
         for (int moveIndex : legalMoves) {
@@ -53,7 +54,7 @@ public class Minimax extends Player {
                 bestMovePlace = moveIndex;
                 bestMoves.clear();
                 bestMoves.add(moveIndex);
-            }else if(newScore == bestScore){
+            } else if (newScore == bestScore) {
                 bestMoves.add(moveIndex);
             }
 
@@ -61,13 +62,14 @@ public class Minimax extends Player {
             game.update(currentPlayer, moveIndex);
         }
 
-        Timestamp endTimestamp = new Timestamp(System.currentTimeMillis());
+        long endTimestamp = System.nanoTime();
 
-        //System.out.printf("%-30s: player %2d time: %10d moveCount: %10d%n", "Minimax",
-        //        currentPlayer,
-        //        endTimestamp.getTime() - startTimestamp.getTime(), moveCount);
-        transpositionTable.clear();
-        return bestMovePlace;
+        MoveData moveData = new MoveData(endTimestamp - startTimestamp, moveCount, bestMovePlace,
+                //GraphLayout.parseInstance(this).totalSize(),
+                0,
+                bestScore);
+        transpositionTable = null;
+        return moveData;
     }
 
     public int deepMove(GameEnvironment game, int depth) throws Exception {
@@ -78,17 +80,25 @@ public class Minimax extends Player {
 
         long hash = game.getHash();
 
+        if(transpositionTable.containsKey(hash)){
+            return transpositionTable.get(hash);
+        }
+
         HashMap<Integer, Integer> results = game.ifTerminal();
 
         if (results.get(0) == 1) {
             if (results.get(1) == 0) {
+                transpositionTable.put(hash, 0);
                 return 0;
             }
+            transpositionTable.put(hash, Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10);
             return Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10;
         }
 
         if (depth == 0) {
-            return currentPlayer * game.evaluateBoard();
+            int evaluationScore = currentPlayer * game.evaluateBoard();
+            transpositionTable.put(hash, evaluationScore);
+            return evaluationScore;
         }
 
         ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
@@ -100,14 +110,9 @@ public class Minimax extends Player {
                 throw new Exception("Minimax: " + e);
             }
 
-            hash = game.update(currentPlayer, moveIndex);
-            if (transpositionTable.containsKey(hash)) {
-                newScore = transpositionTable.get(hash);
-            } else {
-                newScore = -deepMove(game, depth - 1);
-                moveCount += 1;
-                transpositionTable.put(hash, newScore);
-            }
+            game.update(currentPlayer, moveIndex);
+            newScore = -deepMove(game, depth - 1);
+            moveCount += 1;
 
             if (newScore > bestScore) {
                 bestScore = newScore;
@@ -116,6 +121,8 @@ public class Minimax extends Player {
             game.update(currentPlayer, moveIndex);
             game.undoMove(moveIndex);
         }
+
+        transpositionTable.put(hash, bestScore);
 
         return bestScore;
     }

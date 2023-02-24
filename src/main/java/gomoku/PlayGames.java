@@ -1,7 +1,5 @@
 package gomoku;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class PlayGames {
@@ -15,14 +13,15 @@ public class PlayGames {
         this.player2 = player2;
     }
 
-    public ArrayList<Integer> play(int boardSize) {
-        ArrayList<Integer> results = new ArrayList<>(Arrays.asList(0, 0, 0));
+    public GameData play(int boardSize) {
         HashMap<Integer, Integer> result;
-        int move;
+        MoveData move;
         GameEnvironment game = new GameEnvironment(boardSize, false);
         int currentGame = 0;
+        GameData gameData = new GameData();
         while (currentGame < gamesOnSide) {
             game.resetState();
+            int currentMove = 0;
             while (true) {
                 try {
                     if (game.getCurrentPlayer() == 1) {
@@ -30,30 +29,23 @@ public class PlayGames {
                     } else {
                         move = player2.move(game);
                     }
-                    game.move(move);
+                    gameData.addData(currentMove, move.time, move.memoryUsed);
+                    game.move(move.selectedMove);
                 } catch (Exception e) {
                     System.out.println(e);
                     e.printStackTrace();
                     break;
                 }
-                // game.printBoard();
                 result = game.ifTerminal();
                 if (result.get(0) != 0) {
-                    if (result.get(1) == 1) {
-                        results.set(0, results.get(0) + 1);
-                    } else if (result.get(1) == -1) {
-                        results.set(2, results.get(2) + 1);
-                    } else {
-                        results.set(1, results.get(1) + 1);
-                    }
-                    // System.out.printf("Game %3d finished. ", currentGame);
-                    // System.out.printf("Player %2d has won.\n", result.get(1));
+                    gameData.finishGame(result.get(1));
                     break;
                 }
+                currentMove += 1;
             }
             currentGame += 1;
         }
-        return results;
+        return gameData;
     }
 
 }
