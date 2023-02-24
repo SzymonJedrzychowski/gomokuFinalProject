@@ -3,7 +3,6 @@ package gomoku;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Random;
 
 public class GameEnvironment {
@@ -16,7 +15,7 @@ public class GameEnvironment {
     int moveCount;
     int[] scoreTable = { 0, 0, 1, 10, 50, 10000 };
 
-    GameEnvironment(int boardSize, boolean useGraphicalInterface) {
+    GameEnvironment(int boardSize) {
         this.boardSize = boardSize;
         this.gameBoard = new int[boardSize][boardSize];
         moveCount = 0;
@@ -47,64 +46,108 @@ public class GameEnvironment {
     }
 
     public ArrayList<Integer> getLegalMoves(boolean getCloseMoves) {
-        ArrayList<Integer> legalMoves = new ArrayList<>();
-        for (int row = 0; row < boardSize; row++) {
-            for (int column = 0; column < boardSize; column++) {
-                if (gameBoard[row][column] == 0) {
-                    legalMoves.add(row * boardSize + column);
+        if (getCloseMoves == false) {
+            ArrayList<Integer> legalMoves = new ArrayList<>();
+            for (int row = 0; row < boardSize; row++) {
+                for (int column = 0; column < boardSize; column++) {
+                    if (gameBoard[row][column] == 0) {
+                        legalMoves.add(row * boardSize + column);
+                    }
                 }
             }
-        }
-
-        if (getCloseMoves && legalMoves.size() != boardSize * boardSize) {
+            Collections.shuffle(legalMoves);
+            return legalMoves;
+        } else {
             return getCloseMoves();
         }
-        Collections.shuffle(legalMoves);
-        return legalMoves;
     }
 
     public ArrayList<Integer> getCloseMoves() {
         ArrayList<Integer> result = new ArrayList<>();
-        HashSet<Integer> closeMoves = new HashSet<>();
-        HashSet<Integer> playedMoves = new HashSet<>();
         for (int row = 0; row < boardSize; row++) {
             for (int column = 0; column < boardSize; column++) {
-                if (gameBoard[row][column] != 0) {
-                    playedMoves.add(row * boardSize + column);
+                if (gameBoard[row][column] != 0)
+                    continue;
+
+                if (row > 0) {
+                    if (column > 0) {
+                        if (gameBoard[row - 1][column - 1] != 0) {
+                            result.add(row * boardSize + column);
+                            continue;
+                        }
+                    }
+                    if (column < boardSize - 1) {
+                        if (gameBoard[row - 1][column + 1] != 0) {
+                            result.add(row * boardSize + column);
+                            continue;
+                        }
+                    }
+                    if (gameBoard[row - 1][column] != 0) {
+                        result.add(row * boardSize + column);
+                        continue;
+                    }
+                }
+                if (row < boardSize - 1) {
+                    if (column > 0) {
+                        if (gameBoard[row + 1][column - 1] != 0) {
+                            result.add(row * boardSize + column);
+                            continue;
+                        }
+                    }
+                    if (column < boardSize - 1) {
+                        if (gameBoard[row + 1][column + 1] != 0) {
+                            result.add(row * boardSize + column);
+                            continue;
+                        }
+                    }
+                    if (gameBoard[row + 1][column] != 0) {
+                        result.add(row * boardSize + column);
+                        continue;
+                    }
+                }
+                if (column > 0) {
+                    if (row > 0) {
+                        if (gameBoard[row - 1][column - 1] != 0) {
+                            result.add(row * boardSize + column);
+                            continue;
+                        }
+                    }
+                    if (row < boardSize - 1) {
+                        if (gameBoard[row + 1][column - 1] != 0) {
+                            result.add(row * boardSize + column);
+                            continue;
+                        }
+                    }
+                    if (gameBoard[row][column - 1] != 0) {
+                        result.add(row * boardSize + column);
+                        continue;
+                    }
+
+                }
+                if (column < boardSize - 1) {
+                    if (row > 0) {
+                        if (gameBoard[row - 1][column + 1] != 0) {
+                            result.add(row * boardSize + column);
+                            continue;
+                        }
+                    }
+                    if (row < boardSize - 1) {
+                        if (gameBoard[row + 1][column + 1] != 0) {
+                            result.add(row * boardSize + column);
+                            continue;
+                        }
+                    }
+                    if (gameBoard[row][column + 1] != 0)
+                        result.add(row * boardSize + column);
+
                 }
             }
         }
-
-        for (int move : playedMoves) {
-            // N
-            if (move >= boardSize && !playedMoves.contains(move - boardSize))
-                closeMoves.add(move - boardSize);
-            // NE
-            if (move >= boardSize && (move + 1) % boardSize != 0 && !playedMoves.contains(move - boardSize + 1))
-                closeMoves.add(move - boardSize + 1);
-            // E
-            if ((move + 1) % boardSize != 0 && !playedMoves.contains(move + 1))
-                closeMoves.add(move + 1);
-            // SE
-            if ((move + 1) % boardSize != 0 && (move + boardSize + 1) < boardSize * boardSize
-                    && !playedMoves.contains(move + boardSize + 1))
-                closeMoves.add(move + boardSize + 1);
-            // S
-            if (move + boardSize + 1 < boardSize * boardSize && !playedMoves.contains(move + boardSize))
-                closeMoves.add(move + boardSize);
-            // SW
-            if (move + boardSize + 1 < boardSize * boardSize && move % boardSize != 0
-                    && !playedMoves.contains(move + boardSize - 1))
-                closeMoves.add(move + boardSize - 1);
-            // W
-            if (move % boardSize != 0 && !playedMoves.contains(move - 1))
-                closeMoves.add(move - 1);
-            // NW
-            if (move % boardSize != 0 && move >= boardSize && !playedMoves.contains(move - boardSize - 1))
-                closeMoves.add(move - boardSize - 1);
-        }
-        result.addAll(closeMoves);
         Collections.shuffle(result);
+
+        if (result.isEmpty()) {
+            result.add(boardSize * boardSize / 2);
+        }
         return result;
     }
 
@@ -411,7 +454,7 @@ public class GameEnvironment {
     }
 
     public GameEnvironment copy() {
-        GameEnvironment newGame = new GameEnvironment(boardSize, false);
+        GameEnvironment newGame = new GameEnvironment(boardSize);
         newGame.hashArray = hashArray;
         newGame.hash = hash;
         System.arraycopy(gameBoard, 0, newGame.gameBoard, 0, boardSize);

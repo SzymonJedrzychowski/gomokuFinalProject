@@ -16,7 +16,7 @@ public class PlayGames {
     public GameData play(int boardSize) {
         HashMap<Integer, Integer> result;
         MoveData move;
-        GameEnvironment game = new GameEnvironment(boardSize, false);
+        GameEnvironment game = new GameEnvironment(boardSize);
         int currentGame = 0;
         GameData gameData = new GameData();
         while (currentGame < gamesOnSide) {
