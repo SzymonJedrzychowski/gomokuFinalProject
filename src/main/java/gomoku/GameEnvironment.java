@@ -15,8 +15,11 @@ public class GameEnvironment {
     int moveCount;
     int[] scoreTable = { 0, 0, 1, 10, 50, 10000 };
 
-    GameEnvironment(int boardSize) {
+    GameEnvironment(int boardSize) throws Exception{
         this.boardSize = boardSize;
+        if(boardSize%2 == 0){
+            throw new Exception("BoardSize needs to be odd.");
+        }
         this.gameBoard = new int[boardSize][boardSize];
         moveCount = 0;
         currentPlayer = 1;
@@ -143,11 +146,15 @@ public class GameEnvironment {
                 }
             }
         }
-        Collections.shuffle(result);
-
+        
         if (result.isEmpty()) {
-            result.add(boardSize * boardSize / 2);
+            for(int row = 0; row <= boardSize/2; row++){
+                for(int column = 0; column <= row; column ++){
+                    result.add(row*boardSize+column);
+                }
+            }
         }
+        Collections.shuffle(result);
         return result;
     }
 
@@ -158,8 +165,10 @@ public class GameEnvironment {
         if (moveCount < 9) {
             return result;
         }
-        result = checkBoards();
-        if (result.get(0) == 1) {
+        boolean checkResult = checkHorizontal() || checkVertical() || checkDiagonals();
+        if (checkResult) {
+            result.put(0, 1);
+            result.put(1, -currentPlayer);
             return result;
         } else if (moveCount == boardSize * boardSize) {
             result.put(0, 1);
@@ -167,83 +176,105 @@ public class GameEnvironment {
         return result;
     }
 
-    public boolean checkRight(int row, int col, int checkPlayer) {
-        for (int i = 0; i < 5; i++) {
-            if (gameBoard[row][col + i] != checkPlayer) {
-                return false;
+    private boolean checkHorizontal(){
+        int currentResult = 0;
+        for(int row = 0; row < boardSize; row ++){
+            for(int col = 0; col < boardSize; col ++){
+                if(currentResult == 5 && gameBoard[row][col] != -currentPlayer) return true;
+
+                if(gameBoard[row][col] == -currentPlayer) currentResult += 1;
+                else currentResult = 0;
+
+                if(currentResult+boardSize-col-1<5) break;
             }
+            if(currentResult == 5) return true;
+            currentResult = 0;
         }
-        if (col > 0) {
-            if (gameBoard[row][col - 1] == checkPlayer) {
-                return false;
-            }
-        }
-        if (col + 5 < boardSize) {
-            if (gameBoard[row][col + 5] == checkPlayer) {
-                return false;
-            }
-        }
-        return true;
+        return false;
     }
 
-    public boolean checkDown(int row, int col, int checkPlayer) {
-        for (int i = 0; i < 5; i++) {
-            if (gameBoard[row + i][col] != checkPlayer) {
-                return false;
+    private boolean checkVertical(){
+        int currentResult = 0;
+        for(int col = 0; col < boardSize; col ++){
+            for(int row = 0; row < boardSize; row ++){
+                if(currentResult == 5 && gameBoard[row][col] != -currentPlayer) return true;
+
+                if(gameBoard[row][col] == -currentPlayer) currentResult += 1;
+                else currentResult = 0;
+
+                if(currentResult+boardSize-row-1<5) break;
             }
+            if(currentResult == 5) return true;
+            currentResult = 0;
         }
-        if (row > 0) {
-            if (gameBoard[row - 1][col] == checkPlayer) {
-                return false;
-            }
-        }
-        if (row + 5 < boardSize) {
-            if (gameBoard[row + 5][col] == checkPlayer) {
-                return false;
-            }
-        }
-        return true;
+        return false;
     }
 
-    public boolean checkRightBottom(int row, int col, int checkPlayer) {
-        for (int i = 0; i < 5; i++) {
-            if (gameBoard[row + i][col + i] != checkPlayer) {
-                return false;
+    private boolean checkDiagonals(){
+        int currentResult = 0;
+        int startingPoint = boardSize*(boardSize-5);
+        int maxLength = 5;
+
+        //Left-Up to Right-Down
+        while(true){
+            for(int currentPlace = 0; currentPlace<maxLength; currentPlace++){
+                int row = startingPoint/boardSize+currentPlace;
+                int col = startingPoint%boardSize+currentPlace;
+                if(currentResult == 5 & gameBoard[row][col] != -currentPlayer) return true;
+
+                if(gameBoard[row][col] == -currentPlayer) currentResult += 1;
+                else currentResult = 0;
+
+                if(maxLength-currentPlace-1+currentResult<5) break;
+            }
+            if(currentResult == 5) return true;
+            currentResult = 0;
+            if(startingPoint == boardSize-5) break;
+
+            if(startingPoint >= boardSize){
+                startingPoint-=boardSize;
+                maxLength += 1;
+            }
+            else{
+                startingPoint += 1;
+                maxLength -= 1;
+            }
+            
+        }
+
+        startingPoint = 4*boardSize;
+        maxLength = 5;
+        
+        //Left-Down to Right-Up
+        while(true){
+            for(int currentPlace = 0; currentPlace<maxLength; currentPlace++){
+                int row = startingPoint/boardSize-currentPlace;
+                int col = startingPoint%boardSize+currentPlace;
+                if(currentResult == 5 & gameBoard[row][col] != -currentPlayer) return true;
+                
+                if(gameBoard[row][col] == -currentPlayer) currentResult += 1;
+                else currentResult = 0;
+
+                if(maxLength-currentPlace-1+currentResult<5){
+                    break;
+                }
+            }
+            if(currentResult == 5) return true;
+            currentResult = 0;
+            if(startingPoint == boardSize*boardSize-5) return false;
+
+            if(startingPoint < boardSize*(boardSize-1)){
+                startingPoint+=boardSize;
+                maxLength += 1;
+            }
+            else{
+                startingPoint += 1;
+                maxLength -= 1;
             }
         }
-        if (col > 0 && row > 0) {
-            if (gameBoard[row - 1][col - 1] == checkPlayer) {
-                return false;
-            }
-        }
-        if (col + 5 < boardSize && row + 5 < boardSize) {
-            if (gameBoard[row + 5][col + 5] == checkPlayer) {
-                return false;
-            }
-        }
-        return true;
     }
 
-    public boolean checkRightUpward(int row, int col, int checkPlayer) {
-        for (int i = 0; i < 5; i++) {
-            if (gameBoard[row - i][col + i] != checkPlayer) {
-                return false;
-            }
-        }
-        if (col > 0 && row + 1 < boardSize) {
-            if (gameBoard[row + 1][col - 1] == checkPlayer) {
-                return false;
-            }
-        }
-        if (col + 5 < boardSize && row - 5 >= 0) {
-            if (gameBoard[row - 5][col + 5] == checkPlayer) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public int right(int row, int col) {
+    private int right(int row, int col) {
         int result = 1;
         int maxResult = 1;
         int checkPlayer = 0;
@@ -276,7 +307,7 @@ public class GameEnvironment {
         return checkPlayer * scoreTable[maxResult];
     }
 
-    public int down(int row, int col) {
+    private int down(int row, int col) {
         int result = 1;
         int maxResult = 1;
         int checkPlayer = 0;
@@ -307,7 +338,7 @@ public class GameEnvironment {
         return checkPlayer * scoreTable[maxResult];
     }
 
-    public int rightBottom(int row, int col) {
+    private int rightBottom(int row, int col) {
         int result = 1;
         int maxResult = 1;
         int checkPlayer = 0;
@@ -338,7 +369,7 @@ public class GameEnvironment {
         return checkPlayer * scoreTable[maxResult];
     }
 
-    public int rightUpward(int row, int col) {
+    private int rightUpward(int row, int col) {
         int result = 1;
         int maxResult = 1;
         int checkPlayer = 0;
@@ -367,50 +398,6 @@ public class GameEnvironment {
             }
         }
         return checkPlayer * scoreTable[maxResult];
-    }
-
-    public HashMap<Integer, Integer> checkBoards() {
-        int checkPlayer;
-        HashMap<Integer, Integer> results = new HashMap<>();
-        results.put(0, 0);
-        results.put(1, 0);
-        for (int row = 0; row < boardSize; row++) {
-            for (int col = 0; col < boardSize; col++) {
-                checkPlayer = gameBoard[row][col];
-                if (checkPlayer == 0) {
-                    continue;
-                }
-                if (col + 4 < boardSize) {
-                    if (checkRight(row, col, checkPlayer)) {
-                        results.put(0, 1);
-                        results.put(1, checkPlayer);
-                        return results;
-                    }
-                }
-                if (row + 4 < boardSize) {
-                    if (checkDown(row, col, checkPlayer)) {
-                        results.put(0, 1);
-                        results.put(1, checkPlayer);
-                        return results;
-                    }
-                }
-                if (col + 4 < boardSize && row + 4 < boardSize) {
-                    if (checkRightBottom(row, col, checkPlayer)) {
-                        results.put(0, 1);
-                        results.put(1, checkPlayer);
-                        return results;
-                    }
-                }
-                if (col + 4 < boardSize && row - 4 >= 0) {
-                    if (checkRightUpward(row, col, checkPlayer)) {
-                        results.put(0, 1);
-                        results.put(1, checkPlayer);
-                        return results;
-                    }
-                }
-            }
-        }
-        return results;
     }
 
     public int evaluateBoard() {
@@ -453,7 +440,7 @@ public class GameEnvironment {
         System.out.printf("%n");
     }
 
-    public GameEnvironment copy() {
+    public GameEnvironment copy() throws Exception{
         GameEnvironment newGame = new GameEnvironment(boardSize);
         newGame.hashArray = hashArray;
         newGame.hash = hash;
@@ -461,14 +448,6 @@ public class GameEnvironment {
         newGame.moveCount = moveCount;
         newGame.currentPlayer = currentPlayer;
         return newGame;
-    }
-
-    public int[][] getBoard() {
-        return gameBoard;
-    }
-
-    public int getBoardSize() {
-        return boardSize;
     }
 
     public int getCurrentPlayer() {

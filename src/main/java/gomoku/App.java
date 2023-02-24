@@ -8,25 +8,25 @@ public class App {
         
         int maxLimit = 5;
         int boardSize = 7;
-        int gameNumber = 10;
+        int gameNumber = 5;
         GameData gameData;
         GameData gameData2;
-        for (int limit = 5; limit <= maxLimit; limit++) {
+        for (int limit = maxLimit; limit <= maxLimit; limit++) {
             Player player1 = new AlphaBetaPruning(limit, true);
             Player player2 = new AlphaBetaPruning(limit, true);
             PlayGames games;
-            games = new PlayGames(5, player1, player2);
+            games = new PlayGames(5, boardSize, player1, player2);
             //games.play(7);
             Timestamp s = new Timestamp(System.currentTimeMillis());
-            games = new PlayGames(gameNumber, player1, player2);
-            gameData = games.play(boardSize);
+            games = new PlayGames(gameNumber, boardSize, player1, player2);
+            gameData = games.play();
             Timestamp e = new Timestamp(System.currentTimeMillis());
             gameData.printTimes();
             gameData.printMemory();
             gameData.printVisits();
             Timestamp s2 = new Timestamp(System.currentTimeMillis());
-            games = new PlayGames(gameNumber, player2 , player1);
-            gameData2 = games.play(boardSize);
+            games = new PlayGames(gameNumber, boardSize, player2 , player1);
+            gameData2 = games.play();
             Timestamp e2 = new Timestamp(System.currentTimeMillis());
             gameData2.printTimes();
             gameData2.printMemory();

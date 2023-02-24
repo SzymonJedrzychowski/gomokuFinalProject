@@ -4,19 +4,27 @@ import java.util.HashMap;
 
 public class PlayGames {
     int gamesOnSide;
+    int boardSize;
     Player player1;
     Player player2;
 
-    PlayGames(int gamesOnSide, Player player1, Player player2) {
+    PlayGames(int gamesOnSide, int boardSize, Player player1, Player player2) {
         this.gamesOnSide = gamesOnSide;
+        this.boardSize = boardSize;
         this.player1 = player1;
         this.player2 = player2;
     }
 
-    public GameData play(int boardSize) {
+    public GameData play() {
         HashMap<Integer, Integer> result;
         MoveData move;
-        GameEnvironment game = new GameEnvironment(boardSize);
+        GameEnvironment game;
+        try {
+            game = new GameEnvironment(boardSize);
+        } catch (Exception e) {
+            System.out.println(e);
+            return null;
+        }
         int currentGame = 0;
         GameData gameData = new GameData();
         while (currentGame < gamesOnSide) {
