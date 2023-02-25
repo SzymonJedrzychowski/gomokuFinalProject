@@ -98,7 +98,12 @@ public class AlphaBetaPruning extends Player {
             }
         }
 
-        HashMap<Integer, Integer> results = game.ifTerminal();
+        HashMap<Integer, Integer> results;
+        if(depth == 0){
+            results = game.evaluateBoard();
+        }else{
+            results = game.ifTerminal();
+        }
 
         if (results.get(0) == 1) {
             if (results.get(1) == 0) {
@@ -108,12 +113,9 @@ public class AlphaBetaPruning extends Player {
             transpositionTable.put(hash,
                     new ArrayList<>(Arrays.asList(Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10, 0)));
             return Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10;
-        }
-
-        if (depth == 0) {
-            int evaluationScore = currentPlayer * game.evaluateBoard();
-            transpositionTable.put(hash, new ArrayList<>(Arrays.asList(evaluationScore, 0)));
-            return evaluationScore;
+        } else if (depth == 0) {
+            transpositionTable.put(hash, new ArrayList<>(Arrays.asList(currentPlayer*results.get(2), 0)));
+            return currentPlayer*results.get(2);
         }
 
         ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);

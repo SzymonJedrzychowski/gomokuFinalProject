@@ -15,9 +15,9 @@ public class GameEnvironment {
     int moveCount;
     int[] scoreTable = { 0, 0, 1, 10, 50, 10000 };
 
-    GameEnvironment(int boardSize) throws Exception{
+    GameEnvironment(int boardSize) throws Exception {
         this.boardSize = boardSize;
-        if(boardSize%2 == 0){
+        if (boardSize % 2 == 0) {
             throw new Exception("BoardSize needs to be odd.");
         }
         this.gameBoard = new int[boardSize][boardSize];
@@ -68,89 +68,53 @@ public class GameEnvironment {
     public ArrayList<Integer> getCloseMoves() {
         ArrayList<Integer> result = new ArrayList<>();
         for (int row = 0; row < boardSize; row++) {
-            for (int column = 0; column < boardSize; column++) {
-                if (gameBoard[row][column] != 0)
+            for (int col = 0; col < boardSize; col++) {
+                if (gameBoard[row][col] != 0)
                     continue;
 
                 if (row > 0) {
-                    if (column > 0) {
-                        if (gameBoard[row - 1][column - 1] != 0) {
-                            result.add(row * boardSize + column);
+                    if(col > 0){
+                        if(gameBoard[row-1][col-1] != 0 || gameBoard[row][col-1] != 0){
+                            result.add(row*boardSize+col);
                             continue;
                         }
                     }
-                    if (column < boardSize - 1) {
-                        if (gameBoard[row - 1][column + 1] != 0) {
-                            result.add(row * boardSize + column);
+                    if(col < boardSize-1){
+                        if(gameBoard[row-1][col+1] != 0 || gameBoard[row][col+1] != 0){
+                            result.add(row*boardSize+col);
                             continue;
                         }
                     }
-                    if (gameBoard[row - 1][column] != 0) {
-                        result.add(row * boardSize + column);
+                    if(gameBoard[row-1][col] != 0){
+                        result.add(row*boardSize+col);
                         continue;
                     }
                 }
                 if (row < boardSize - 1) {
-                    if (column > 0) {
-                        if (gameBoard[row + 1][column - 1] != 0) {
-                            result.add(row * boardSize + column);
+                    if(col > 0){
+                        if(gameBoard[row+1][col-1] != 0 || gameBoard[row][col-1] != 0){
+                            result.add(row*boardSize+col);
                             continue;
                         }
                     }
-                    if (column < boardSize - 1) {
-                        if (gameBoard[row + 1][column + 1] != 0) {
-                            result.add(row * boardSize + column);
+                    if(col < boardSize-1){
+                        if(gameBoard[row+1][col+1] != 0 || gameBoard[row][col+1] != 0){
+                            result.add(row*boardSize+col);
                             continue;
                         }
                     }
-                    if (gameBoard[row + 1][column] != 0) {
-                        result.add(row * boardSize + column);
+                    if(gameBoard[row+1][col] != 0){
+                        result.add(row*boardSize+col);
                         continue;
                     }
-                }
-                if (column > 0) {
-                    if (row > 0) {
-                        if (gameBoard[row - 1][column - 1] != 0) {
-                            result.add(row * boardSize + column);
-                            continue;
-                        }
-                    }
-                    if (row < boardSize - 1) {
-                        if (gameBoard[row + 1][column - 1] != 0) {
-                            result.add(row * boardSize + column);
-                            continue;
-                        }
-                    }
-                    if (gameBoard[row][column - 1] != 0) {
-                        result.add(row * boardSize + column);
-                        continue;
-                    }
-
-                }
-                if (column < boardSize - 1) {
-                    if (row > 0) {
-                        if (gameBoard[row - 1][column + 1] != 0) {
-                            result.add(row * boardSize + column);
-                            continue;
-                        }
-                    }
-                    if (row < boardSize - 1) {
-                        if (gameBoard[row + 1][column + 1] != 0) {
-                            result.add(row * boardSize + column);
-                            continue;
-                        }
-                    }
-                    if (gameBoard[row][column + 1] != 0)
-                        result.add(row * boardSize + column);
-
                 }
             }
         }
-        
+
         if (result.isEmpty()) {
-            for(int row = 0; row <= boardSize/2; row++){
-                for(int column = 0; column <= row; column ++){
-                    result.add(row*boardSize+column);
+            for (int row = 0; row <= boardSize / 2; row++) {
+                for (int col = 0; col <= row; col++) {
+                    result.add(row * boardSize + col);
                 }
             }
         }
@@ -176,248 +140,297 @@ public class GameEnvironment {
         return result;
     }
 
-    private boolean checkHorizontal(){
+    private boolean checkHorizontal() {
         int currentResult = 0;
-        for(int row = 0; row < boardSize; row ++){
-            for(int col = 0; col < boardSize; col ++){
-                if(currentResult == 5 && gameBoard[row][col] != -currentPlayer) return true;
+        for (int row = 0; row < boardSize; row++) {
+            for (int col = 0; col < boardSize; col++) {
+                if (currentResult == 5 && gameBoard[row][col] != -currentPlayer)
+                    return true;
 
-                if(gameBoard[row][col] == -currentPlayer) currentResult += 1;
-                else currentResult = 0;
+                if (gameBoard[row][col] == -currentPlayer)
+                    currentResult += 1;
+                else
+                    currentResult = 0;
 
-                if(currentResult+boardSize-col-1<5) break;
+                if (currentResult + boardSize - col - 1 < 5)
+                    break;
             }
-            if(currentResult == 5) return true;
+            if (currentResult == 5)
+                return true;
             currentResult = 0;
         }
         return false;
     }
 
-    private boolean checkVertical(){
+    private boolean checkVertical() {
         int currentResult = 0;
-        for(int col = 0; col < boardSize; col ++){
-            for(int row = 0; row < boardSize; row ++){
-                if(currentResult == 5 && gameBoard[row][col] != -currentPlayer) return true;
+        for (int col = 0; col < boardSize; col++) {
+            for (int row = 0; row < boardSize; row++) {
+                if (currentResult == 5 && gameBoard[row][col] != -currentPlayer)
+                    return true;
 
-                if(gameBoard[row][col] == -currentPlayer) currentResult += 1;
-                else currentResult = 0;
+                if (gameBoard[row][col] == -currentPlayer)
+                    currentResult += 1;
+                else
+                    currentResult = 0;
 
-                if(currentResult+boardSize-row-1<5) break;
+                if (currentResult + boardSize - row - 1 < 5)
+                    break;
             }
-            if(currentResult == 5) return true;
+            if (currentResult == 5)
+                return true;
             currentResult = 0;
         }
         return false;
     }
 
-    private boolean checkDiagonals(){
+    private boolean checkDiagonals() {
         int currentResult = 0;
-        int startingPoint = boardSize*(boardSize-5);
+        int startingPoint = boardSize * (boardSize - 5);
         int maxLength = 5;
 
-        //Left-Up to Right-Down
-        while(true){
-            for(int currentPlace = 0; currentPlace<maxLength; currentPlace++){
-                int row = startingPoint/boardSize+currentPlace;
-                int col = startingPoint%boardSize+currentPlace;
-                if(currentResult == 5 & gameBoard[row][col] != -currentPlayer) return true;
+        // Left-Up to Right-Down
+        while (true) {
+            for (int currentPlace = 0; currentPlace < maxLength; currentPlace++) {
+                int row = startingPoint / boardSize + currentPlace;
+                int col = startingPoint % boardSize + currentPlace;
+                if (currentResult == 5 & gameBoard[row][col] != -currentPlayer)
+                    return true;
 
-                if(gameBoard[row][col] == -currentPlayer) currentResult += 1;
-                else currentResult = 0;
+                if (gameBoard[row][col] == -currentPlayer)
+                    currentResult += 1;
+                else
+                    currentResult = 0;
 
-                if(maxLength-currentPlace-1+currentResult<5) break;
+                if (maxLength - currentPlace - 1 + currentResult < 5)
+                    break;
             }
-            if(currentResult == 5) return true;
+            if (currentResult == 5)
+                return true;
             currentResult = 0;
-            if(startingPoint == boardSize-5) break;
+            if (startingPoint == boardSize - 5)
+                break;
 
-            if(startingPoint >= boardSize){
-                startingPoint-=boardSize;
+            if (startingPoint >= boardSize) {
+                startingPoint -= boardSize;
                 maxLength += 1;
-            }
-            else{
+            } else {
                 startingPoint += 1;
                 maxLength -= 1;
             }
-            
+
         }
 
-        startingPoint = 4*boardSize;
+        startingPoint = 4 * boardSize;
         maxLength = 5;
-        
-        //Left-Down to Right-Up
-        while(true){
-            for(int currentPlace = 0; currentPlace<maxLength; currentPlace++){
-                int row = startingPoint/boardSize-currentPlace;
-                int col = startingPoint%boardSize+currentPlace;
-                if(currentResult == 5 & gameBoard[row][col] != -currentPlayer) return true;
-                
-                if(gameBoard[row][col] == -currentPlayer) currentResult += 1;
-                else currentResult = 0;
 
-                if(maxLength-currentPlace-1+currentResult<5){
+        // Left-Down to Right-Up
+        while (true) {
+            for (int currentPlace = 0; currentPlace < maxLength; currentPlace++) {
+                int row = startingPoint / boardSize - currentPlace;
+                int col = startingPoint % boardSize + currentPlace;
+                if (currentResult == 5 & gameBoard[row][col] != -currentPlayer)
+                    return true;
+
+                if (gameBoard[row][col] == -currentPlayer)
+                    currentResult += 1;
+                else
+                    currentResult = 0;
+
+                if (maxLength - currentPlace - 1 + currentResult < 5) {
                     break;
                 }
             }
-            if(currentResult == 5) return true;
+            if (currentResult == 5)
+                return true;
             currentResult = 0;
-            if(startingPoint == boardSize*boardSize-5) return false;
+            if (startingPoint == boardSize * boardSize - 5)
+                return false;
 
-            if(startingPoint < boardSize*(boardSize-1)){
-                startingPoint+=boardSize;
+            if (startingPoint < boardSize * (boardSize - 1)) {
+                startingPoint += boardSize;
                 maxLength += 1;
-            }
-            else{
+            } else {
                 startingPoint += 1;
                 maxLength -= 1;
             }
         }
     }
 
-    private int right(int row, int col) {
-        int result = 1;
-        int maxResult = 1;
-        int checkPlayer = 0;
-        for (int i = 0; i < 5; i++) {
-            if (checkPlayer == 0) {
-                checkPlayer = gameBoard[row][col + i];
-            } else {
-                if (gameBoard[row][col + i] == -checkPlayer) {
-                    return 0;
-                } else if (gameBoard[row][col + i] == checkPlayer) {
-                    result += 1;
-                    maxResult = Math.max(result, maxResult);
-                } else {
-                    result = 0;
-                }
-            }
-        }
-        if (checkPlayer == 0)
-            return 0;
-        if (col > 0) {
-            if (gameBoard[row][col - 1] == checkPlayer) {
-                return 0;
-            }
-        }
-        if (col + 5 < boardSize) {
-            if (gameBoard[row][col + 5] == checkPlayer) {
-                return 0;
-            }
-        }
-        return checkPlayer * scoreTable[maxResult];
-    }
-
-    private int down(int row, int col) {
-        int result = 1;
-        int maxResult = 1;
-        int checkPlayer = 0;
-        for (int i = 0; i < 5; i++) {
-            if (checkPlayer == 0) {
-                checkPlayer = gameBoard[row + i][col];
-            } else {
-                if (gameBoard[row + i][col] == -checkPlayer) {
-                    return 0;
-                } else if (gameBoard[row + i][col] == checkPlayer) {
-                    result += 1;
-                    maxResult = Math.max(result, maxResult);
-                } else {
-                    result = 0;
-                }
-            }
-        }
-        if (row > 0) {
-            if (gameBoard[row - 1][col] == checkPlayer) {
-                return 0;
-            }
-        }
-        if (row + 5 < boardSize) {
-            if (gameBoard[row + 5][col] == checkPlayer) {
-                return 0;
-            }
-        }
-        return checkPlayer * scoreTable[maxResult];
-    }
-
-    private int rightBottom(int row, int col) {
-        int result = 1;
-        int maxResult = 1;
-        int checkPlayer = 0;
-        for (int i = 0; i < 5; i++) {
-            if (checkPlayer == 0) {
-                checkPlayer = gameBoard[row + i][col + i];
-            } else {
-                if (gameBoard[row + i][col + i] == -checkPlayer) {
-                    return 0;
-                } else if (gameBoard[row + i][col + i] == checkPlayer) {
-                    result += 1;
-                    maxResult = Math.max(result, maxResult);
-                } else {
-                    result = 0;
-                }
-            }
-        }
-        if (col > 0 && row > 0) {
-            if (gameBoard[row - 1][col - 1] == checkPlayer) {
-                return 0;
-            }
-        }
-        if (col + 5 < boardSize && row + 5 < boardSize) {
-            if (gameBoard[row + 5][col + 5] == checkPlayer) {
-                return 0;
-            }
-        }
-        return checkPlayer * scoreTable[maxResult];
-    }
-
-    private int rightUpward(int row, int col) {
-        int result = 1;
-        int maxResult = 1;
-        int checkPlayer = 0;
-        for (int i = 0; i < 5; i++) {
-            if (checkPlayer == 0) {
-                checkPlayer = gameBoard[row - i][col + i];
-            } else {
-                if (gameBoard[row - i][col + i] == -checkPlayer) {
-                    return 0;
-                } else if (gameBoard[row - i][col + i] == checkPlayer) {
-                    result += 1;
-                    maxResult = Math.max(result, maxResult);
-                } else {
-                    result = 0;
-                }
-            }
-        }
-        if (col > 0 && row + 1 < boardSize) {
-            if (gameBoard[row + 1][col - 1] == checkPlayer) {
-                return 0;
-            }
-        }
-        if (col + 5 < boardSize && row - 5 >= 0) {
-            if (gameBoard[row - 5][col + 5] == checkPlayer) {
-                return 0;
-            }
-        }
-        return checkPlayer * scoreTable[maxResult];
-    }
-
-    public int evaluateBoard() {
-        int result = 0;
+    private int right() {
+        int evaluationScore = 0;
         for (int row = 0; row < boardSize; row++) {
-            for (int col = 0; col < boardSize; col++) {
-                if (col + 4 < boardSize) {
-                    result += right(row, col);
+            int col = 0;
+            while (col < boardSize - 4) {
+                int result = 1;
+                int maxResult = 1;
+                int checkPlayer = 0;
+                boolean breakLoop = false;
+                int lastFilled = -1;
+                for (int i = 0; i < 5; i++) {
+                    if (checkPlayer == 0) {
+                        checkPlayer = gameBoard[row][col + i];
+                        lastFilled = i;
+                    } else {
+                        if (gameBoard[row][col + i] == -checkPlayer) {
+                            breakLoop = true;
+                            col = col + lastFilled;
+                            break;
+                        } else if (gameBoard[row][col + i] == checkPlayer) {
+                            result++;
+                            maxResult = Math.max(result, maxResult);
+                            lastFilled = i;
+                        } else {
+                            result = 0;
+                        }
+                    }
                 }
-                if (row + 4 < boardSize) {
-                    result += down(row, col);
+                if (breakLoop) {
+                    col++;
+                    continue;
                 }
-                if (col + 4 < boardSize && row + 4 < boardSize) {
-                    result += rightBottom(row, col);
+                if (breakLoop || (col > 0 && gameBoard[row][col - 1] == checkPlayer)
+                        || (col + 5 < boardSize && gameBoard[row][col + 5] == checkPlayer)) {
+                    col++;
+                    continue;
                 }
-                if (col + 4 < boardSize && row - 4 >= 0) {
-                    result += rightUpward(row, col);
-                }
+                col++;
+                evaluationScore += checkPlayer * scoreTable[maxResult];
             }
         }
+        return evaluationScore;
+    }
+
+    private int down() {
+        int evaluationScore = 0;
+        for (int col = 0; col < boardSize; col++) {
+            int row = 0;
+            while (row < boardSize - 4) {
+                int result = 1;
+                int maxResult = 1;
+                int checkPlayer = 0;
+                boolean breakLoop = false;
+                int lastFilled = -1;
+                for (int i = 0; i < 5; i++) {
+                    if (checkPlayer == 0) {
+                        checkPlayer = gameBoard[row + i][col];
+                        lastFilled = i;
+                    } else {
+                        if (gameBoard[row + i][col] == -checkPlayer) {
+                            breakLoop = true;
+                            row = row + lastFilled;
+                            break;
+                        } else if (gameBoard[row + i][col] == checkPlayer) {
+                            result++;
+                            maxResult = Math.max(result, maxResult);
+                            lastFilled = i;
+                        } else {
+                            result = 0;
+                        }
+                    }
+                }
+                if (breakLoop) {
+                    row++;
+                    continue;
+                }
+                if (breakLoop || (row > 0 && gameBoard[row - 1][col] == checkPlayer)
+                        || (row + 5 < boardSize && gameBoard[row + 5][col] == checkPlayer)) {
+                    row++;
+                    continue;
+                }
+                row++;
+                evaluationScore += checkPlayer * scoreTable[maxResult];
+            }
+        }
+        return evaluationScore;
+    }
+
+    private int rightBottom() {
+        int evaluationScore = 0;
+        for (int row = 0; row < boardSize; row++) {
+            int col = 0;
+            while (col < boardSize - 4 && row < boardSize - 4) {
+                int result = 1;
+                int maxResult = 1;
+                int checkPlayer = 0;
+                boolean breakLoop = false;
+                for (int i = 0; i < 5; i++) {
+                    if (checkPlayer == 0) {
+                        checkPlayer = gameBoard[row + i][col + i];
+                    } else {
+                        if (gameBoard[row + i][col + i] == -checkPlayer) {
+                            breakLoop = true;
+                            break;
+                        } else if (gameBoard[row + i][col + i] == checkPlayer) {
+                            result += 1;
+                            maxResult = Math.max(result, maxResult);
+                        } else {
+                            result = 0;
+                        }
+                    }
+                }
+                if (breakLoop || ((col > 0 && row > 0) && gameBoard[row - 1][col - 1] == checkPlayer)
+                        || ((col + 5 < boardSize && row + 5 < boardSize)
+                                && gameBoard[row + 5][col + 5] == checkPlayer)) {
+                    col++;
+                    continue;
+                }
+                col++;
+                evaluationScore += checkPlayer * scoreTable[maxResult];
+            }
+        }
+        return evaluationScore;
+    }
+
+    private int rightUpward() {
+        int evaluationScore = 0;
+        for (int row = 0; row < boardSize; row++) {
+            int col = 0;
+            while (col < boardSize - 4 && row > 3) {
+                int result = 1;
+                int maxResult = 1;
+                int checkPlayer = 0;
+                boolean breakLoop = false;
+                for (int i = 0; i < 5; i++) {
+                    if (checkPlayer == 0) {
+                        checkPlayer = gameBoard[row - i][col + i];
+                    } else {
+                        if (gameBoard[row - i][col + i] == -checkPlayer) {
+                            breakLoop = true;
+                            break;
+                        } else if (gameBoard[row - i][col + i] == checkPlayer) {
+                            result += 1;
+                            maxResult = Math.max(result, maxResult);
+                        } else {
+                            result = 0;
+                        }
+                    }
+                }
+                if (breakLoop || ((col > 0 && row + 1 < boardSize) && gameBoard[row + 1][col - 1] == checkPlayer)
+                        || ((col + 5 < boardSize && row - 5 >= 0) && gameBoard[row - 5][col + 5] == checkPlayer)) {
+                    col++;
+                    continue;
+                }
+                col++;
+                evaluationScore += checkPlayer * scoreTable[maxResult];
+            }
+        }
+        return evaluationScore;
+    }
+
+    public HashMap<Integer, Integer> evaluateBoard() {
+        HashMap<Integer, Integer> result = new HashMap<>();
+        result.put(0, 0);
+        result.put(1, 0);
+        int evaluation = right() + down() + rightBottom() + rightUpward();
+        if(Math.abs(evaluation) > 5000){
+            result.put(0, 1);
+            result.put(1, -currentPlayer);
+            return result;
+        }else if (moveCount == boardSize * boardSize) {
+            result.put(0, 1);
+        }
+        result.put(2, evaluation);
         return result;
     }
 
@@ -440,7 +453,7 @@ public class GameEnvironment {
         System.out.printf("%n");
     }
 
-    public GameEnvironment copy() throws Exception{
+    public GameEnvironment copy() throws Exception {
         GameEnvironment newGame = new GameEnvironment(boardSize);
         newGame.hashArray = hashArray;
         newGame.hash = hash;

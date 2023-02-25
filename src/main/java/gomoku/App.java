@@ -6,14 +6,14 @@ public class App {
 
     public static void main(String[] args) {
         
-        int maxLimit = 5;
+        int maxLimit = 4;
         int boardSize = 7;
-        int gameNumber = 5;
+        int gameNumber = 1;
         GameData gameData;
         GameData gameData2;
         for (int limit = maxLimit; limit <= maxLimit; limit++) {
-            Player player1 = new AlphaBetaPruning(limit, true);
-            Player player2 = new AlphaBetaPruning(limit, true);
+            Player player1 = new AlphaBetaPruning(limit, false);
+            Player player2 = new AlphaBetaPruning(limit, false);
             PlayGames games;
             games = new PlayGames(5, boardSize, player1, player2);
             //games.play(7);
