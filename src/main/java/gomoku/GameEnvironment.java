@@ -298,59 +298,55 @@ public class GameEnvironment {
         int bestResult;
         int result;
         for (int row = 0; row < boardSize; row++) {
-            int[] inStones = new int[2];
+            int firstStones = 0;
+            int secondStones = 0;
             for (int col = 0; col < boardSize; col++) {
                 if (col > 4) {
-                    boolean firstPlayer = inStones[0] > 1 && inStones[1] == 0 && gameBoard[row][col] != 1;
-                    boolean secondPlayer = inStones[1] > 1 && inStones[0] == 0 && gameBoard[row][col] != -1;
-                    if (firstPlayer) {
-                        if (col > 5 && gameBoard[row][col - 6] == 1) {
-                        } else {
-                            result = 0;
-                            bestResult = 0;
-                            for (int i = col - 5; i < col; i++) {
-                                if (gameBoard[row][i] == 1) {
-                                    result++;
-                                    bestResult = Math.max(result, bestResult);
-                                } else {
-                                    result = 0;
-                                }
+                    if (firstStones > 1 && secondStones == 0) {
+                        result = 0;
+                        bestResult = 0;
+                        for (int i = col - 5; i < col; i++) {
+                            if (gameBoard[row][i] == 1) {
+                                result++;
+                                bestResult = Math.max(result, bestResult);
+                            } else {
+                                result = 0;
                             }
+                        }
+                        if (col > 5 && gameBoard[row][col - 6] == 1) {
+                        } else if (gameBoard[row][col] == 1) {
+                        } else {
                             evaluationResult += scoreTable[bestResult];
                         }
-                    } else if (secondPlayer) {
-                        if (col > 5 && gameBoard[row][col - 6] == -1) {
-                        } else {
-                            result = 0;
-                            bestResult = 0;
-                            for (int i = col - 5; i < col; i++) {
-                                if (gameBoard[row][i] == -1) {
-                                    result++;
-                                    bestResult = Math.max(result, bestResult);
-                                } else {
-                                    result = 0;
-                                }
+                    } else if (secondStones > 1 && firstStones == 0) {
+                        result = 0;
+                        bestResult = 0;
+                        for (int i = col - 5; i < col; i++) {
+                            if (gameBoard[row][i] == -1) {
+                                result++;
+                                bestResult = Math.max(result, bestResult);
+                            } else {
+                                result = 0;
                             }
+                        }
+                        if (col > 5 && gameBoard[row][col - 6] == -1) {
+                        } else if (gameBoard[row][col] == -1) {
+                        } else {
                             evaluationResult -= scoreTable[bestResult];
                         }
                     }
 
                     if (gameBoard[row][col - 5] == 1)
-                        inStones[0]--;
+                        firstStones--;
                     else if (gameBoard[row][col - 5] == -1)
-                        inStones[1]--;
+                        secondStones--;
                 }
                 if (gameBoard[row][col] == 1)
-                    inStones[0]++;
+                    firstStones++;
                 else if (gameBoard[row][col] == -1)
-                    inStones[1]++;
+                    secondStones++;
             }
-            boolean firstPlayer = inStones[0] > 1 && inStones[1] == 0;
-            boolean secondPlayer = inStones[1] > 1 && inStones[0] == 0;
-            if (firstPlayer) {
-                if (gameBoard[row][boardSize - 6] == 1) {
-                    continue;
-                }
+            if (firstStones > 1 && secondStones == 0) {
                 result = 0;
                 bestResult = 0;
                 for (int i = boardSize - 5; i < boardSize; i++) {
@@ -361,11 +357,10 @@ public class GameEnvironment {
                         result = 0;
                     }
                 }
-                evaluationResult += scoreTable[bestResult];
-            } else if (secondPlayer) {
-                if (gameBoard[row][boardSize - 6] == -1) {
-                    continue;
+                if (gameBoard[row][boardSize - 6] != 1) {
+                    evaluationResult += scoreTable[bestResult];
                 }
+            } else if (secondStones > 1 && firstStones == 0) {
                 result = 0;
                 bestResult = 0;
                 for (int i = boardSize - 5; i < boardSize; i++) {
@@ -376,7 +371,309 @@ public class GameEnvironment {
                         result = 0;
                     }
                 }
-                evaluationResult -= scoreTable[bestResult];
+                if (gameBoard[row][boardSize - 6] != -1) {
+                    evaluationResult -= scoreTable[bestResult];
+                }
+            }
+        }
+
+        return evaluationResult;
+    }
+
+    private int evaluateVertical() {
+        int evaluationResult = 0;
+        int bestResult;
+        int result;
+        for (int col = 0; col < boardSize; col++) {
+            int firstStones = 0;
+            int secondStones = 0;
+            for (int row = 0; row < boardSize; row++) {
+                if (row > 4) {
+                    if (firstStones > 1 && secondStones == 0) {
+                        result = 0;
+                        bestResult = 0;
+                        for (int i = row - 5; i < row; i++) {
+                            if (gameBoard[i][col] == 1) {
+                                result++;
+                                bestResult = Math.max(result, bestResult);
+                            } else {
+                                result = 0;
+                            }
+                        }
+                        if (row > 5 && gameBoard[row - 6][col] == 1) {
+                        } else if (gameBoard[row][col] == 1) {
+                        } else {
+                            evaluationResult += scoreTable[bestResult];
+                        }
+                    } else if (secondStones > 1 && firstStones == 0) {
+                        result = 0;
+                        bestResult = 0;
+                        for (int i = row - 5; i < row; i++) {
+                            if (gameBoard[i][col] == -1) {
+                                result++;
+                                bestResult = Math.max(result, bestResult);
+                            } else {
+                                result = 0;
+                            }
+                        }
+                        if (row > 5 && gameBoard[row - 6][col] == -1) {
+                        } else if (gameBoard[row][col] == -1) {
+                        } else {
+                            evaluationResult -= scoreTable[bestResult];
+                        }
+                    }
+
+                    if (gameBoard[row - 5][col] == 1)
+                        firstStones--;
+                    else if (gameBoard[row - 5][col] == -1)
+                        secondStones--;
+                }
+                if (gameBoard[row][col] == 1)
+                    firstStones++;
+                else if (gameBoard[row][col] == -1)
+                    secondStones++;
+            }
+            if (firstStones > 1 && secondStones == 0) {
+                result = 0;
+                bestResult = 0;
+                for (int i = boardSize - 5; i < boardSize; i++) {
+                    if (gameBoard[i][col] == 1) {
+                        result++;
+                        bestResult = Math.max(result, bestResult);
+                    } else {
+                        result = 0;
+                    }
+                }
+                if (gameBoard[boardSize - 6][col] != 1) {
+                    evaluationResult += scoreTable[bestResult];
+                }
+            } else if (secondStones > 1 && firstStones == 0) {
+                result = 0;
+                bestResult = 0;
+                for (int i = boardSize - 5; i < boardSize; i++) {
+                    if (gameBoard[i][col] == -1) {
+                        result++;
+                        bestResult = Math.max(result, bestResult);
+                    } else {
+                        result = 0;
+                    }
+                }
+                if (gameBoard[boardSize - 6][col] != -1) {
+                    evaluationResult -= scoreTable[bestResult];
+                }
+            }
+        }
+
+        return evaluationResult;
+    }
+
+    private int evaluateDiagonal() {
+        int evaluationResult = 0;
+        int bestResult;
+        int result;
+        int startingPoint = boardSize * (boardSize - 5);
+        int maxLength = 5;
+        while (true) {
+            int firstStones = 0;
+            int secondStones = 0;
+            int row = -1;
+            int col = -1;
+            int currentPlace = 0;
+            for (currentPlace = 0; currentPlace < maxLength; currentPlace++) {
+                row = startingPoint / boardSize + currentPlace;
+                col = startingPoint % boardSize + currentPlace;
+                if (currentPlace > 4) {
+                    if (firstStones > 1 && secondStones == 0) {
+                        result = 0;
+                        bestResult = 0;
+                        for (int i = 0; i < 5; i++) {
+                            if (gameBoard[row - 5 + i][col - 5 + i] == 1) {
+                                result++;
+                                bestResult = Math.max(result, bestResult);
+                            } else {
+                                result = 0;
+                            }
+                        }
+                        if (currentPlace > 5 && gameBoard[row - 6][col - 6] == 1) {
+                        } else if (gameBoard[row][col] == 1) {
+                        } else {
+                            evaluationResult += scoreTable[bestResult];
+                        }
+                    } else if (secondStones > 1 && firstStones == 0) {
+                        result = 0;
+                        bestResult = 0;
+                        for (int i = 0; i < 5; i++) {
+                            if (gameBoard[row - 5 + i][col - 5 + i] == -1) {
+                                result++;
+                                bestResult = Math.max(result, bestResult);
+                            } else {
+                                result = 0;
+                            }
+                        }
+                        if (currentPlace > 5 && gameBoard[row - 6][col - 6] == -1) {
+                        } else if (gameBoard[row][col] == -1) {
+                        } else {
+                            evaluationResult -= scoreTable[bestResult];
+                        }
+                    }
+
+                    if (gameBoard[row - 5][col - 5] == 1)
+                        firstStones--;
+                    else if (gameBoard[row - 5][col - 5] == -1)
+                        secondStones--;
+                }
+                if (gameBoard[row][col] == 1)
+                    firstStones++;
+                else if (gameBoard[row][col] == -1)
+                    secondStones++;
+            }
+            row = startingPoint / boardSize + currentPlace;
+            col = startingPoint % boardSize + currentPlace;
+            if (firstStones > 1 && secondStones == 0) {
+                result = 0;
+                bestResult = 0;
+                for (int i = 0; i < 5; i++) {
+                    if (gameBoard[row - 5 + i][col - 5 + i] == 1) {
+                        result++;
+                        bestResult = Math.max(result, bestResult);
+                    } else {
+                        result = 0;
+                    }
+                }
+                if (maxLength > 5 && gameBoard[row - 6][col - 6] == 1) {
+                } else {
+                    evaluationResult += scoreTable[bestResult];
+                }
+            } else if (secondStones > 1 && firstStones == 0) {
+                result = 0;
+                bestResult = 0;
+                for (int i = 0; i < 5; i++) {
+                    if (gameBoard[row - 5 + i][col - 5 + i] == -1) {
+                        result++;
+                        bestResult = Math.max(result, bestResult);
+                    } else {
+                        result = 0;
+                    }
+                }
+                if (maxLength > 5 && gameBoard[row - 6][col - 6] == -1) {
+                } else {
+                    evaluationResult -= scoreTable[bestResult];
+                }
+            }
+            if (startingPoint == boardSize - 5)
+                break;
+
+            if (startingPoint >= boardSize) {
+                startingPoint -= boardSize;
+                maxLength += 1;
+            } else {
+                startingPoint += 1;
+                maxLength -= 1;
+            }
+        }
+
+        startingPoint = 4 * boardSize;
+        maxLength = 5;
+        result = 0;
+        bestResult = 0;
+        while (true) {
+            int firstStones = 0;
+            int secondStones = 0;
+            int row = -1;
+            int col = -1;
+            int currentPlace = 0;
+            for (currentPlace = 0; currentPlace < maxLength; currentPlace++) {
+                row = startingPoint / boardSize - currentPlace;
+                col = startingPoint % boardSize + currentPlace;
+                // System.out.printf("r%d c%d%n", row, col);
+                if (currentPlace > 4) {
+                    // System.out.printf("%d %d%n", firstStones, secondStones);
+                    if (firstStones > 1 && secondStones == 0) {
+                        result = 0;
+                        bestResult = 0;
+                        for (int i = 0; i < 5; i++) {
+                            if (gameBoard[row + 5 - i][col - 5 + i] == 1) {
+                                result++;
+                                bestResult = Math.max(result, bestResult);
+                            } else {
+                                result = 0;
+                            }
+                        }
+                        if (currentPlace > 5 && gameBoard[row + 6][col - 6] == 1) {
+                        } else if (gameBoard[row][col] == 1) {
+                        } else {
+                            evaluationResult += scoreTable[bestResult];
+                        }
+                    } else if (secondStones > 1 && firstStones == 0) {
+                        result = 0;
+                        bestResult = 0;
+                        for (int i = 0; i < 5; i++) {
+                            if (gameBoard[row + 5 - i][col - 5 + i] == -1) {
+                                result++;
+                                bestResult = Math.max(result, bestResult);
+                            } else {
+                                result = 0;
+                            }
+                        }
+                        if (currentPlace > 5 && gameBoard[row + 6][col - 6] == -1) {
+                        } else if (gameBoard[row][col] == -1) {
+                        } else {
+                            evaluationResult -= scoreTable[bestResult];
+                        }
+                    }
+
+                    if (gameBoard[row + 5][col - 5] == 1)
+                        firstStones--;
+                    else if (gameBoard[row + 5][col - 5] == -1)
+                        secondStones--;
+                }
+                if (gameBoard[row][col] == 1)
+                    firstStones++;
+                else if (gameBoard[row][col] == -1)
+                    secondStones++;
+            }
+            row = startingPoint / boardSize - currentPlace;
+            col = startingPoint % boardSize + currentPlace;
+            if (firstStones > 1 && secondStones == 0) {
+                result = 0;
+                bestResult = 0;
+                for (int i = 0; i < 5; i++) {
+                    if (gameBoard[row + 5 - i][col - 5 + i] == 1) {
+                        result++;
+                        bestResult = Math.max(result, bestResult);
+                    } else {
+                        result = 0;
+                    }
+                }
+                if (maxLength > 5 && gameBoard[row + 6][col - 6] == 1) {
+                } else {
+                    evaluationResult += scoreTable[bestResult];
+                }
+            } else if (secondStones > 1 && firstStones == 0) {
+                result = 0;
+                bestResult = 0;
+                for (int i = 0; i < 5; i++) {
+                    if (gameBoard[row + 5 - i][col - 5 + i] == -1) {
+                        result++;
+                        bestResult = Math.max(result, bestResult);
+                    } else {
+                        result = 0;
+                    }
+                }
+                if (maxLength > 5 && gameBoard[row + 6][col - 6] == -1) {
+                } else {
+                    evaluationResult -= scoreTable[bestResult];
+                }
+            }
+            if (startingPoint == boardSize * boardSize - 5)
+                break;
+
+            if (startingPoint < boardSize * (boardSize - 1)) {
+                startingPoint += boardSize;
+                maxLength += 1;
+            } else {
+                startingPoint += 1;
+                maxLength -= 1;
             }
         }
 
@@ -510,24 +807,7 @@ public class GameEnvironment {
     }
 
     public int evaluateBoard() {
-        int result = 0;
-        for (int row = 0; row < boardSize; row++) {
-            for (int col = 0; col < boardSize; col++) {
-                if (col + 4 < boardSize) {
-                    result += right(row, col);
-                }
-                if (row + 4 < boardSize) {
-                    result += down(row, col);
-                }
-                if (col + 4 < boardSize && row + 4 < boardSize) {
-                    result += rightBottom(row, col);
-                }
-                if (col + 4 < boardSize && row - 4 >= 0) {
-                    result += rightUpward(row, col);
-                }
-            }
-        }
-        return result;
+        return evaluateHorizontal() + evaluateVertical() + evaluateDiagonal();
     }
 
     public void printBoard() {
