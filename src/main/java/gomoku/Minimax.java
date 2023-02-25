@@ -84,7 +84,12 @@ public class Minimax extends Player {
             return transpositionTable.get(hash);
         }
 
-        HashMap<Integer, Integer> results = game.ifTerminal();
+        HashMap<Integer, Integer> results;
+        if(depth == 0){
+            results = game.evaluateBoard();
+        }else{
+            results = game.ifTerminal();
+        }
 
         if (results.get(0) == 1) {
             if (results.get(1) == 0) {
@@ -93,12 +98,9 @@ public class Minimax extends Player {
             }
             transpositionTable.put(hash, Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10);
             return Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10;
-        }
-
-        if (depth == 0) {
-            int evaluationScore = currentPlayer * game.evaluateBoard();
-            transpositionTable.put(hash, evaluationScore);
-            return evaluationScore;
+        }else if(depth == 0){
+            transpositionTable.put(hash, currentPlayer*results.get(2));
+            return currentPlayer*results.get(2);
         }
 
         ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);

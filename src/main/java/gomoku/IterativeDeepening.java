@@ -160,7 +160,12 @@ public class IterativeDeepening extends Player {
             }
         }
 
-        HashMap<Integer, Integer> results = game.ifTerminal();
+        HashMap<Integer, Integer> results;
+        if(depth == 0){
+            results = game.evaluateBoard();
+        }else{
+            results = game.ifTerminal();
+        }
 
         if (results.get(0) == 1) {
             if (results.get(1) == 0) {
@@ -172,12 +177,9 @@ public class IterativeDeepening extends Player {
             transpositionTable.put(hash,
                     new ArrayList<>(Arrays.asList(Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10, 0)));
             return moveResults;
-        }
-
-        if (depth == 0) {
-            int evaluationScore = currentPlayer * game.evaluateBoard();
-            moveResults.put("bestScore", evaluationScore);
-            transpositionTable.put(hash, new ArrayList<>(Arrays.asList(evaluationScore, 0)));
+        } else if (depth == 0) {
+            moveResults.put("bestScore", currentPlayer*results.get(2));
+            transpositionTable.put(hash, new ArrayList<>(Arrays.asList(currentPlayer*results.get(2), 0)));
             return moveResults;
         }
 

@@ -42,7 +42,7 @@ public class BFM extends Player {
         for (int move : legalMoves) {
             game.move(move);
 
-            results = game.ifTerminal();
+            results = game.evaluateBoard();
             if (results.get(0) == 1) {
                 evaluationScore = 0;
                 if (results.get(1) == 1) {
@@ -51,7 +51,7 @@ public class BFM extends Player {
                     evaluationScore = Integer.MIN_VALUE;
                 }
             } else {
-                evaluationScore = game.evaluateBoard();
+                evaluationScore = results.get(2);
             }
 
             tempArray = bestMoves.getOrDefault(evaluationScore, new ArrayList<>());
@@ -134,7 +134,7 @@ public class BFM extends Player {
         for (int move : legalMoves) {
             game.move(move);
 
-            results = game.ifTerminal();
+            results = game.evaluateBoard();
             if (results.get(0) == 1) {
                 evaluationScore = 0;
                 if (results.get(1) == 1) {
@@ -143,7 +143,7 @@ public class BFM extends Player {
                     evaluationScore = Integer.MIN_VALUE;
                 }
             } else {
-                evaluationScore = game.evaluateBoard();
+                evaluationScore = results.get(2);
             }
 
             tempArray = bestMoves.getOrDefault(evaluationScore, new ArrayList<>());
