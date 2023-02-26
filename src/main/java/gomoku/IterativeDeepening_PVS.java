@@ -60,8 +60,7 @@ public class IterativeDeepening_PVS extends Player {
         long endTimestamp = System.nanoTime();
         MoveData moveData = new MoveData(endTimestamp - startTimestamp, previousResult.get("moveCount"),
                 previousResult.get("bestMove"), 
-                0,
-                //GraphLayout.parseInstance(this).totalSize(),
+                GraphLayout.parseInstance(this).totalSize(),
                 previousResult.get("bestScore"));
         transpositionTable = null;
         previousScores = null;

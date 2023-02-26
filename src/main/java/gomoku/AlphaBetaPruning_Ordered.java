@@ -69,8 +69,7 @@ public class AlphaBetaPruning_Ordered extends Player {
 
         long endTimestamp = System.nanoTime();
         MoveData moveData = new MoveData(endTimestamp - startTimestamp, moveCount, bestMovePlace,
-                // GraphLayout.parseInstance(this).totalSize(),
-                0,
+                GraphLayout.parseInstance(this).totalSize(),
                 bestScore);
         transpositionTable = null;
         return moveData;

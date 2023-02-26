@@ -15,7 +15,7 @@ public class PlayGames {
         this.player2 = player2;
     }
 
-    public GameData play() {
+    public GameData[] play() {
         HashMap<Integer, Integer> result;
         MoveData move;
         GameEnvironment game;
@@ -26,18 +26,22 @@ public class PlayGames {
             return null;
         }
         int currentGame = 0;
-        GameData gameData = new GameData();
+        GameData[] gameData = {new GameData(), new GameData()};
+        int currentMove = 0;
         while (currentGame < gamesOnSide) {
             game.resetState();
-            int currentMove = 0;
+            currentMove = 0;
             while (true) {
                 try {
                     if (game.getCurrentPlayer() == 1) {
                         move = player1.move(game);
+                        gameData[0].addData(currentMove, move.time, move.memoryUsed);
+                        gameData[1].addData(currentMove);
                     } else {
                         move = player2.move(game);
+                        gameData[0].addData(currentMove);
+                        gameData[1].addData(currentMove, move.time, move.memoryUsed);
                     }
-                    gameData.addData(currentMove, move.time, move.memoryUsed);
                     game.move(move.selectedMove);
                 } catch (Exception e) {
                     System.out.println(e);
@@ -46,7 +50,34 @@ public class PlayGames {
                 }
                 result = game.ifTerminal();
                 if (result.get(0) != 0) {
-                    gameData.finishGame(result.get(1));
+                    gameData[0].finishGame(result.get(1));
+                    break;
+                }
+                currentMove += 1;
+            }
+            game.resetState();
+            currentMove = 0;
+            while (true) {
+                try {
+                    if (game.getCurrentPlayer() == 1) {
+                        move = player2.move(game);
+                        gameData[0].addData(currentMove);
+                        gameData[1].addData(currentMove, move.time, move.memoryUsed);
+                    } else {
+                        move = player1.move(game);
+                        gameData[0].addData(currentMove, move.time, move.memoryUsed);
+                        gameData[1].addData(currentMove);
+                    }
+                    
+                    game.move(move.selectedMove);
+                } catch (Exception e) {
+                    System.out.println(e);
+                    e.printStackTrace();
+                    break;
+                }
+                result = game.ifTerminal();
+                if (result.get(0) != 0) {
+                    gameData[1].finishGame(result.get(1));
                     break;
                 }
                 currentMove += 1;

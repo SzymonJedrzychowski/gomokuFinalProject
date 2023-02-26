@@ -20,6 +20,14 @@ public class GameData {
         }
     }
 
+    public void addData(int currentMove){
+        if(currentMove >= timesVisited.size()){
+            timesVisited.add(0);
+            savedTime.add((long)0);
+            savedMemory.add((long)0);
+        }
+    }
+
     public void finishGame(int winner){
         if (winner == 1) {
             gameResults[0] += 1;
@@ -65,5 +73,11 @@ public class GameData {
             System.out.printf("%d ", visit);
         }
         System.out.println();
+    }
+
+    public void printData(){
+        printTimes();
+        printMemory();
+        printVisits();
     }
 }
