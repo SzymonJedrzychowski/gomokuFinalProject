@@ -423,6 +423,7 @@ public class GameEnvironment {
         result.put(0, 0);
         result.put(1, 0);
         int evaluation = right() + down() + rightBottom() + rightUpward();
+        result.put(2, evaluation);
         if(Math.abs(evaluation) > 5000){
             result.put(0, 1);
             result.put(1, -currentPlayer);
@@ -430,7 +431,6 @@ public class GameEnvironment {
         }else if (moveCount == boardSize * boardSize) {
             result.put(0, 1);
         }
-        result.put(2, evaluation);
         return result;
     }
 

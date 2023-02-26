@@ -80,4 +80,8 @@ public class GameData {
         printMemory();
         printVisits();
     }
+    
+    public String printResults(){
+        return String.format("%d/%d/%d", gameResults[0], gameResults[1], gameResults[2]);
+    }
 }
