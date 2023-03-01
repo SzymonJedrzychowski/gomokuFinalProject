@@ -32,7 +32,7 @@ public class MCTS_UCT extends Player {
                 selectedNode = selectedNode.select(explorationValue);
             }
             moveCount += 1;
-        } while (endTimestamp - startTimestamp < timeLimit * 1000000);
+        } while (endTimestamp - startTimestamp < (long)timeLimit * 1000000);
         HashMap<Integer, Float> UCB = new HashMap<>();
         MCTS_UCT_node child;
 

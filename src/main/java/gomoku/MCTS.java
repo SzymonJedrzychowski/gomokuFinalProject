@@ -28,7 +28,7 @@ public class MCTS extends Player {
                 selectedNode = selectedNode.select();
             }
             moveCount += 1;
-        } while (endTimestamp - startTimestamp < timeLimit * 1000000);
+        } while (endTimestamp - startTimestamp < (long)timeLimit * 1000000);
 
         MCTS_node child;
         float bestValue = Float.NEGATIVE_INFINITY;

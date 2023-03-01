@@ -15,7 +15,7 @@ public class PlayGames {
         this.player2 = player2;
     }
 
-    public GameData[] play() {
+    public GameData[] play(boolean displayInformation) {
         HashMap<Integer, Integer> result;
         MoveData move;
         GameEnvironment game;
@@ -55,6 +55,7 @@ public class PlayGames {
                 }
                 currentMove += 1;
             }
+            if(displayInformation) System.out.printf("Game %d (1) has ended.%n", currentGame);
             game.resetState();
             currentMove = 0;
             while (true) {
@@ -82,6 +83,7 @@ public class PlayGames {
                 }
                 currentMove += 1;
             }
+            if(displayInformation) System.out.printf("Game %d (2) has ended.%n", currentGame);
             currentGame += 1;
         }
         return gameData;

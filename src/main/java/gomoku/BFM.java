@@ -74,7 +74,7 @@ public class BFM extends Player {
         int newScore;
         int currentMove;
         int secondBest;
-        while (System.nanoTime() - startTimestamp < timeLimit * 1000000
+        while (System.nanoTime() - startTimestamp < (long)timeLimit * 1000000
                 && !((currentPlayer == 1 && bestMoves.firstKey() == Integer.MAX_VALUE)
                 || (currentPlayer == -1 && bestMoves.firstKey() == Integer.MIN_VALUE))) {
             if (bestMoves.firstEntry().getValue().size() > 1) {
@@ -190,7 +190,7 @@ public class BFM extends Player {
             secondBest = currentPlayer == 1 ? bestMoves.ceilingKey(bestMoves.firstKey() - 1)
                     : bestMoves.floorKey(bestMoves.firstKey() + 1);
         }
-        while (System.nanoTime() - startTimestamp < timeLimit * 1000000
+        while (System.nanoTime() - startTimestamp < (long)timeLimit * 1000000
                 && (bestMoves.firstKey() >= alpha && bestMoves.firstKey() <= beta)) {
             randomIndex = (int) (bestMoves.firstEntry().getValue().size() * Math.random());
             currentMove = bestMoves.firstEntry().getValue().get(randomIndex);

@@ -29,6 +29,9 @@ public class IterativeDeepening extends Player {
         transpositionTable = new HashMap<>();
         previousScores = new HashMap<>();
         globalDepth = 1;
+        
+        int currentHighest = 0;
+        long memory = 0;
 
         HashMap<String, Integer> results;
         HashMap<String, Integer> previousResult = new HashMap<>();
@@ -40,6 +43,12 @@ public class IterativeDeepening extends Player {
         do {
             transpositionTable = null;
             results = iterativeMove(game, globalDepth);
+            if(transpositionTable.size()>currentHighest){
+                currentHighest = transpositionTable.size();
+                long currentTime = System.nanoTime();
+                memory = GraphLayout.parseInstance(this).totalSize();
+                startTimestamp += (System.nanoTime()-currentTime);
+            }
 
             if (!results.containsKey("time")) {
                 previousResult = results;
@@ -55,7 +64,7 @@ public class IterativeDeepening extends Player {
         long endTimestamp = System.nanoTime();
         MoveData moveData = new MoveData(endTimestamp - startTimestamp, previousResult.get("moveCount"),
                 previousResult.get("bestMove"), 
-                GraphLayout.parseInstance(this).totalSize(),
+                memory,
                 previousResult.get("bestScore"));
         previousScores = null;
         transpositionTable = null;
@@ -80,7 +89,7 @@ public class IterativeDeepening extends Player {
         HashMap<String, Integer> moveResults = new HashMap<>();
 
         if (isLimitTime) {
-            if (System.nanoTime() - simulationLimit*1000000 + 1000> startTimestamp) {
+            if (System.nanoTime() - (long)simulationLimit*1000000 + 1000> startTimestamp) {
                 moveResults.put("time", 1);
                 return moveResults;
             }
@@ -156,7 +165,7 @@ public class IterativeDeepening extends Player {
         }
         
         if (isLimitTime) {
-            if (System.nanoTime() - simulationLimit*1000000 + 1000 > startTimestamp) {
+            if (System.nanoTime() - (long)simulationLimit*1000000 + 1000 > startTimestamp) {
                 moveResults.put("time", 1);
                 return moveResults;
             }
