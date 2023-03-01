@@ -16,12 +16,6 @@ public class IterativeDeepening_PVS extends Player {
     long startTimestamp;
     boolean isLimitTime;
 
-    IterativeDeepening_PVS(int simulationLimit, boolean isLimitTime) {
-        this.simulationLimit = simulationLimit;
-        this.isLimitTime = isLimitTime;
-        this.onlyCloseMoves = false;
-    }
-
     IterativeDeepening_PVS(int simulationLimit, boolean isLimitTime, boolean onlyCloseMoves) {
         this.simulationLimit = simulationLimit;
         this.isLimitTime = isLimitTime;
@@ -35,7 +29,7 @@ public class IterativeDeepening_PVS extends Player {
         transpositionTable = new HashMap<>();
         previousScores = new HashMap<>();
 
-        HashMap<String, Integer> results = new HashMap<>();
+        HashMap<String, Integer> results;
         HashMap<String, Integer> previousResult = new HashMap<>();
 
         previousResult.put("bestMove", -1);
@@ -81,12 +75,10 @@ public class IterativeDeepening_PVS extends Player {
         int beta = Integer.MAX_VALUE;
         int b = beta;
 
-        game.hashInit();
-
         HashMap<String, Integer> moveResults = new HashMap<>();
 
         if (isLimitTime) {
-            if (System.nanoTime() - simulationLimit*1000000 + 10 > startTimestamp) {
+            if (System.nanoTime() - simulationLimit*1000000 + 1000 > startTimestamp) {
                 moveResults.put("time", 1);
                 return moveResults;
             }
@@ -153,13 +145,15 @@ public class IterativeDeepening_PVS extends Player {
             tempArray = transpositionTable.get(hash);
             flag = tempArray.get(1);
             newScore = tempArray.get(0);
-            if (flag == 0) {
-                moveResults.put("bestScore", newScore);
-                return moveResults;
-            } else if (flag == 1) {
-                alpha = Math.max(alpha, newScore);
-            } else if (flag == 2) {
-                beta = Math.min(beta, newScore);
+            switch (flag) {
+                case 0 -> {
+                    moveResults.put("bestScore", newScore);
+                    return moveResults;
+                }
+                case 1 -> alpha = Math.max(alpha, newScore);
+                case 2 -> beta = Math.min(beta, newScore);
+                default -> {
+                }
             }
             if (alpha >= beta) {
                 moveResults.put("bestScore", newScore);
@@ -172,6 +166,13 @@ public class IterativeDeepening_PVS extends Player {
             results = game.evaluateBoard();
         }else{
             results = game.ifTerminal();
+        }
+        
+        if (isLimitTime) {
+            if (System.nanoTime() - simulationLimit*1000000 + 1000 > startTimestamp) {
+                moveResults.put("time", 1);
+                return moveResults;
+            }
         }
 
         if (results.get(0) == 1) {
@@ -188,13 +189,6 @@ public class IterativeDeepening_PVS extends Player {
             moveResults.put("bestScore", currentPlayer*results.get(2));
             transpositionTable.put(hash, new ArrayList<>(Arrays.asList(currentPlayer*results.get(2), 0)));
             return moveResults;
-        }
-
-        if (isLimitTime) {
-            if (System.nanoTime() - simulationLimit*1000000 + 10 > startTimestamp) {
-                moveResults.put("time", 1);
-                return moveResults;
-            }
         }
 
         ArrayList<Integer> legalMoves = getMoves(game);

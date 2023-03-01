@@ -105,13 +105,12 @@ public class GameEnvironment {
                     }
                     if(gameBoard[row+1][col] != 0){
                         result.add(row*boardSize+col);
-                        continue;
                     }
                 }
             }
         }
 
-        if (result.isEmpty()) {
+        if (result.isEmpty() && gameBoard[0][0] == 0) {
             for (int row = 0; row <= boardSize / 2; row++) {
                 for (int col = 0; col <= row; col++) {
                     result.add(row * boardSize + col);
@@ -457,7 +456,9 @@ public class GameEnvironment {
         GameEnvironment newGame = new GameEnvironment(boardSize);
         newGame.hashArray = hashArray;
         newGame.hash = hash;
-        System.arraycopy(gameBoard, 0, newGame.gameBoard, 0, boardSize);
+        for(int i=0; i<boardSize; i++){
+            System.arraycopy(gameBoard[i], 0, newGame.gameBoard[i], 0, boardSize);
+        }
         newGame.moveCount = moveCount;
         newGame.currentPlayer = currentPlayer;
         return newGame;

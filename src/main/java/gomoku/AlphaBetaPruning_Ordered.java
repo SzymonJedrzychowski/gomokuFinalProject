@@ -11,16 +11,12 @@ public class AlphaBetaPruning_Ordered extends Player {
     int moveCount;
     boolean onlyCloseMoves;
 
-    AlphaBetaPruning_Ordered(int globalDepth) {
-        this.globalDepth = globalDepth;
-        this.onlyCloseMoves = false;
-    }
-
     AlphaBetaPruning_Ordered(int globalDepth, boolean onlyCloseMoves) {
         this.globalDepth = globalDepth;
         this.onlyCloseMoves = onlyCloseMoves;
     }
 
+    @Override
     public MoveData move(GameEnvironment gameState) throws Exception {
         long startTimestamp = System.nanoTime();
         transpositionTable = new HashMap<>();
@@ -89,12 +85,14 @@ public class AlphaBetaPruning_Ordered extends Player {
             tempArray = transpositionTable.get(hash);
             flag = tempArray.get(1);
             newScore = tempArray.get(0);
-            if (flag == 0) {
-                return newScore;
-            } else if (flag == 1) {
-                alpha = Math.max(alpha, newScore);
-            } else if (flag == 2) {
-                beta = Math.min(beta, newScore);
+            switch (flag) {
+                case 0 -> {
+                    return newScore;
+                }
+                case 1 -> alpha = Math.max(alpha, newScore);
+                case 2 -> beta = Math.min(beta, newScore);
+                default -> {
+                }
             }
             if (alpha >= beta) {
                 return newScore;

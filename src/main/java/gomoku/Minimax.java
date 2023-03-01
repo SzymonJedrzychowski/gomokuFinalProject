@@ -11,16 +11,12 @@ public class Minimax extends Player {
     int moveCount;
     boolean onlyCloseMoves;
 
-    Minimax(int globalDepth) {
-        this.globalDepth = globalDepth;
-        this.onlyCloseMoves = false;
-    }
-
     Minimax(int globalDepth, boolean onlyCloseMoves) {
         this.globalDepth = globalDepth;
         this.onlyCloseMoves = onlyCloseMoves;
     }
 
+    @Override
     public MoveData move(GameEnvironment gameState) throws Exception {
         long startTimestamp = System.nanoTime();
         transpositionTable = new HashMap<>();

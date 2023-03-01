@@ -1,10 +1,11 @@
 package gomoku;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class MCTS_UCT_node {
+
     GameEnvironment state;
     MCTS_UCT_node parent;
     HashMap<Integer, MCTS_UCT_node> children = new HashMap<>();
@@ -23,36 +24,33 @@ public class MCTS_UCT_node {
         if (children.size() < legalMoves.size()) {
             expand();
             return null;
-        } else if (legalMoves.size() == 0) {
+        } else if (legalMoves.isEmpty()) {
             randomPolicy();
             return null;
         } else {
-            HashMap<Integer, Float> UCB = new HashMap<>();
             MCTS_UCT_node child;
-            for (Integer move : children.keySet()) {
+            float bestValue = Float.NEGATIVE_INFINITY;
+            float moveValue;
+            int bestMovePlace = -1;
+
+            ArrayList<Integer> keys = new ArrayList<>(children.keySet());
+            Collections.shuffle(keys);
+            for (int move : keys) {
                 child = children.get(move);
                 if (state.getCurrentPlayer() == 1) {
-                    UCB.put(move, (float) ((child.stats[0] + 0.5 * child.stats[1]) / child.visits
-                            + explorationValue * Math.sqrt((Math.log(visits) / child.visits))));
+                    moveValue = (float) ((child.stats[0] + 0.5 * child.stats[1]) / child.visits
+                            + explorationValue * Math.sqrt((Math.log(visits) / child.visits)));
                 } else {
-                    UCB.put(move, (float) ((child.stats[2] + 0.5 * child.stats[1]) / child.visits
-                            + explorationValue * Math.sqrt((Math.log(visits) / child.visits))));
+                    moveValue = (float) ((child.stats[2] + 0.5 * child.stats[1]) / child.visits
+                            + explorationValue * Math.sqrt((Math.log(visits) / child.visits)));
                 }
-            }
-            float bestValue = Float.NEGATIVE_INFINITY;
-            ArrayList<Integer> moves = new ArrayList<>();
-
-            for (int move : UCB.keySet()) {
-                if (UCB.get(move) > bestValue) {
-                    bestValue = UCB.get(move);
-                    moves.clear();
-                    moves.add(move);
-                } else if (UCB.get(move) == bestValue) {
-                    moves.add(move);
+                if (moveValue > bestValue) {
+                    bestValue = moveValue;
+                    bestMovePlace = move;
                 }
             }
 
-            return children.get(moves.get((int) (Math.random() * moves.size())));
+            return children.get(bestMovePlace);
         }
     }
 
@@ -68,8 +66,7 @@ public class MCTS_UCT_node {
                 possibleMoves.add(move);
             }
         }
-
-        int move = possibleMoves.get((int) (Math.random() * possibleMoves.size()));
+        int move = possibleMoves.get(0);
         stateCopy = state.copy();
         stateCopy.move(move);
 
@@ -82,58 +79,59 @@ public class MCTS_UCT_node {
     private void randomPolicy() throws Exception {
         HashMap<Integer, Integer> results = state.ifTerminal();
         if (results.get(0) == 1) {
-            if (results.get(1) == 1) {
-                stats[0] += 1;
-            } else if (results.get(1) == -1) {
-                stats[2] += 1;
-            } else {
+            if (null == results.get(1)) {
                 stats[1] += 1;
+            } else {
+                switch (results.get(1)) {
+                    case 1 ->
+                        stats[0] += 1;
+                    case -1 ->
+                        stats[2] += 1;
+                    default ->
+                        stats[1] += 1;
+                }
             }
             visits += 1;
             propagate(results.get(1));
         } else {
             ArrayList<Integer> legalMoves;
-            int randomNum;
-            int moveIndex;
             GameEnvironment thisState = state.copy();
             while (results.get(0) == 0) {
                 legalMoves = thisState.getLegalMoves(onlyCloseMoves);
-                randomNum = ThreadLocalRandom.current().nextInt(0, legalMoves.size());
-                moveIndex = 0;
-                for (Integer move : legalMoves) {
-                    if (moveIndex == randomNum) {
-                        thisState.move(move);
-                        break;
-                    }
-                    moveIndex += 1;
-                }
+                thisState.move(legalMoves.get(0));
                 results = thisState.ifTerminal();
             }
-            if (results.get(1) == 1) {
-                stats[0] += 1;
-            } else if (results.get(1) == -1) {
-                stats[2] += 1;
-            } else {
+            if (null == results.get(1)) {
                 stats[1] += 1;
+            } else {
+                switch (results.get(1)) {
+                    case 1 ->
+                        stats[0] += 1;
+                    case -1 ->
+                        stats[2] += 1;
+                    default ->
+                        stats[1] += 1;
+                }
             }
             visits += 1;
             propagate(results.get(1));
         }
     }
 
-    private void propagate(int result) {
+    protected void propagate(int result) {
         MCTS_UCT_node parentNode = this;
         while (true) {
             parentNode = parentNode.parent;
             if (parentNode == null) {
                 break;
             }
-            if (result == 1) {
-                parentNode.stats[0] += 1;
-            } else if (result == -1) {
-                parentNode.stats[2] += 1;
-            } else {
-                parentNode.stats[1] += 1;
+            switch (result) {
+                case 1 ->
+                    parentNode.stats[0] += 1;
+                case -1 ->
+                    parentNode.stats[2] += 1;
+                default ->
+                    parentNode.stats[1] += 1;
             }
             parentNode.visits += 1;
         }

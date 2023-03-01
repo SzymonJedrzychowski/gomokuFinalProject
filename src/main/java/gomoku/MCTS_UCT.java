@@ -1,43 +1,38 @@
 package gomoku;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import org.openjdk.jol.info.GraphLayout;
 
 public class MCTS_UCT extends Player {
     int timeLimit;
     float explorationValue;
-    boolean simulationLimitIsMoves;
     boolean onlyCloseMoves;
-
-    MCTS_UCT(int timeLimit, float explorationValue, boolean onlyCloseMoves) {
-        this.timeLimit = timeLimit;
-        this.explorationValue = explorationValue;
-        this.onlyCloseMoves = onlyCloseMoves;
-    }
 
     MCTS_UCT(int timeLimit, boolean onlyCloseMoves) {
         this.timeLimit = timeLimit;
-        this.explorationValue = 1.4f;
+        this.explorationValue = (float) 1.41;
         this.onlyCloseMoves = onlyCloseMoves;
     }
 
+    @Override
     public MoveData move(GameEnvironment state) throws Exception {
         int moveCount = 0;
-        Timestamp startTimestamp = new Timestamp(System.currentTimeMillis());
-        Timestamp endTimestamp;
+        long startTimestamp = System.nanoTime();
+        long endTimestamp;
 
         MCTS_UCT_node currentNode = new MCTS_UCT_node(state, null, onlyCloseMoves);
         MCTS_UCT_node selectedNode;
 
         do {
-            endTimestamp = new Timestamp(System.currentTimeMillis());
+            endTimestamp = System.nanoTime();
             selectedNode = currentNode.select(explorationValue);
             while (selectedNode != null) {
                 selectedNode = selectedNode.select(explorationValue);
             }
             moveCount += 1;
-        } while (endTimestamp.getTime() - startTimestamp.getTime() < timeLimit);
+        } while (endTimestamp - startTimestamp < timeLimit * 1000000);
         HashMap<Integer, Float> UCB = new HashMap<>();
         MCTS_UCT_node child;
 
@@ -51,25 +46,24 @@ public class MCTS_UCT extends Player {
         }
 
         float bestValue = Float.NEGATIVE_INFINITY;
-        ArrayList<Integer> moves = new ArrayList<>();
+        int bestMovePlace = -1;
         float moveValue;
 
-        for (int moveIndex : UCB.keySet()) {
+        ArrayList<Integer> keys = new ArrayList<>(UCB.keySet());
+        Collections.shuffle(keys);
+        for (int moveIndex : keys) {
             moveValue = UCB.get(moveIndex);
             if (moveValue > bestValue) {
                 bestValue = moveValue;
-                moves.clear();
-                moves.add(moveIndex);
-            } else if (moveValue == bestValue) {
-                moves.add(moveIndex);
+                bestMovePlace = moveIndex;
             }
         }
 
-        endTimestamp = new Timestamp(System.currentTimeMillis());
-        // System.out.printf("%-30s time: %10d moveCount: %10d %n", "MCTS_UCT",
-        // endTimestamp.getTime() - startTimestamp.getTime(), moveCount);
-        MoveData moveData = new MoveData(endTimestamp.getTime() - startTimestamp.getTime(), moveCount,
-                moves.get((int) (Math.random() * moves.size())), 0, 0);
+        endTimestamp = System.nanoTime();
+        MoveData moveData = new MoveData(endTimestamp - startTimestamp,
+                moveCount,
+                bestMovePlace,
+                GraphLayout.parseInstance(this).totalSize() + GraphLayout.parseInstance(currentNode).totalSize(), 0);
         return moveData;
     }
 }

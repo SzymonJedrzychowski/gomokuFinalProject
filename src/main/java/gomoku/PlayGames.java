@@ -27,7 +27,7 @@ public class PlayGames {
         }
         int currentGame = 0;
         GameData[] gameData = {new GameData(), new GameData()};
-        int currentMove = 0;
+        int currentMove;
         while (currentGame < gamesOnSide) {
             game.resetState();
             currentMove = 0;
