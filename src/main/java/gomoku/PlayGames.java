@@ -28,6 +28,10 @@ public class PlayGames {
         int currentGame = 0;
         GameData[] gameData = {new GameData(), new GameData()};
         int currentMove;
+        if(displayInformation){
+            System.out.printf("Player 1: %s %n", player1.getClass());
+            System.out.printf("Player 2: %s %n", player2.getClass());
+        }
         while (currentGame < gamesOnSide) {
             game.resetState();
             currentMove = 0;

@@ -38,15 +38,16 @@ public class IterativeDeepening extends Player {
 
         previousResult.put("bestMove", -1);
 
+        HashMap<Long, ArrayList<Integer>> largestTT = new HashMap<>();
+
         game.hashInit();
 
         do {
             transpositionTable = null;
             results = iterativeMove(game, globalDepth);
-            if(transpositionTable.size()>currentHighest){
-                currentHighest = transpositionTable.size();
+            if(transpositionTable.size()>largestTT.size()){
                 long currentTime = System.nanoTime();
-                memory = GraphLayout.parseInstance(this).totalSize();
+                largestTT = new HashMap<>(transpositionTable);
                 startTimestamp += (System.nanoTime()-currentTime);
             }
 
@@ -62,12 +63,12 @@ public class IterativeDeepening extends Player {
         } while (!results.containsKey("time"));
         
         long endTimestamp = System.nanoTime();
+        transpositionTable = null;
         MoveData moveData = new MoveData(endTimestamp - startTimestamp, previousResult.get("moveCount"),
                 previousResult.get("bestMove"), 
-                memory,
+                0,//GraphLayout.parseInstance(this).totalSize()+GraphLayout.parseInstance(largestTT).totalSize(),
                 previousResult.get("bestScore"));
         previousScores = null;
-        transpositionTable = null;
         return moveData;
     }
 

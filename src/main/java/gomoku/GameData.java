@@ -76,9 +76,10 @@ public class GameData {
     }
 
     public void printData(){
-        printTimes();
-        printMemory();
-        printVisits();
+        //printTimes();
+        //printMemory();
+        //printVisits();
+        System.out.println(printResults());
     }
     
     public String printResults(){

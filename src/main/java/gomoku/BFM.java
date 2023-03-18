@@ -111,7 +111,7 @@ public class BFM extends Player {
         }
         MoveData moveData = new MoveData(System.nanoTime() - startTimestamp, moveCount,
                 bestMoves.firstEntry().getValue().get((int) (bestMoves.firstEntry().getValue().size() * Math.random())),
-                GraphLayout.parseInstance(this).totalSize(),
+                0,//GraphLayout.parseInstance(this).totalSize(),
                 bestMoves.firstKey());
         transpositionTable = null;
         return moveData;

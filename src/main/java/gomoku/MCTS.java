@@ -54,7 +54,7 @@ public class MCTS extends Player {
         MoveData moveData = new MoveData(endTimestamp - startTimestamp,
                 moveCount,
                 bestMovePlace,
-                GraphLayout.parseInstance(this).totalSize() + GraphLayout.parseInstance(currentNode).totalSize(),
+                0, //GraphLayout.parseInstance(this).totalSize() + GraphLayout.parseInstance(currentNode).totalSize(),
                 0);
         return moveData;
     }

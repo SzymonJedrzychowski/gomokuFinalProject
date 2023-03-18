@@ -3,6 +3,9 @@ package gomoku;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.openjdk.jol.info.GraphLayout;
 
 public class IterativeDeepening_PVS extends Player {
@@ -33,18 +36,17 @@ public class IterativeDeepening_PVS extends Player {
         HashMap<String, Integer> previousResult = new HashMap<>();
 
         previousResult.put("bestMove", -1);
-        int currentHighest = 0;
-        long memory = 0;
+
+        HashMap<Long, ArrayList<Integer>> largestTT = new HashMap<>();
 
         game.hashInit();
 
         do {
             transpositionTable = null;
             results = iterativeMove(game, globalDepth);
-            if(transpositionTable.size()>currentHighest){
-                currentHighest = transpositionTable.size();
+            if(transpositionTable.size()>largestTT.size()){
                 long currentTime = System.nanoTime();
-                memory = GraphLayout.parseInstance(this).totalSize();
+                largestTT = new HashMap<>(transpositionTable);
                 startTimestamp += (System.nanoTime()-currentTime);
             }
 
@@ -60,11 +62,11 @@ public class IterativeDeepening_PVS extends Player {
         } while (!results.containsKey("time"));
 
         long endTimestamp = System.nanoTime();
+        transpositionTable = null;
         MoveData moveData = new MoveData(endTimestamp - startTimestamp, previousResult.get("moveCount"),
                 previousResult.get("bestMove"), 
-                memory,
+                0, //GraphLayout.parseInstance(this).totalSize()+GraphLayout.parseInstance(largestTT).totalSize(),
                 previousResult.get("bestScore"));
-        transpositionTable = null;
         previousScores = null;
         return moveData;
     }

@@ -6,10 +6,10 @@ public class App {
 
     public static void main(String[] args) {
 
-        int limit = 5000;
-        int boardSize = 15;
-        int gameNumber = 10;
-        boolean closeMoves = false;
+        int limit = 1000;
+        int boardSize = 7;
+        int gameNumber = 50;
+        boolean closeMoves = true;
         
         GameData[] gameData;
         Player player1 = new MCTS(limit, closeMoves);
@@ -19,12 +19,12 @@ public class App {
         Player player5 = new IterativeDeepening_PVS(limit, true, closeMoves);
 
         Player p1 = player1;
-        Player p2 = player1;
+        Player p2 = player3;
 
         PlayGames games;
 
         Player t = new IterativeDeepening(1, false, false);
-        games = new PlayGames(30, 7, t, t);
+        games = new PlayGames(1, 7, t, t);
         games.play(false);
 
         games = new PlayGames(gameNumber, boardSize, p1, p2);
