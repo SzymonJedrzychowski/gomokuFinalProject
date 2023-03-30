@@ -8,7 +8,7 @@ public class App {
 
         int limit = 1000;
         int boardSize = 7;
-        int gameNumber = 50;
+        int gameNumber = 1;
         boolean closeMoves = true;
         
         GameData[] gameData;
@@ -18,8 +18,14 @@ public class App {
         Player player4 = new IterativeDeepening(limit, true, closeMoves);
         Player player5 = new IterativeDeepening_PVS(limit, true, closeMoves);
 
+        Player player1c = new MCTS(limit, !closeMoves);
+        Player player2c = new MCTS_UCT(limit, !closeMoves);
+        Player player3c = new BFM(limit, !closeMoves);
+        Player player4c = new IterativeDeepening(limit, true, !closeMoves);
+        Player player5c = new IterativeDeepening_PVS(limit, true, !closeMoves);
+
         Player p1 = player1;
-        Player p2 = player3;
+        Player p2 = player4;
 
         PlayGames games;
 

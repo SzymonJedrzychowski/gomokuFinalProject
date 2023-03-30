@@ -92,9 +92,9 @@ public class BFM extends Player {
             game.update(currentPlayer, currentMove);
 
             if (currentPlayer == 1) {
-                newScore = deepMove(game, Math.max(secondBest, Integer.MIN_VALUE), Integer.MAX_VALUE, 1);
+                newScore = deepMove(game, secondBest, Integer.MAX_VALUE, 1);
             } else {
-                newScore = deepMove(game, Integer.MIN_VALUE, Math.min(secondBest, Integer.MAX_VALUE), 1);
+                newScore = deepMove(game, Integer.MIN_VALUE, secondBest, 1);
             }
             game.update(currentPlayer, currentMove);
             game.undoMove(currentMove);
