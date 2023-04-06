@@ -73,38 +73,38 @@ public class GameEnvironment {
                     continue;
 
                 if (row > 0) {
-                    if(col > 0){
-                        if(gameBoard[row-1][col-1] != 0 || gameBoard[row][col-1] != 0){
-                            result.add(row*boardSize+col);
+                    if (col > 0) {
+                        if (gameBoard[row - 1][col - 1] != 0 || gameBoard[row][col - 1] != 0) {
+                            result.add(row * boardSize + col);
                             continue;
                         }
                     }
-                    if(col < boardSize-1){
-                        if(gameBoard[row-1][col+1] != 0 || gameBoard[row][col+1] != 0){
-                            result.add(row*boardSize+col);
+                    if (col < boardSize - 1) {
+                        if (gameBoard[row - 1][col + 1] != 0 || gameBoard[row][col + 1] != 0) {
+                            result.add(row * boardSize + col);
                             continue;
                         }
                     }
-                    if(gameBoard[row-1][col] != 0){
-                        result.add(row*boardSize+col);
+                    if (gameBoard[row - 1][col] != 0) {
+                        result.add(row * boardSize + col);
                         continue;
                     }
                 }
                 if (row < boardSize - 1) {
-                    if(col > 0){
-                        if(gameBoard[row+1][col-1] != 0 || gameBoard[row][col-1] != 0){
-                            result.add(row*boardSize+col);
+                    if (col > 0) {
+                        if (gameBoard[row + 1][col - 1] != 0 || gameBoard[row][col - 1] != 0) {
+                            result.add(row * boardSize + col);
                             continue;
                         }
                     }
-                    if(col < boardSize-1){
-                        if(gameBoard[row+1][col+1] != 0 || gameBoard[row][col+1] != 0){
-                            result.add(row*boardSize+col);
+                    if (col < boardSize - 1) {
+                        if (gameBoard[row + 1][col + 1] != 0 || gameBoard[row][col + 1] != 0) {
+                            result.add(row * boardSize + col);
                             continue;
                         }
                     }
-                    if(gameBoard[row+1][col] != 0){
-                        result.add(row*boardSize+col);
+                    if (gameBoard[row + 1][col] != 0) {
+                        result.add(row * boardSize + col);
                     }
                 }
             }
@@ -423,11 +423,11 @@ public class GameEnvironment {
         result.put(1, 0);
         int evaluation = right() + down() + rightBottom() + rightUpward();
         result.put(2, evaluation);
-        if(Math.abs(evaluation) > 5000){
+        if (Math.abs(evaluation) > 5000) {
             result.put(0, 1);
             result.put(1, -currentPlayer);
             return result;
-        }else if (moveCount == boardSize * boardSize) {
+        } else if (moveCount == boardSize * boardSize) {
             result.put(0, 1);
         }
         return result;
@@ -456,7 +456,7 @@ public class GameEnvironment {
         GameEnvironment newGame = new GameEnvironment(boardSize);
         newGame.hashArray = hashArray;
         newGame.hash = hash;
-        for(int i=0; i<boardSize; i++){
+        for (int i = 0; i < boardSize; i++) {
             System.arraycopy(gameBoard[i], 0, newGame.gameBoard[i], 0, boardSize);
         }
         newGame.moveCount = moveCount;
@@ -500,5 +500,9 @@ public class GameEnvironment {
         } else {
             return hash ^= hashArray[1][(int) (space / boardSize)][space % boardSize];
         }
+    }
+
+    public int getBoardSpace() {
+        return boardSize * boardSize;
     }
 }

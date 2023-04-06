@@ -28,7 +28,7 @@ public class MCTS extends Player {
                 selectedNode = selectedNode.select();
             }
             moveCount += 1;
-        } while (endTimestamp - startTimestamp < (long)timeLimit * 1000000);
+        } while (endTimestamp - startTimestamp < (long) timeLimit * 1000000);
 
         MCTS_node child;
         float bestValue = Float.NEGATIVE_INFINITY;
@@ -54,7 +54,7 @@ public class MCTS extends Player {
         MoveData moveData = new MoveData(endTimestamp - startTimestamp,
                 moveCount,
                 bestMovePlace,
-                0, //GraphLayout.parseInstance(this).totalSize() + GraphLayout.parseInstance(currentNode).totalSize(),
+                GraphLayout.parseInstance(this).totalSize() + GraphLayout.parseInstance(currentNode).totalSize(),
                 0);
         return moveData;
     }

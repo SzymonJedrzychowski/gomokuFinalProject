@@ -1,16 +1,14 @@
 package gomoku;
 
-import java.util.ArrayList;
-
 public class App {
 
     public static void main(String[] args) {
 
         int limit = 1000;
-        int boardSize = 7;
-        int gameNumber = 1;
+        int boardSize = 15;
+        int gameNumber = 10;
         boolean closeMoves = true;
-        
+
         GameData[] gameData;
         Player player1 = new MCTS(limit, closeMoves);
         Player player2 = new MCTS_UCT(limit, closeMoves);

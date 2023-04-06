@@ -74,9 +74,9 @@ public class BFM extends Player {
         int newScore;
         int currentMove;
         int secondBest;
-        while (System.nanoTime() - startTimestamp < (long)timeLimit * 1000000
+        while (System.nanoTime() - startTimestamp < (long) timeLimit * 1000000
                 && !((currentPlayer == 1 && bestMoves.firstKey() == Integer.MAX_VALUE)
-                || (currentPlayer == -1 && bestMoves.firstKey() == Integer.MIN_VALUE))) {
+                        || (currentPlayer == -1 && bestMoves.firstKey() == Integer.MIN_VALUE))) {
             if (bestMoves.firstEntry().getValue().size() > 1) {
                 secondBest = bestMoves.firstKey();
             } else if (bestMoves.size() == 1) {
@@ -111,7 +111,7 @@ public class BFM extends Player {
         }
         MoveData moveData = new MoveData(System.nanoTime() - startTimestamp, moveCount,
                 bestMoves.firstEntry().getValue().get((int) (bestMoves.firstEntry().getValue().size() * Math.random())),
-                0,//GraphLayout.parseInstance(this).totalSize(),
+                GraphLayout.parseInstance(this).totalSize(),
                 bestMoves.firstKey());
         transpositionTable = null;
         return moveData;
@@ -167,7 +167,7 @@ public class BFM extends Player {
             tempArray = bestMoves.getOrDefault(evaluationScore, new ArrayList<>());
             tempArray.add(move);
             bestMoves.put(evaluationScore, tempArray);
-            
+
             game.update(currentPlayer, move);
             game.undoMove(move);
             moveCount += 1;
@@ -190,7 +190,7 @@ public class BFM extends Player {
             secondBest = currentPlayer == 1 ? bestMoves.ceilingKey(bestMoves.firstKey() - 1)
                     : bestMoves.floorKey(bestMoves.firstKey() + 1);
         }
-        while (System.nanoTime() - startTimestamp < (long)timeLimit * 1000000
+        while (System.nanoTime() - startTimestamp < (long) timeLimit * 1000000
                 && (bestMoves.firstKey() >= alpha && bestMoves.firstKey() <= beta)) {
             randomIndex = (int) (bestMoves.firstEntry().getValue().size() * Math.random());
             currentMove = bestMoves.firstEntry().getValue().get(randomIndex);
@@ -224,7 +224,7 @@ public class BFM extends Player {
             }
 
         }
-        
+
         return bestMoves.firstKey();
     }
 }

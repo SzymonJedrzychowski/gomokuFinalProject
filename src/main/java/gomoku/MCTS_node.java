@@ -9,7 +9,7 @@ public class MCTS_node {
     GameEnvironment state;
     MCTS_node parent;
     HashMap<Integer, MCTS_node> children = new HashMap<>();
-    int[] stats = {0, 0, 0};
+    int[] stats = { 0, 0, 0 };
     int visits = 0;
     boolean onlyCloseMoves;
 

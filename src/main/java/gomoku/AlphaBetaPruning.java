@@ -60,7 +60,7 @@ public class AlphaBetaPruning extends Player {
 
         long endTimestamp = System.nanoTime();
 
-        MoveData moveData = new MoveData(endTimestamp - startTimestamp, moveCount, bestMovePlace, 
+        MoveData moveData = new MoveData(endTimestamp - startTimestamp, moveCount, bestMovePlace,
                 GraphLayout.parseInstance(this).totalSize(),
                 bestScore);
         transpositionTable = null;
@@ -96,9 +96,9 @@ public class AlphaBetaPruning extends Player {
         }
 
         HashMap<Integer, Integer> results;
-        if(depth == 0){
+        if (depth == 0) {
             results = game.evaluateBoard();
-        }else{
+        } else {
             results = game.ifTerminal();
         }
 
@@ -111,8 +111,8 @@ public class AlphaBetaPruning extends Player {
                     new ArrayList<>(Arrays.asList(Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10, 0)));
             return Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10;
         } else if (depth == 0) {
-            transpositionTable.put(hash, new ArrayList<>(Arrays.asList(currentPlayer*results.get(2), 0)));
-            return currentPlayer*results.get(2);
+            transpositionTable.put(hash, new ArrayList<>(Arrays.asList(currentPlayer * results.get(2), 0)));
+            return currentPlayer * results.get(2);
         }
 
         ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);

@@ -32,17 +32,20 @@ public class IterativeDeepeningThread extends Thread {
             for (globalDepth = 1; globalDepth <= depthLimit; globalDepth++) {
                 results = iterativeMove(game, globalDepth);
 
-                if (results.get("bestScore") > 5000) {
-                    globalDepth = depthLimit + 1;
-                }
-
                 if (transpositionTable.size() > largestTT.size()) {
                     largestTT = new HashMap<>(transpositionTable);
+                }
+
+                if (results.get("bestScore") > 5000 || globalDepth > game.getBoardSpace()) {
+                    globalDepth = depthLimit + 1;
+                    break;
                 }
             }
         } catch (Exception e) {
             if (globalDepth <= depthLimit) {
                 System.out.println("Problem with thread.");
+                System.out.println(e);
+                System.out.printf("%d %d%n", globalDepth, depthLimit);
             }
         }
     }
@@ -55,17 +58,20 @@ public class IterativeDeepeningThread extends Thread {
         return globalDepth > depthLimit;
     }
 
-    public void finishThread() {
+    public void finishThread() throws Exception {
         globalDepth = depthLimit + 1;
         transpositionTable = null;
         previousScores = null;
     }
 
-    public HashMap<Long, ArrayList<Integer>> getLargestTT(){
+    public HashMap<Long, ArrayList<Integer>> getLargestTT() {
+        if (transpositionTable.size() > largestTT.size()) {
+            return transpositionTable;
+        }
         return largestTT;
     }
 
-    public HashMap<Long, Integer> getPreviousScores(){
+    public HashMap<Long, Integer> getPreviousScores() {
         return previousScores;
     }
 

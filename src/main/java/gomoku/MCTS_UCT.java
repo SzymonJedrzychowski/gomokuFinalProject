@@ -32,7 +32,7 @@ public class MCTS_UCT extends Player {
                 selectedNode = selectedNode.select(explorationValue);
             }
             moveCount += 1;
-        } while (endTimestamp - startTimestamp < (long)timeLimit * 1000000);
+        } while (endTimestamp - startTimestamp < (long) timeLimit * 1000000);
         HashMap<Integer, Float> UCB = new HashMap<>();
         MCTS_UCT_node child;
 
@@ -63,7 +63,7 @@ public class MCTS_UCT extends Player {
         MoveData moveData = new MoveData(endTimestamp - startTimestamp,
                 moveCount,
                 bestMovePlace,
-                0, //GraphLayout.parseInstance(this).totalSize() + GraphLayout.parseInstance(currentNode).totalSize(),
+                GraphLayout.parseInstance(this).totalSize() + GraphLayout.parseInstance(currentNode).totalSize(),
                 0);
         return moveData;
     }

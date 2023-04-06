@@ -26,9 +26,9 @@ public class PlayGames {
             return null;
         }
         int currentGame = 0;
-        GameData[] gameData = {new GameData(), new GameData()};
+        GameData[] gameData = { new GameData(), new GameData() };
         int currentMove;
-        if(displayInformation){
+        if (displayInformation) {
             System.out.printf("Player 1: %s %n", player1.getClass());
             System.out.printf("Player 2: %s %n", player2.getClass());
         }
@@ -59,7 +59,8 @@ public class PlayGames {
                 }
                 currentMove += 1;
             }
-            if(displayInformation) System.out.printf("Game %d (1) has ended.%n", currentGame);
+            if (displayInformation)
+                System.out.printf("Game %d (1) has ended.%n", currentGame);
             game.resetState();
             currentMove = 0;
             while (true) {
@@ -73,7 +74,7 @@ public class PlayGames {
                         gameData[0].addData(currentMove, move.time, move.memoryUsed);
                         gameData[1].addData(currentMove);
                     }
-                    
+
                     game.move(move.selectedMove);
                 } catch (Exception e) {
                     System.out.println(e);
@@ -87,7 +88,8 @@ public class PlayGames {
                 }
                 currentMove += 1;
             }
-            if(displayInformation) System.out.printf("Game %d (2) has ended.%n", currentGame);
+            if (displayInformation)
+                System.out.printf("Game %d (2) has ended.%n", currentGame);
             currentGame += 1;
         }
         return gameData;
