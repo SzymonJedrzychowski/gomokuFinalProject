@@ -4,23 +4,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-public class MCTS_UCT_node {
-
-    GameEnvironment state;
-    MCTS_UCT_node parent;
-    HashMap<Integer, MCTS_UCT_node> children = new HashMap<>();
+public class MCTS_UCT_Node {
+    GameEnvironment gameState;
+    MCTS_UCT_Node parent;
+    HashMap<Integer, MCTS_UCT_Node> children = new HashMap<>();
     int[] stats = { 0, 0, 0 };
     int visits = 0;
     boolean onlyCloseMoves;
 
-    MCTS_UCT_node(GameEnvironment state, MCTS_UCT_node parent, boolean onlyCloseMoves) {
-        this.state = state;
+    MCTS_UCT_Node(GameEnvironment gameState, MCTS_UCT_Node parent, boolean onlyCloseMoves) {
+        this.gameState = gameState;
         this.parent = parent;
         this.onlyCloseMoves = onlyCloseMoves;
     }
 
-    public MCTS_UCT_node select(float explorationValue) throws Exception {
-        ArrayList<Integer> legalMoves = state.getLegalMoves(onlyCloseMoves);
+    public MCTS_UCT_Node select(float explorationValue) throws Exception {
+        ArrayList<Integer> legalMoves = gameState.getLegalMoves(onlyCloseMoves);
         if (children.size() < legalMoves.size()) {
             expand();
             return null;
@@ -28,7 +27,7 @@ public class MCTS_UCT_node {
             randomPolicy();
             return null;
         } else {
-            MCTS_UCT_node child;
+            MCTS_UCT_Node child;
             float bestValue = Float.NEGATIVE_INFINITY;
             float moveValue;
             int bestMovePlace = -1;
@@ -37,7 +36,7 @@ public class MCTS_UCT_node {
             Collections.shuffle(keys);
             for (int move : keys) {
                 child = children.get(move);
-                if (state.getCurrentPlayer() == 1) {
+                if (gameState.getCurrentPlayer() == 1) {
                     moveValue = (float) ((child.stats[0] + 0.5 * child.stats[1]) / child.visits
                             + explorationValue * Math.sqrt((Math.log(visits) / child.visits)));
                 } else {
@@ -55,71 +54,52 @@ public class MCTS_UCT_node {
     }
 
     private void expand() throws Exception {
-        GameEnvironment stateCopy;
-        MCTS_UCT_node newNode;
+        GameEnvironment gameStateCopy;
+        MCTS_UCT_Node newNode;
 
-        ArrayList<Integer> legalMoves = state.getLegalMoves(onlyCloseMoves);
-        ArrayList<Integer> possibleMoves = new ArrayList<>();
+        ArrayList<Integer> legalMoves = gameState.getLegalMoves(onlyCloseMoves);
 
+        int selectedMove = -1;
         for (int move : legalMoves) {
             if (!children.containsKey(move)) {
-                possibleMoves.add(move);
+                selectedMove = move;
+                break;
             }
         }
-        int move = possibleMoves.get(0);
-        stateCopy = state.copy();
-        stateCopy.move(move);
+        gameStateCopy = gameState.copy();
+        gameStateCopy.move(selectedMove);
 
-        newNode = new MCTS_UCT_node(stateCopy, this, onlyCloseMoves);
+        newNode = new MCTS_UCT_Node(gameStateCopy, this, onlyCloseMoves);
         newNode.randomPolicy();
 
-        children.put(move, newNode);
+        children.put(selectedMove, newNode);
     }
 
     private void randomPolicy() throws Exception {
-        HashMap<Integer, Integer> results = state.ifTerminal();
-        if (results.get(0) == 1) {
-            if (null == results.get(1)) {
-                stats[1] += 1;
-            } else {
-                switch (results.get(1)) {
-                    case 1 ->
-                        stats[0] += 1;
-                    case -1 ->
-                        stats[2] += 1;
-                    default ->
-                        stats[1] += 1;
-                }
-            }
-            visits += 1;
-            propagate(results.get(1));
-        } else {
+        HashMap<Integer, Integer> results = gameState.ifTerminal();
+        if (results.get(0) == 0) {
             ArrayList<Integer> legalMoves;
-            GameEnvironment thisState = state.copy();
+            GameEnvironment thisGameState = gameState.copy();
             while (results.get(0) == 0) {
-                legalMoves = thisState.getLegalMoves(onlyCloseMoves);
-                thisState.move(legalMoves.get(0));
-                results = thisState.ifTerminal();
+                legalMoves = thisGameState.getLegalMoves(onlyCloseMoves);
+                thisGameState.move(legalMoves.get(0));
+                results = thisGameState.ifTerminal();
             }
-            if (null == results.get(1)) {
-                stats[1] += 1;
-            } else {
-                switch (results.get(1)) {
-                    case 1 ->
-                        stats[0] += 1;
-                    case -1 ->
-                        stats[2] += 1;
-                    default ->
-                        stats[1] += 1;
-                }
-            }
-            visits += 1;
-            propagate(results.get(1));
         }
+        switch (results.get(1)) {
+            case 1 ->
+                stats[0] += 1;
+            case -1 ->
+                stats[2] += 1;
+            default ->
+                stats[1] += 1;
+        }
+        visits += 1;
+        propagate(results.get(1));
     }
 
     protected void propagate(int result) {
-        MCTS_UCT_node parentNode = this;
+        MCTS_UCT_Node parentNode = this;
         while (true) {
             parentNode = parentNode.parent;
             if (parentNode == null) {

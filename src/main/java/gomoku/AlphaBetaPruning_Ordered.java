@@ -8,19 +8,19 @@ import org.openjdk.jol.info.GraphLayout;
 public class AlphaBetaPruning_Ordered extends Player {
     int globalDepth;
     HashMap<Long, ArrayList<Integer>> transpositionTable;
-    int moveCount;
     boolean onlyCloseMoves;
+    boolean gatherMemory;
 
-    AlphaBetaPruning_Ordered(int globalDepth, boolean onlyCloseMoves) {
+    AlphaBetaPruning_Ordered(int globalDepth, boolean onlyCloseMoves, boolean gatherMemory) {
         this.globalDepth = globalDepth;
         this.onlyCloseMoves = onlyCloseMoves;
+        this.gatherMemory = gatherMemory;
     }
 
     @Override
     public MoveData move(GameEnvironment gameState) throws Exception {
         long startTimestamp = System.nanoTime();
         transpositionTable = new HashMap<>();
-        moveCount = 0;
 
         GameEnvironment game = gameState.copy();
         int currentPlayer = game.getCurrentPlayer();
@@ -47,10 +47,9 @@ public class AlphaBetaPruning_Ordered extends Player {
                 throw new Exception("Minimax: " + e);
             }
 
-            game.update(currentPlayer, moveIndex);
+            game.updateHash(currentPlayer, moveIndex);
 
             newScore = -deepMove(game, globalDepth - 1, -beta, -alpha);
-            moveCount += 1;
 
             if (newScore > bestScore) {
                 bestScore = newScore;
@@ -59,15 +58,21 @@ public class AlphaBetaPruning_Ordered extends Player {
 
             alpha = Math.max(alpha, newScore);
 
-            game.update(currentPlayer, moveIndex);
+            game.updateHash(currentPlayer, moveIndex);
             game.undoMove(moveIndex);
         }
 
         long endTimestamp = System.nanoTime();
-        MoveData moveData = new MoveData(endTimestamp - startTimestamp, moveCount, bestMovePlace,
-                GraphLayout.parseInstance(this).totalSize(),
-                bestScore);
+
+        MoveData moveData;
+        if (gatherMemory) {
+            moveData = new MoveData(bestMovePlace, endTimestamp - startTimestamp,
+                    GraphLayout.parseInstance(this).totalSize());
+        } else {
+            moveData = new MoveData(bestMovePlace, endTimestamp - startTimestamp);
+        }
         transpositionTable = null;
+
         return moveData;
     }
 
@@ -133,17 +138,16 @@ public class AlphaBetaPruning_Ordered extends Player {
                 throw new Exception("Minimax: " + e);
             }
 
-            game.update(currentPlayer, moveIndex);
+            game.updateHash(currentPlayer, moveIndex);
 
             newScore = -deepMove(game, depth - 1, -beta, -alpha);
-            moveCount += 1;
 
             if (newScore > bestScore) {
                 bestScore = newScore;
             }
 
             game.undoMove(moveIndex);
-            game.update(currentPlayer, moveIndex);
+            game.updateHash(currentPlayer, moveIndex);
 
             alpha = Math.max(alpha, newScore);
 

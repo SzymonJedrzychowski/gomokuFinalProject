@@ -4,27 +4,35 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class IterativeDeepeningThread extends Thread {
+public class IterativeDeepening_Thread extends Thread {
     private int globalDepth;
-    private int depthLimit;
+    private final int depthLimit;
     private GameEnvironment game;
     private HashMap<Long, ArrayList<Integer>> transpositionTable;
     private HashMap<Long, Integer> previousScores;
     private HashMap<Long, ArrayList<Integer>> largestTT = new HashMap<>();
     private HashMap<String, Integer> results;
-    private boolean onlyCloseMoves;
-    private int moveCount;
+    private final boolean onlyCloseMoves;
 
-    IterativeDeepeningThread(int depthLimit, GameEnvironment game, boolean onlyCloseMoves) {
+    IterativeDeepening_Thread(int depthLimit, GameEnvironment game, boolean onlyCloseMoves) {
         this.depthLimit = depthLimit;
         this.game = game;
         this.onlyCloseMoves = onlyCloseMoves;
     }
 
+    IterativeDeepening_Thread(GameEnvironment game, boolean onlyCloseMoves) {
+        this.depthLimit = Integer.MAX_VALUE-10;
+        this.game = game;
+        this.onlyCloseMoves = onlyCloseMoves;
+    }
+
     public void run() {
+        startNormally();
+    }
+
+    public void startNormally(){
         transpositionTable = new HashMap<>();
         previousScores = new HashMap<>();
-        globalDepth = 1;
 
         game.hashInit();
 
@@ -36,15 +44,14 @@ public class IterativeDeepeningThread extends Thread {
                     largestTT = new HashMap<>(transpositionTable);
                 }
 
-                if (results.get("bestScore") > 5000 || globalDepth > game.getBoardSpace()) {
+                if (results.get("bestScore") > 25000 || globalDepth > game.getBoardSpace()) {
                     globalDepth = depthLimit + 1;
                     break;
                 }
             }
         } catch (Exception e) {
             if (globalDepth <= depthLimit) {
-                System.out.println("Problem with thread.");
-                System.out.println(e);
+                System.out.printf("Problem with thread: %s%n", e);
                 System.out.printf("%d %d%n", globalDepth, depthLimit);
             }
         }
@@ -58,13 +65,13 @@ public class IterativeDeepeningThread extends Thread {
         return globalDepth > depthLimit;
     }
 
-    public void finishThread() throws Exception {
+    public void finishThread() {
         globalDepth = depthLimit + 1;
         transpositionTable = null;
         previousScores = null;
     }
 
-    public HashMap<Long, ArrayList<Integer>> getLargestTT() {
+    public HashMap<Long, ArrayList<Integer>> getLargestTT(){
         if (transpositionTable.size() > largestTT.size()) {
             return transpositionTable;
         }
@@ -77,7 +84,6 @@ public class IterativeDeepeningThread extends Thread {
 
     public HashMap<String, Integer> iterativeMove(GameEnvironment gameState, int depth) throws Exception {
         transpositionTable = new HashMap<>();
-        moveCount = 0;
 
         int currentPlayer = gameState.getCurrentPlayer();
 
@@ -86,8 +92,6 @@ public class IterativeDeepeningThread extends Thread {
         int newScore;
         int alpha = Integer.MIN_VALUE + 1;
         int beta = Integer.MAX_VALUE;
-
-        HashMap<String, Integer> moveResults = new HashMap<>();
 
         ArrayList<Integer> legalMoves = getMoves(gameState);
 
@@ -98,12 +102,9 @@ public class IterativeDeepeningThread extends Thread {
                 throw new Exception("Iterative Deepening: " + e);
             }
 
-            gameState.update(currentPlayer, moveIndex);
+            gameState.updateHash(currentPlayer, moveIndex);
 
-            moveResults = deepMove(gameState, depth - 1, -beta, -alpha);
-
-            newScore = -moveResults.get("bestScore");
-            moveCount += 1;
+            newScore = -deepMove(gameState, depth - 1, -beta, -alpha);
 
             if (newScore > bestScore) {
                 bestScore = newScore;
@@ -112,24 +113,24 @@ public class IterativeDeepeningThread extends Thread {
 
             alpha = Math.max(alpha, newScore);
 
-            gameState.update(currentPlayer, moveIndex);
+            gameState.updateHash(currentPlayer, moveIndex);
             gameState.undoMove(moveIndex);
         }
-        moveResults.put("bestMove", bestMovePlace);
-        moveResults.put("moveCount", moveCount);
-        moveResults.put("bestScore", bestScore);
 
         previousScores.put(game.getHash(), bestMovePlace);
+        
+        HashMap<String, Integer> moveResults = new HashMap<>();
+        moveResults.put("bestMove", bestMovePlace);
+        moveResults.put("bestScore", bestScore);
 
         return moveResults;
     }
 
-    public HashMap<String, Integer> deepMove(GameEnvironment game, int depth, int alpha, int beta) throws Exception {
+    public int deepMove(GameEnvironment game, int depth, int alpha, int beta) throws Exception {
         int currentPlayer = game.getCurrentPlayer();
 
         int bestScore = Integer.MIN_VALUE;
         int newScore;
-        HashMap<String, Integer> moveResults = new HashMap<>();
         int bestMovePlace = -1;
         int startAlpha = alpha;
 
@@ -142,8 +143,7 @@ public class IterativeDeepeningThread extends Thread {
             newScore = tempArray.get(0);
             switch (flag) {
                 case 0 -> {
-                    moveResults.put("bestScore", newScore);
-                    return moveResults;
+                    return newScore;
                 }
                 case 1 -> alpha = Math.max(alpha, newScore);
                 case 2 -> beta = Math.min(beta, newScore);
@@ -151,8 +151,7 @@ public class IterativeDeepeningThread extends Thread {
                 }
             }
             if (alpha >= beta) {
-                moveResults.put("bestScore", newScore);
-                return moveResults;
+                return newScore;
             }
         }
 
@@ -165,18 +164,15 @@ public class IterativeDeepeningThread extends Thread {
 
         if (results.get(0) == 1) {
             if (results.get(1) == 0) {
-                moveResults.put("bestScore", 0);
                 transpositionTable.put(hash, new ArrayList<>(Arrays.asList(0, 0)));
-                return moveResults;
+                return 0;
             }
-            moveResults.put("bestScore", Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10);
             transpositionTable.put(hash,
                     new ArrayList<>(Arrays.asList(Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10, 0)));
-            return moveResults;
+            return Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10;
         } else if (depth == 0) {
-            moveResults.put("bestScore", currentPlayer * results.get(2));
             transpositionTable.put(hash, new ArrayList<>(Arrays.asList(currentPlayer * results.get(2), 0)));
-            return moveResults;
+            return currentPlayer * results.get(2);
         }
 
         ArrayList<Integer> legalMoves = getMoves(game);
@@ -188,12 +184,9 @@ public class IterativeDeepeningThread extends Thread {
                 throw new Exception("Minimax: " + e);
             }
 
-            game.update(currentPlayer, moveIndex);
+            game.updateHash(currentPlayer, moveIndex);
 
-            moveResults = deepMove(game, depth - 1, -beta, -alpha);
-
-            newScore = -moveResults.get("bestScore");
-            moveCount += 1;
+            newScore = -deepMove(game, depth - 1, -beta, -alpha);
 
             if (newScore > bestScore) {
                 bestScore = newScore;
@@ -201,7 +194,7 @@ public class IterativeDeepeningThread extends Thread {
             }
 
             game.undoMove(moveIndex);
-            game.update(currentPlayer, moveIndex);
+            game.updateHash(currentPlayer, moveIndex);
 
             alpha = Math.max(alpha, newScore);
 
@@ -218,11 +211,10 @@ public class IterativeDeepeningThread extends Thread {
             flag = 0;
         }
         transpositionTable.put(game.getHash(), new ArrayList<>(Arrays.asList(bestScore, flag)));
-        moveResults.put("bestScore", bestScore);
 
         previousScores.put(game.getHash(), bestMovePlace);
 
-        return moveResults;
+        return bestScore;
     }
 
     public ArrayList<Integer> getMoves(GameEnvironment game) {
@@ -232,9 +224,10 @@ public class IterativeDeepeningThread extends Thread {
         }
 
         ArrayList<Integer> sortedMoves = new ArrayList<>();
-        sortedMoves.add(previousScores.get(game.getHash()));
+        int bestIndex = previousScores.get(game.getHash());
+        sortedMoves.add(bestIndex);
         for (int moveIndex : legalMoves) {
-            if (sortedMoves.get(0) != moveIndex) {
+            if (bestIndex != moveIndex) {
                 sortedMoves.add(moveIndex);
             }
         }

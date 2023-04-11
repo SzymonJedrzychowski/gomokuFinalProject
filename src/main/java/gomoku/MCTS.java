@@ -7,30 +7,30 @@ import org.openjdk.jol.info.GraphLayout;
 public class MCTS extends Player {
     int timeLimit;
     boolean onlyCloseMoves;
+    boolean gatherMemory;
 
-    MCTS(int timeLimit, boolean onlyCloseMoves) {
+    MCTS(int timeLimit, boolean onlyCloseMoves, boolean gatherMemory) {
         this.timeLimit = timeLimit;
         this.onlyCloseMoves = onlyCloseMoves;
+        this.gatherMemory = gatherMemory;
     }
 
     @Override
-    public MoveData move(GameEnvironment state) throws Exception {
+    public MoveData move(GameEnvironment gameState) throws Exception {
         long startTimestamp = System.nanoTime();
         long endTimestamp;
-        int moveCount = 0;
 
-        MCTS_node currentNode = new MCTS_node(state, null, onlyCloseMoves);
-        MCTS_node selectedNode;
+        MCTS_Node currentNode = new MCTS_Node(gameState, null, onlyCloseMoves);
+        MCTS_Node selectedNode;
         do {
             endTimestamp = System.nanoTime();
             selectedNode = currentNode.select();
             while (selectedNode != null) {
                 selectedNode = selectedNode.select();
             }
-            moveCount += 1;
         } while (endTimestamp - startTimestamp < (long) timeLimit * 1000000);
 
-        MCTS_node child;
+        MCTS_Node child;
         float bestValue = Float.NEGATIVE_INFINITY;
         int bestMovePlace = -1;
         float moveValue;
@@ -39,7 +39,7 @@ public class MCTS extends Player {
         Collections.shuffle(keys);
         for (int moveIndex : keys) {
             child = currentNode.children.get(moveIndex);
-            if (state.getCurrentPlayer() == 1) {
+            if (gameState.getCurrentPlayer() == 1) {
                 moveValue = (float) ((child.stats[0] + child.stats[1] * 0.5) / child.visits);
             } else {
                 moveValue = (float) ((child.stats[2] + child.stats[1] * 0.5) / child.visits);
@@ -51,11 +51,15 @@ public class MCTS extends Player {
         }
 
         endTimestamp = System.nanoTime();
-        MoveData moveData = new MoveData(endTimestamp - startTimestamp,
-                moveCount,
-                bestMovePlace,
-                GraphLayout.parseInstance(this).totalSize() + GraphLayout.parseInstance(currentNode).totalSize(),
-                0);
+        
+        MoveData moveData;
+        if(gatherMemory){
+            moveData = new MoveData(bestMovePlace, endTimestamp - startTimestamp,
+                GraphLayout.parseInstance(this).totalSize() + GraphLayout.parseInstance(currentNode).totalSize());
+        }else{
+            moveData = new MoveData(bestMovePlace, endTimestamp - startTimestamp);
+        }
+
         return moveData;
     }
 }

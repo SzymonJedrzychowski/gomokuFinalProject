@@ -1,17 +1,31 @@
 package gomoku;
 
+/**
+ * Class responsible for holding data of move.
+ */
 public class MoveData {
-    long time;
-    int moveCount;
     int selectedMove;
+    long time;
     long memoryUsed;
-    int bestScore;
 
-    MoveData(long time, int moveCount, int selectedMove, long memoryUsed, int bestScore) {
-        this.time = time / 1000;
-        this.moveCount = moveCount;
+    /**
+     * @param selectedMove selected move space
+     * @param time time used to calculate the move (in ns)
+     * @param memoryUsed maximum memory used to calculate the move
+     */
+    MoveData(int selectedMove, long time, long memoryUsed) {
         this.selectedMove = selectedMove;
+        this.time = time / 1000;
         this.memoryUsed = memoryUsed;
-        this.bestScore = bestScore;
+    }
+
+    /**
+     * @param selectedMove selected move space
+     * @param time time used to calculate the move (in ns)
+     */
+    MoveData(int selectedMove, long time) {
+        this.selectedMove = selectedMove;
+        this.time = time / 1000;
+        this.memoryUsed = 0;
     }
 }

@@ -4,34 +4,55 @@ public class App {
 
     public static void main(String[] args) {
 
-        int limit = 1000;
-        int boardSize = 15;
-        int gameNumber = 10;
-        boolean closeMoves = true;
+        int limit = 100;
+        int boardSize = 7;
+        int gameNumber = 50;
+        boolean isLimitTime = true;
+        boolean gatherMemory = false;
 
         GameData[] gameData;
-        Player player1 = new MCTS(limit, closeMoves);
-        Player player2 = new MCTS_UCT(limit, closeMoves);
-        Player player3 = new BFM(limit, closeMoves);
-        Player player4 = new IterativeDeepening(limit, true, closeMoves);
-        Player player5 = new IterativeDeepening_PVS(limit, true, closeMoves);
+        Player[] players = new Player[10];
 
-        Player player1c = new MCTS(limit, !closeMoves);
-        Player player2c = new MCTS_UCT(limit, !closeMoves);
-        Player player3c = new BFM(limit, !closeMoves);
-        Player player4c = new IterativeDeepening(limit, true, !closeMoves);
-        Player player5c = new IterativeDeepening_PVS(limit, true, !closeMoves);
+        if (isLimitTime) {
+            if (limit < 100) {
+                System.out.println("Minimal limit for time experiments is 100.");
+                return;
+            }
+            players[0] = new MCTS(limit, false, gatherMemory);
+            players[1] = new MCTS_UCT(limit, false, gatherMemory);
+            players[2] = new RecursiveBestFirstMinimax(limit, false, gatherMemory);
+            players[3] = new IterativeDeepening(limit, isLimitTime, false, gatherMemory);
+            players[4] = new PrincipalVariationSearch(limit, isLimitTime, false, gatherMemory);
 
-        Player p1 = player1;
-        Player p2 = player4;
+            players[5] = new MCTS(limit, true, gatherMemory);
+            players[6] = new MCTS_UCT(limit, true, gatherMemory);
+            players[7] = new RecursiveBestFirstMinimax(limit, true, gatherMemory);
+            players[8] = new IterativeDeepening(limit, isLimitTime, true, gatherMemory);
+            players[9] = new PrincipalVariationSearch(limit, isLimitTime, true, gatherMemory);
+        } else {
+            if (limit < 1) {
+                System.out.println("Minimal limit for time experiments is 1.");
+                return;
+            }
+            players[0] = new Minimax(limit, false, gatherMemory);
+            players[1] = new AlphaBetaPruning(limit, false, gatherMemory);
+            players[2] = new AlphaBetaPruning_Ordered(limit, false, gatherMemory);
+            players[3] = new IterativeDeepening(limit, isLimitTime, false, gatherMemory);
+            players[4] = new PrincipalVariationSearch(limit, isLimitTime, false, gatherMemory);
+
+            players[5] = new Minimax(limit, true, gatherMemory);
+            players[6] = new AlphaBetaPruning(limit, true, gatherMemory);
+            players[7] = new AlphaBetaPruning_Ordered(limit, true, gatherMemory);
+            players[8] = new IterativeDeepening(limit, isLimitTime, true, gatherMemory);
+            players[9] = new PrincipalVariationSearch(limit, isLimitTime, true, gatherMemory);
+        }
+
+        Player p1 = players[0];
+        Player p2 = players[2];
 
         PlayGames games;
 
-        Player t = new IterativeDeepening(1, false, false);
-        games = new PlayGames(1, 7, t, t);
-        games.play(false);
-
-        games = new PlayGames(gameNumber, boardSize, p1, p2);
+        games = new PlayGames(gameNumber, boardSize, p1, p2, isLimitTime);
         gameData = games.play(true);
 
         gameData[0].printData();

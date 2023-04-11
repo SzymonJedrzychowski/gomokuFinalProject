@@ -6,25 +6,24 @@ import java.util.HashMap;
 import java.util.TreeMap;
 import org.openjdk.jol.info.GraphLayout;
 
-public class BFM extends Player {
-
+public class RecursiveBestFirstMinimax extends Player {
     int timeLimit;
     long startTimestamp;
-    int moveCount;
-    boolean onlyCloseMoves;
     HashMap<Long, Integer> transpositionTable;
+    boolean onlyCloseMoves;
+    boolean gatherMemory;
 
-    BFM(int timeLimit, boolean onlyCloseMoves) {
+    RecursiveBestFirstMinimax(int timeLimit, boolean onlyCloseMoves, boolean gatherMemory) {
         this.timeLimit = timeLimit;
         this.onlyCloseMoves = onlyCloseMoves;
+        this.gatherMemory = gatherMemory;
     }
 
     @Override
-    public MoveData move(GameEnvironment state) throws Exception {
+    public MoveData move(GameEnvironment gameState) throws Exception {
         startTimestamp = System.nanoTime();
-        moveCount = 0;
         transpositionTable = new HashMap<>();
-        GameEnvironment game = state.copy();
+        GameEnvironment game = gameState.copy();
         int currentPlayer = game.getCurrentPlayer();
         ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
         TreeMap<Integer, ArrayList<Integer>> bestMoves;
@@ -40,9 +39,9 @@ public class BFM extends Player {
 
         game.hashInit();
         long hash;
-        for (int move : legalMoves) {
-            game.move(move);
-            hash = game.update(currentPlayer, move);
+        for (int moveIndex : legalMoves) {
+            game.move(moveIndex);
+            hash = game.updateHash(currentPlayer, moveIndex);
 
             if (transpositionTable.containsKey(hash)) {
                 evaluationScore = transpositionTable.get(hash);
@@ -62,12 +61,11 @@ public class BFM extends Player {
             }
 
             tempArray = bestMoves.getOrDefault(evaluationScore, new ArrayList<>());
-            tempArray.add(move);
+            tempArray.add(moveIndex);
             bestMoves.put(evaluationScore, tempArray);
 
-            game.update(currentPlayer, move);
-            game.undoMove(move);
-            moveCount += 1;
+            game.updateHash(currentPlayer, moveIndex);
+            game.undoMove(moveIndex);
         }
 
         int randomIndex;
@@ -89,14 +87,14 @@ public class BFM extends Player {
             randomIndex = (int) (bestMoves.firstEntry().getValue().size() * Math.random());
             currentMove = bestMoves.firstEntry().getValue().get(randomIndex);
             game.move(currentMove);
-            game.update(currentPlayer, currentMove);
+            game.updateHash(currentPlayer, currentMove);
 
             if (currentPlayer == 1) {
                 newScore = deepMove(game, secondBest, Integer.MAX_VALUE, 1);
             } else {
                 newScore = deepMove(game, Integer.MIN_VALUE, secondBest, 1);
             }
-            game.update(currentPlayer, currentMove);
+            game.updateHash(currentPlayer, currentMove);
             game.undoMove(currentMove);
             if (newScore != bestMoves.firstKey()) {
                 if (bestMoves.firstEntry().getValue().size() > 1) {
@@ -109,11 +107,19 @@ public class BFM extends Player {
                 bestMoves.put(newScore, tempArray);
             }
         }
-        MoveData moveData = new MoveData(System.nanoTime() - startTimestamp, moveCount,
+        MoveData moveData;
+        if(gatherMemory){
+            moveData = new MoveData(
                 bestMoves.firstEntry().getValue().get((int) (bestMoves.firstEntry().getValue().size() * Math.random())),
-                GraphLayout.parseInstance(this).totalSize(),
-                bestMoves.firstKey());
+                System.nanoTime() - startTimestamp,
+                GraphLayout.parseInstance(this).totalSize());
+        }else{
+            moveData = new MoveData(
+                bestMoves.firstEntry().getValue().get((int) (bestMoves.firstEntry().getValue().size() * Math.random())),
+                System.nanoTime() - startTimestamp);
+        }
         transpositionTable = null;
+        
         return moveData;
     }
 
@@ -145,7 +151,7 @@ public class BFM extends Player {
 
         for (int move : legalMoves) {
             game.move(move);
-            hash = game.update(currentPlayer, move);
+            hash = game.updateHash(currentPlayer, move);
 
             if (transpositionTable.containsKey(hash)) {
                 evaluationScore = transpositionTable.get(hash);
@@ -168,9 +174,8 @@ public class BFM extends Player {
             tempArray.add(move);
             bestMoves.put(evaluationScore, tempArray);
 
-            game.update(currentPlayer, move);
+            game.updateHash(currentPlayer, move);
             game.undoMove(move);
-            moveCount += 1;
 
             if ((currentPlayer == 1 && evaluationScore > beta) || (currentPlayer == -1 && evaluationScore < alpha)) {
                 return evaluationScore;
@@ -195,14 +200,14 @@ public class BFM extends Player {
             randomIndex = (int) (bestMoves.firstEntry().getValue().size() * Math.random());
             currentMove = bestMoves.firstEntry().getValue().get(randomIndex);
             game.move(currentMove);
-            game.update(currentPlayer, currentMove);
+            game.updateHash(currentPlayer, currentMove);
 
             if (currentPlayer == 1) {
                 newScore = deepMove(game, Math.max(alpha, secondBest), beta, depth + 1);
             } else {
                 newScore = deepMove(game, alpha, Math.min(beta, secondBest), depth + 1);
             }
-            game.update(currentPlayer, currentMove);
+            game.updateHash(currentPlayer, currentMove);
             game.undoMove(currentMove);
             if (newScore != bestMoves.firstKey()) {
                 if (bestMoves.firstEntry().getValue().size() > 1) {
