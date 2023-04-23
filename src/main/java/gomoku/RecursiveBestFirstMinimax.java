@@ -25,7 +25,6 @@ public class RecursiveBestFirstMinimax extends Player {
         transpositionTable = new HashMap<>();
         GameEnvironment game = gameState.copy();
         int currentPlayer = game.getCurrentPlayer();
-        ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
         TreeMap<Integer, ArrayList<Integer>> bestMoves;
         if (currentPlayer == 1) {
             bestMoves = new TreeMap<>(Collections.reverseOrder());
@@ -39,6 +38,7 @@ public class RecursiveBestFirstMinimax extends Player {
 
         game.hashInit();
         long hash;
+        ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
         for (int moveIndex : legalMoves) {
             game.move(moveIndex);
             hash = game.updateHash(currentPlayer, moveIndex);
@@ -108,24 +108,25 @@ public class RecursiveBestFirstMinimax extends Player {
             }
         }
         MoveData moveData;
-        if(gatherMemory){
+        if (gatherMemory) {
             moveData = new MoveData(
-                bestMoves.firstEntry().getValue().get((int) (bestMoves.firstEntry().getValue().size() * Math.random())),
-                System.nanoTime() - startTimestamp,
-                GraphLayout.parseInstance(this).totalSize());
-        }else{
+                    bestMoves.firstEntry().getValue()
+                            .get((int) (bestMoves.firstEntry().getValue().size() * Math.random())),
+                    System.nanoTime() - startTimestamp,
+                    GraphLayout.parseInstance(this).totalSize());
+        } else {
             moveData = new MoveData(
-                bestMoves.firstEntry().getValue().get((int) (bestMoves.firstEntry().getValue().size() * Math.random())),
-                System.nanoTime() - startTimestamp);
+                    bestMoves.firstEntry().getValue()
+                            .get((int) (bestMoves.firstEntry().getValue().size() * Math.random())),
+                    System.nanoTime() - startTimestamp);
         }
         transpositionTable = null;
-        
+
         return moveData;
     }
 
     private int deepMove(GameEnvironment game, int alpha, int beta, int depth) throws Exception {
         int currentPlayer = game.getCurrentPlayer();
-        ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
         TreeMap<Integer, ArrayList<Integer>> bestMoves;
         if (currentPlayer == 1) {
             bestMoves = new TreeMap<>(Collections.reverseOrder());
@@ -148,6 +149,7 @@ public class RecursiveBestFirstMinimax extends Player {
         }
 
         long hash;
+        ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
 
         for (int move : legalMoves) {
             game.move(move);
@@ -187,16 +189,17 @@ public class RecursiveBestFirstMinimax extends Player {
         int currentMove;
         int newScore;
 
-        if (bestMoves.firstEntry().getValue().size() > 1) {
-            secondBest = bestMoves.firstKey();
-        } else if (bestMoves.size() == 1) {
-            secondBest = currentPlayer == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
-        } else {
-            secondBest = currentPlayer == 1 ? bestMoves.ceilingKey(bestMoves.firstKey() - 1)
-                    : bestMoves.floorKey(bestMoves.firstKey() + 1);
-        }
         while (System.nanoTime() - startTimestamp < (long) timeLimit * 1000000
                 && (bestMoves.firstKey() >= alpha && bestMoves.firstKey() <= beta)) {
+            if (bestMoves.firstEntry().getValue().size() > 1) {
+                secondBest = bestMoves.firstKey();
+            } else if (bestMoves.size() == 1) {
+                secondBest = currentPlayer == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+            } else {
+                secondBest = currentPlayer == 1 ? bestMoves.ceilingKey(bestMoves.firstKey() - 1)
+                        : bestMoves.floorKey(bestMoves.firstKey() + 1);
+            }
+
             randomIndex = (int) (bestMoves.firstEntry().getValue().size() * Math.random());
             currentMove = bestMoves.firstEntry().getValue().get(randomIndex);
             game.move(currentMove);
@@ -218,14 +221,6 @@ public class RecursiveBestFirstMinimax extends Player {
                 tempArray = bestMoves.getOrDefault(newScore, new ArrayList<>());
                 tempArray.add(currentMove);
                 bestMoves.put(newScore, tempArray);
-            }
-            if (bestMoves.firstEntry().getValue().size() > 1) {
-                secondBest = bestMoves.firstKey();
-            } else if (bestMoves.size() == 1) {
-                secondBest = currentPlayer == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
-            } else {
-                secondBest = currentPlayer == 1 ? bestMoves.ceilingKey(bestMoves.firstKey() - 1)
-                        : bestMoves.floorKey(bestMoves.firstKey() + 1);
             }
 
         }

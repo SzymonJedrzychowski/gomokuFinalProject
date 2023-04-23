@@ -2,15 +2,22 @@ package gomoku;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import org.openjdk.jol.info.GraphLayout;
 
+/**
+ * Class resposbile for Monte Carlo Tree Search with UCT agent.
+ */
 public class MCTS_UCT extends Player {
     int timeLimit;
     float explorationValue;
     boolean onlyCloseMoves;
     boolean gatherMemory;
 
+    /**
+     * @param timeLimit      limit of the search
+     * @param onlyCloseMoves if only close moves should be used
+     * @param gatherMemory   if memory should be gathered
+     */
     MCTS_UCT(int timeLimit, boolean onlyCloseMoves, boolean gatherMemory) {
         this.timeLimit = timeLimit;
         this.explorationValue = (float) 1.41;
@@ -19,13 +26,15 @@ public class MCTS_UCT extends Player {
     }
 
     @Override
-    public MoveData move(GameEnvironment state) throws Exception {
+    public MoveData move(GameEnvironment gameState) throws Exception {
         long startTimestamp = System.nanoTime();
         long endTimestamp;
 
-        MCTS_UCT_Node currentNode = new MCTS_UCT_Node(state, null, onlyCloseMoves);
+        // Create node with current game state
+        MCTS_UCT_Node currentNode = new MCTS_UCT_Node(gameState, null, onlyCloseMoves);
         MCTS_UCT_Node selectedNode;
 
+        // Select new nodes to search as long as there is time
         do {
             endTimestamp = System.nanoTime();
             selectedNode = currentNode.select(explorationValue);
@@ -33,26 +42,22 @@ public class MCTS_UCT extends Player {
                 selectedNode = selectedNode.select(explorationValue);
             }
         } while (endTimestamp - startTimestamp < (long) timeLimit * 1000000);
-        HashMap<Integer, Float> UCB = new HashMap<>();
+
         MCTS_UCT_Node child;
-
-        for (int moveIndex : currentNode.children.keySet()) {
-            child = currentNode.children.get(moveIndex);
-            if (state.getCurrentPlayer() == 1) {
-                UCB.put(moveIndex, (float) ((child.stats[0] + child.stats[1] * 0.5) / child.visits));
-            } else {
-                UCB.put(moveIndex, (float) ((child.stats[2] + child.stats[1] * 0.5) / child.visits));
-            }
-        }
-
         float bestValue = Float.NEGATIVE_INFINITY;
         int bestMovePlace = -1;
         float moveValue;
 
-        ArrayList<Integer> keys = new ArrayList<>(UCB.keySet());
+        // Evaluate the nodes in random order to determine one has the largest win rate
+        ArrayList<Integer> keys = new ArrayList<>(currentNode.children.keySet());
         Collections.shuffle(keys);
         for (int moveIndex : keys) {
-            moveValue = UCB.get(moveIndex);
+            child = currentNode.children.get(moveIndex);
+            if (gameState.getCurrentPlayer() == 1) {
+                moveValue = (float) ((child.stats[0] + child.stats[1] * 0.5) / child.visits);
+            } else {
+                moveValue = (float) ((child.stats[2] + child.stats[1] * 0.5) / child.visits);
+            }
             if (moveValue > bestValue) {
                 bestValue = moveValue;
                 bestMovePlace = moveIndex;
@@ -61,11 +66,12 @@ public class MCTS_UCT extends Player {
 
         endTimestamp = System.nanoTime();
 
+        // Gather the data of the move
         MoveData moveData;
-        if(gatherMemory){
+        if (gatherMemory) {
             moveData = new MoveData(bestMovePlace, endTimestamp - startTimestamp,
-                GraphLayout.parseInstance(this).totalSize() + GraphLayout.parseInstance(currentNode).totalSize());
-        }else{
+                    GraphLayout.parseInstance(this).totalSize() + GraphLayout.parseInstance(currentNode).totalSize());
+        } else {
             moveData = new MoveData(bestMovePlace, endTimestamp - startTimestamp);
         }
 

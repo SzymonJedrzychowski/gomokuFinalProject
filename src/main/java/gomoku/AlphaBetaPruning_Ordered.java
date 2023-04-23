@@ -5,12 +5,20 @@ import java.util.Arrays;
 import java.util.HashMap;
 import org.openjdk.jol.info.GraphLayout;
 
+/**
+ * Class resposbile for Alpha-Beta Pruning (Ordered) agent.
+ */
 public class AlphaBetaPruning_Ordered extends Player {
     int globalDepth;
     HashMap<Long, ArrayList<Integer>> transpositionTable;
     boolean onlyCloseMoves;
     boolean gatherMemory;
 
+    /**
+     * @param globalDepth    depth of the search
+     * @param onlyCloseMoves if only close moves should be used
+     * @param gatherMemory   if memory should be gathered
+     */
     AlphaBetaPruning_Ordered(int globalDepth, boolean onlyCloseMoves, boolean gatherMemory) {
         this.globalDepth = globalDepth;
         this.onlyCloseMoves = onlyCloseMoves;
@@ -33,6 +41,7 @@ public class AlphaBetaPruning_Ordered extends Player {
 
         game.hashInit();
 
+        // Decide if moves should be ordered or not
         ArrayList<Integer> legalMoves;
         if (globalDepth > 1) {
             legalMoves = sortMoves(game);
@@ -40,6 +49,7 @@ public class AlphaBetaPruning_Ordered extends Player {
             legalMoves = game.getLegalMoves(onlyCloseMoves);
         }
 
+        // Iterate through possible moves
         for (int moveIndex : legalMoves) {
             try {
                 game.move(moveIndex);
@@ -49,14 +59,15 @@ public class AlphaBetaPruning_Ordered extends Player {
 
             game.updateHash(currentPlayer, moveIndex);
 
-            newScore = -deepMove(game, globalDepth - 1, -beta, -alpha);
+            newScore = -deepMove(game, globalDepth - 1, -beta, -alpha); // Get value from deeper search
 
+            // Change the best move if new move is better
             if (newScore > bestScore) {
                 bestScore = newScore;
                 bestMovePlace = moveIndex;
             }
 
-            alpha = Math.max(alpha, newScore);
+            alpha = Math.max(alpha, newScore); // Update Alpha
 
             game.updateHash(currentPlayer, moveIndex);
             game.undoMove(moveIndex);
@@ -64,6 +75,7 @@ public class AlphaBetaPruning_Ordered extends Player {
 
         long endTimestamp = System.nanoTime();
 
+        // Gather the data of the move
         MoveData moveData;
         if (gatherMemory) {
             moveData = new MoveData(bestMovePlace, endTimestamp - startTimestamp,
@@ -76,6 +88,16 @@ public class AlphaBetaPruning_Ordered extends Player {
         return moveData;
     }
 
+    /**
+     * Method used to search deeper.
+     * 
+     * @param game  game environment
+     * @param depth remaining depth
+     * @param alpha Alpha
+     * @param beta  Beta
+     * @return score from the sub-tree
+     * @throws Exception if error occurred while playing the move
+     */
     public int deepMove(GameEnvironment game, int depth, int alpha, int beta) throws Exception {
         int currentPlayer = game.getCurrentPlayer();
 
@@ -86,6 +108,8 @@ public class AlphaBetaPruning_Ordered extends Player {
         long hash = game.getHash();
         ArrayList<Integer> tempArray;
         int flag;
+
+        // If gameState occurred in the transposition table, decide how to use it
         if (transpositionTable.containsKey(hash)) {
             tempArray = transpositionTable.get(hash);
             flag = tempArray.get(1);
@@ -104,6 +128,7 @@ public class AlphaBetaPruning_Ordered extends Player {
             }
         }
 
+        // Evaluate the game
         HashMap<Integer, Integer> results;
         if (depth == 0) {
             results = game.evaluateBoard();
@@ -111,6 +136,7 @@ public class AlphaBetaPruning_Ordered extends Player {
             results = game.ifTerminal();
         }
 
+        // If game is over or depth is 0, return the score
         if (results.get(0) == 1) {
             if (results.get(1) == 0) {
                 transpositionTable.put(hash, new ArrayList<>(Arrays.asList(0, 0)));
@@ -124,6 +150,7 @@ public class AlphaBetaPruning_Ordered extends Player {
             return currentPlayer * results.get(2);
         }
 
+        // Decide if moves should be ordered or not
         ArrayList<Integer> legalMoves;
         if (globalDepth - depth <= Math.min(2, globalDepth - 2)) {
             legalMoves = sortMoves(game);
@@ -131,6 +158,7 @@ public class AlphaBetaPruning_Ordered extends Player {
             legalMoves = game.getLegalMoves(onlyCloseMoves);
         }
 
+        // Iterate through the moves
         for (int moveIndex : legalMoves) {
             try {
                 game.move(moveIndex);
@@ -140,8 +168,9 @@ public class AlphaBetaPruning_Ordered extends Player {
 
             game.updateHash(currentPlayer, moveIndex);
 
-            newScore = -deepMove(game, depth - 1, -beta, -alpha);
+            newScore = -deepMove(game, depth - 1, -beta, -alpha); // Get value from deeper search
 
+            // Change the best move if new move is better
             if (newScore > bestScore) {
                 bestScore = newScore;
             }
@@ -149,13 +178,15 @@ public class AlphaBetaPruning_Ordered extends Player {
             game.undoMove(moveIndex);
             game.updateHash(currentPlayer, moveIndex);
 
-            alpha = Math.max(alpha, newScore);
+            alpha = Math.max(alpha, newScore); // Update the Alpha
 
+            // Check for cutoff
             if (alpha >= beta) {
                 break;
             }
         }
 
+        // Select the flag for transposition table
         if (bestScore <= startAlpha) {
             flag = 2;
         } else if (bestScore >= beta) {
@@ -168,23 +199,33 @@ public class AlphaBetaPruning_Ordered extends Player {
         return bestScore;
     }
 
+    /**
+     * Method used to sort the moves
+     * 
+     * @param game game environment
+     * @return ArrayList of moves
+     * @throws Exception if error ocurred while playing the move
+     */
     public ArrayList<Integer> sortMoves(GameEnvironment game) throws Exception {
         ArrayList<Integer> sortedMoves = new ArrayList<>();
         ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
         int bestScore = Integer.MIN_VALUE;
         int bestIndex = -1;
-
         int tempScore;
+
+        // Iterate through the possible moves
         for (int moveIndex : legalMoves) {
             game.move(moveIndex);
-            tempScore = game.evaluateBoard().get(2);
+            tempScore = game.evaluateBoard().get(2); // Evaluate the board state
             game.undoMove(moveIndex);
             if (game.getCurrentPlayer() * tempScore > bestScore) {
                 bestScore = tempScore;
                 bestIndex = moveIndex;
             }
         }
-        sortedMoves.add(bestIndex);
+
+        sortedMoves.add(bestIndex); // Add the best move first
+        // Add remaining moves to the ArrayList
         for (int moveIndex : legalMoves) {
             if (moveIndex != bestIndex) {
                 sortedMoves.add(moveIndex);

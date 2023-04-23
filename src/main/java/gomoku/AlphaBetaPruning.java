@@ -5,12 +5,20 @@ import java.util.Arrays;
 import java.util.HashMap;
 import org.openjdk.jol.info.GraphLayout;
 
+/**
+ * Class resposbile for Alpha-Beta Pruning agent.
+ */
 public class AlphaBetaPruning extends Player {
     int globalDepth;
     HashMap<Long, ArrayList<Integer>> transpositionTable;
     boolean onlyCloseMoves;
     boolean gatherMemory;
 
+    /**
+     * @param globalDepth    depth of the search
+     * @param onlyCloseMoves if only close moves should be used
+     * @param gatherMemory   if memory should be gathered
+     */
     AlphaBetaPruning(int globalDepth, boolean onlyCloseMoves, boolean gatherMemory) {
         this.globalDepth = globalDepth;
         this.onlyCloseMoves = onlyCloseMoves;
@@ -35,6 +43,7 @@ public class AlphaBetaPruning extends Player {
 
         ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
 
+        // Iterate through the moves
         for (int moveIndex : legalMoves) {
             try {
                 game.move(moveIndex);
@@ -44,14 +53,15 @@ public class AlphaBetaPruning extends Player {
 
             game.updateHash(currentPlayer, moveIndex);
 
-            newScore = -deepMove(game, globalDepth - 1, -beta, -alpha);
+            newScore = -deepMove(game, globalDepth - 1, -beta, -alpha); // Get value from deeper search
 
+            // Change the best move if new move is better
             if (newScore > bestScore) {
                 bestScore = newScore;
                 bestMovePlace = moveIndex;
             }
 
-            alpha = Math.max(alpha, newScore);
+            alpha = Math.max(alpha, newScore); // Update the Alpha
 
             game.updateHash(currentPlayer, moveIndex);
             game.undoMove(moveIndex);
@@ -59,6 +69,7 @@ public class AlphaBetaPruning extends Player {
 
         long endTimestamp = System.nanoTime();
 
+        // Gather the data of the move
         MoveData moveData;
         if (gatherMemory) {
             moveData = new MoveData(bestMovePlace, endTimestamp - startTimestamp,
@@ -71,6 +82,16 @@ public class AlphaBetaPruning extends Player {
         return moveData;
     }
 
+    /**
+     * Method used to search deeper.
+     * 
+     * @param game  game environment
+     * @param depth remaining depth
+     * @param alpha Alpha
+     * @param beta  Beta
+     * @return score from the sub-tree
+     * @throws Exception if error occurred while playing the move
+     */
     public int deepMove(GameEnvironment game, int depth, int alpha, int beta) throws Exception {
         int currentPlayer = game.getCurrentPlayer();
 
@@ -81,6 +102,8 @@ public class AlphaBetaPruning extends Player {
         long hash = game.getHash();
         ArrayList<Integer> tempArray;
         int flag;
+
+        // If gameState occurred in the transposition table, decide how to use it
         if (transpositionTable.containsKey(hash)) {
             tempArray = transpositionTable.get(hash);
             flag = tempArray.get(1);
@@ -99,6 +122,7 @@ public class AlphaBetaPruning extends Player {
             }
         }
 
+        // Evaluate the game
         HashMap<Integer, Integer> results;
         if (depth == 0) {
             results = game.evaluateBoard();
@@ -106,6 +130,7 @@ public class AlphaBetaPruning extends Player {
             results = game.ifTerminal();
         }
 
+        // If game is over or depth is 0, return the score
         if (results.get(0) == 1) {
             if (results.get(1) == 0) {
                 transpositionTable.put(hash, new ArrayList<>(Arrays.asList(0, 0)));
@@ -121,6 +146,7 @@ public class AlphaBetaPruning extends Player {
 
         ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
 
+        // Iterate through the moves
         for (int moveIndex : legalMoves) {
             try {
                 game.move(moveIndex);
@@ -130,8 +156,9 @@ public class AlphaBetaPruning extends Player {
 
             game.updateHash(currentPlayer, moveIndex);
 
-            newScore = -deepMove(game, depth - 1, -beta, -alpha);
+            newScore = -deepMove(game, depth - 1, -beta, -alpha); // Get value from deeper search
 
+            // Change the best move if new move is better
             if (newScore > bestScore) {
                 bestScore = newScore;
             }
@@ -139,13 +166,15 @@ public class AlphaBetaPruning extends Player {
             game.undoMove(moveIndex);
             game.updateHash(currentPlayer, moveIndex);
 
-            alpha = Math.max(alpha, newScore);
+            alpha = Math.max(alpha, newScore); // Update the Alpha
 
+            // Check for cutoff
             if (alpha >= beta) {
                 break;
             }
         }
 
+        // Select the flag for transposition table
         if (bestScore <= startAlpha) {
             flag = 2;
         } else if (bestScore >= beta) {

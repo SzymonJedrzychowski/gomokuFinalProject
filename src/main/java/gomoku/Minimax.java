@@ -38,17 +38,20 @@ public class Minimax extends Player {
 
         game.hashInit();
 
-        ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves); // Get legal moves
+        ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
+
+        // Iterate through possible moves
         for (int moveIndex : legalMoves) {
             try {
-                game.move(moveIndex); // Try the move
+                game.move(moveIndex);
             } catch (Exception e) {
                 throw new Exception("Minimax: " + e);
             }
 
             game.updateHash(currentPlayer, moveIndex);
 
-            newScore = -deepMove(game, globalDepth - 1); // Get score from deeper moves
+            newScore = -deepMove(game, globalDepth - 1); // Get value from deeper search
+
             // Change the best move if new move is better
             if (newScore > bestScore) {
                 bestScore = newScore;
@@ -60,7 +63,8 @@ public class Minimax extends Player {
         }
 
         long endTimestamp = System.nanoTime();
-        
+
+        // Gather the data of the move
         MoveData moveData;
         if (gatherMemory) {
             moveData = new MoveData(bestMovePlace, endTimestamp - startTimestamp,
@@ -68,10 +72,18 @@ public class Minimax extends Player {
         } else {
             moveData = new MoveData(bestMovePlace, endTimestamp - startTimestamp);
         }
-        
+
         return moveData;
     }
 
+    /**
+     * Method used to search deeper.
+     * 
+     * @param game  game environment
+     * @param depth remaining depth
+     * @return score from the sub-tree
+     * @throws Exception if error occurred while playing the move
+     */
     public int deepMove(GameEnvironment game, int depth) throws Exception {
         int currentPlayer = game.getCurrentPlayer();
 
@@ -85,7 +97,7 @@ public class Minimax extends Player {
             return transpositionTable.get(hash);
         }
 
-        // Decide if board needs to be evaluated of checked for terminal state
+        // Evaluate the game
         HashMap<Integer, Integer> results;
         if (depth == 0) {
             results = game.evaluateBoard();
@@ -93,8 +105,8 @@ public class Minimax extends Player {
             results = game.ifTerminal();
         }
 
+        // If game is over or depth is 0, return the score
         if (results.get(0) == 1) {
-            // If game is finished, return value for winning player
             if (results.get(1) == 0) {
                 transpositionTable.put(hash, 0);
                 return 0;
@@ -102,12 +114,13 @@ public class Minimax extends Player {
             transpositionTable.put(hash, Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10);
             return Integer.MIN_VALUE + 1 + (globalDepth - depth) * 10;
         } else if (depth == 0) {
-            // If depth is 0, return evaluation score
             transpositionTable.put(hash, currentPlayer * results.get(2));
             return currentPlayer * results.get(2);
         }
 
         ArrayList<Integer> legalMoves = game.getLegalMoves(onlyCloseMoves);
+
+        // Iterate through the moves
         for (int moveIndex : legalMoves) {
             try {
                 game.move(moveIndex);
@@ -116,7 +129,7 @@ public class Minimax extends Player {
             }
 
             game.updateHash(currentPlayer, moveIndex);
-            newScore = -deepMove(game, depth - 1);
+            newScore = -deepMove(game, depth - 1); // Get value from deeper search
 
             // Change the best move if new move is better
             if (newScore > bestScore) {

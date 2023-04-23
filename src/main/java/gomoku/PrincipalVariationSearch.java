@@ -5,6 +5,9 @@ import java.util.HashMap;
 
 import org.openjdk.jol.info.GraphLayout;
 
+/**
+ * Class responsible for Principal Variation Search agent.
+ */
 public class PrincipalVariationSearch extends Player {
     boolean onlyCloseMoves;
     int simulationLimit;
@@ -12,7 +15,13 @@ public class PrincipalVariationSearch extends Player {
     boolean isLimitTime;
     boolean gatherMemory;
 
-    PrincipalVariationSearch(int simulationLimit, boolean isLimitTime, boolean onlyCloseMoves, boolean gatherMemory){
+    /**
+     * @param simulationLimit limit of the search
+     * @param isLimitTime     if the search is time-limited
+     * @param onlyCloseMoves  if only close moves should be used
+     * @param gatherMemory    if memory should be gathered
+     */
+    PrincipalVariationSearch(int simulationLimit, boolean isLimitTime, boolean onlyCloseMoves, boolean gatherMemory) {
         this.simulationLimit = simulationLimit;
         this.isLimitTime = isLimitTime;
         this.onlyCloseMoves = onlyCloseMoves;
@@ -26,21 +35,22 @@ public class PrincipalVariationSearch extends Player {
 
         HashMap<String, Integer> results = new HashMap<>();
 
+        // Create new thread with proper simulation limits
         PrincipalVariationSearch_Thread thread;
         if (isLimitTime) {
             thread = new PrincipalVariationSearch_Thread(game, onlyCloseMoves);
-            thread.start();
+            thread.start(); // Run the thread - time-limited
             while (System.nanoTime() - (long) simulationLimit * 1000000 < startTimestamp) {
                 results = thread.getResults();
 
                 if (thread.isFinished()) {
                     break;
                 }
-                Thread.sleep(5);
+                Thread.sleep(5); // Sleep to prevent constant run of previous function
             }
         } else {
             thread = new PrincipalVariationSearch_Thread(simulationLimit, game, onlyCloseMoves);
-            thread.startNormally();
+            thread.startNormally(); // Run the thread - depth-limited
             results = thread.getResults();
         }
 
@@ -48,18 +58,19 @@ public class PrincipalVariationSearch extends Player {
         HashMap<Long, ArrayList<Integer>> largestTT = thread.getLargestTT();
         thread.finishThread();
 
-        if(results == null || !results.containsKey("bestMove")){
+        if (results == null || !results.containsKey("bestMove")) {
             throw new Exception("Provided time was not enough to calculate the move.");
         }
 
         long endTimestamp = System.nanoTime();
 
+        // Gather the data of the move
         MoveData moveData;
-        if(gatherMemory){
+        if (gatherMemory) {
             moveData = new MoveData(results.get("bestMove"), endTimestamp - startTimestamp,
-            GraphLayout.parseInstance(this).totalSize() + GraphLayout.parseInstance(previousScores).totalSize()
-                    + GraphLayout.parseInstance(largestTT).totalSize());
-        }else{
+                    GraphLayout.parseInstance(this).totalSize() + GraphLayout.parseInstance(previousScores).totalSize()
+                            + GraphLayout.parseInstance(largestTT).totalSize());
+        } else {
             moveData = new MoveData(results.get("bestMove"), endTimestamp - startTimestamp);
         }
         return moveData;

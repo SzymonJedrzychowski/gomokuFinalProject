@@ -2,13 +2,23 @@ package gomoku;
 
 import java.util.HashMap;
 
+/**
+ * Class responsible for playing the games for the experiment.
+ */
 public class PlayGames {
     int gamesOnSide;
     int boardSize;
     Player player1;
     Player player2;
     boolean isLimitTime;
-
+    
+    /**
+     * @param gamesOnSide number of games per experiment
+     * @param boardSize size of the board
+     * @param player1 first player
+     * @param player2 second player
+     * @param isLimitTime if the limit of the search is time
+     */
     PlayGames(int gamesOnSide, int boardSize, Player player1, Player player2, boolean isLimitTime) {
         this.gamesOnSide = gamesOnSide;
         this.boardSize = boardSize;
@@ -17,10 +27,18 @@ public class PlayGames {
         this.isLimitTime = isLimitTime;
     }
 
+    /**
+     * Method used to conduct the experiment.
+     * 
+     * @param displayInformation if the information of played games should be displayed
+     * @return GameData[] of played games
+     */
     public GameData[] play(boolean displayInformation) {
         HashMap<Integer, Integer> result;
         MoveData move;
         GameEnvironment game;
+        
+        //Create the game environment
         try {
             game = new GameEnvironment(boardSize);
         } catch (Exception e) {
@@ -28,13 +46,13 @@ public class PlayGames {
             return null;
         }
         
+        //Play test games
         if(isLimitTime){
             playTestGames(game, 1);
         }else{
             playTestGames(game, 10);
         }
         
-        int currentGame = 0;
         GameData[] gameData = { new GameData(), new GameData() };
         int currentMove;
         boolean notException = true;
@@ -44,10 +62,13 @@ public class PlayGames {
             System.out.printf("Player 2: %s %n", player2.getClass());
         }
         
-        while (currentGame < gamesOnSide) {
+        //Play the games
+        for (int currentGame = 0; currentGame < gamesOnSide; currentGame ++) {
             notException = true;
             game.resetState();
             currentMove = 0;
+            
+            //Play a game
             while (true) {
                 try {
                     if (game.getCurrentPlayer() == 1) {
@@ -72,6 +93,7 @@ public class PlayGames {
                 }
                 currentMove += 1;
             }
+            
             if (displayInformation && notException){
                 System.out.printf("Game %d (1) has ended.%n", currentGame);
             }
@@ -79,6 +101,8 @@ public class PlayGames {
             notException = true;
             game.resetState();
             currentMove = 0;
+
+            //Play the games with reversed players
             while (true) {
                 try {
                     if (game.getCurrentPlayer() == 1) {
@@ -103,18 +127,25 @@ public class PlayGames {
                 }
                 currentMove += 1;
             }
+
             if (displayInformation && notException){
                 System.out.printf("Game %d (2) has ended.%n", currentGame);
             }
-            currentGame += 1;
         }
         return gameData;
     }
     
+    /**
+     * Method used to play test games.
+     * 
+     * @param game game environment
+     * @param testGamesNumber number of test games to be played
+     */
     private void playTestGames(GameEnvironment game, int testGamesNumber){
         MoveData move;
         HashMap<Integer, Integer> result;
         
+        //Play the test games
         for(int i = 0; i<testGamesNumber; i++) {
             game.resetState();
             while (true) {

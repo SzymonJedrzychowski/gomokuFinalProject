@@ -4,6 +4,7 @@ public class App {
 
     public static void main(String[] args) {
 
+        // Initialise parameters for the experiment
         int limit = 100;
         int boardSize = 7;
         int gameNumber = 50;
@@ -13,6 +14,7 @@ public class App {
         GameData[] gameData;
         Player[] players = new Player[10];
 
+        // Initialise players for correct experiment
         if (isLimitTime) {
             if (limit < 100) {
                 System.out.println("Minimal limit for time experiments is 100.");
@@ -47,14 +49,17 @@ public class App {
             players[9] = new PrincipalVariationSearch(limit, isLimitTime, true, gatherMemory);
         }
 
+        // Select two players for the experiment
         Player p1 = players[0];
         Player p2 = players[2];
 
         PlayGames games;
 
+        // Conduct the experiment
         games = new PlayGames(gameNumber, boardSize, p1, p2, isLimitTime);
         gameData = games.play(true);
 
+        // Display relevant data
         gameData[0].printData();
         gameData[1].printData();
 
