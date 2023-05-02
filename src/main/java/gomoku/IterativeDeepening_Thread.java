@@ -154,12 +154,7 @@ public class IterativeDeepening_Thread extends Thread {
 
         // Iterate through possible moves
         for (int moveIndex : legalMoves) {
-            try {
-                gameState.move(moveIndex);
-            } catch (Exception e) {
-                throw new Exception("Iterative Deepening: " + e);
-            }
-
+            gameState.move(moveIndex);
             gameState.updateHash(currentPlayer, moveIndex);
 
             newScore = -deepMove(gameState, depth - 1, -beta, -alpha); // Get value from deeper search
@@ -252,12 +247,7 @@ public class IterativeDeepening_Thread extends Thread {
 
         // Iterate through the moves
         for (int moveIndex : legalMoves) {
-            try {
-                game.move(moveIndex);
-            } catch (Exception e) {
-                throw new Exception("Minimax: " + e);
-            }
-
+            game.move(moveIndex);
             game.updateHash(currentPlayer, moveIndex);
 
             newScore = -deepMove(game, depth - 1, -beta, -alpha); // Get value from deeper search

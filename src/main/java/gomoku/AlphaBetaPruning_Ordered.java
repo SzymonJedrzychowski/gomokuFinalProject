@@ -51,12 +51,7 @@ public class AlphaBetaPruning_Ordered extends Player {
 
         // Iterate through possible moves
         for (int moveIndex : legalMoves) {
-            try {
-                game.move(moveIndex);
-            } catch (Exception e) {
-                throw new Exception("Minimax: " + e);
-            }
-
+            game.move(moveIndex);
             game.updateHash(currentPlayer, moveIndex);
 
             newScore = -deepMove(game, globalDepth - 1, -beta, -alpha); // Get value from deeper search
@@ -160,12 +155,7 @@ public class AlphaBetaPruning_Ordered extends Player {
 
         // Iterate through the moves
         for (int moveIndex : legalMoves) {
-            try {
-                game.move(moveIndex);
-            } catch (Exception e) {
-                throw new Exception("Minimax: " + e);
-            }
-
+            game.move(moveIndex);
             game.updateHash(currentPlayer, moveIndex);
 
             newScore = -deepMove(game, depth - 1, -beta, -alpha); // Get value from deeper search

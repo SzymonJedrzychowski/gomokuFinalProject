@@ -88,6 +88,7 @@ public class GameData {
      * Method used to display the time data.
      */
     public void printTimes() {
+        System.out.println("Time");
         for (long time : savedTime) {
             System.out.printf("%d ", time);
         }
@@ -98,6 +99,7 @@ public class GameData {
      * Method used to display the memory data.
      */
     public void printMemory() {
+        System.out.println("Memory");
         for (long memory : savedMemory) {
             System.out.printf("%d ", memory);
         }
@@ -108,6 +110,7 @@ public class GameData {
      * Method used to display the visits data.
      */
     public void printVisits() {
+        System.out.println("Visits");
         for (int visit : timesVisited) {
             System.out.printf("%d ", visit);
         }
@@ -118,6 +121,7 @@ public class GameData {
      * Method used to display the game results data.
      */
     public void printResults() {
+        System.out.println("Results (Wins/Draws/Loses)");
         System.out.printf("%d/%d/%d%n", gameResults[0], gameResults[1], gameResults[2]);
     }
 
@@ -125,9 +129,9 @@ public class GameData {
      * Method used to display all data at once.
      */
     public void printData() {
-        //printTimes();
-        //printMemory();
-        //printVisits();
+        printTimes();
+        printMemory();
+        printVisits();
         printResults();
     }
 }

@@ -5,10 +5,10 @@ public class App {
     public static void main(String[] args) {
 
         // Initialise parameters for the experiment
-        int limit = 100;
+        int limit = 1;
         int boardSize = 7;
         int gameNumber = 50;
-        boolean isLimitTime = true;
+        boolean isLimitTime = false;
         boolean gatherMemory = false;
 
         GameData[] gameData;
@@ -51,7 +51,7 @@ public class App {
 
         // Select two players for the experiment
         Player p1 = players[0];
-        Player p2 = players[2];
+        Player p2 = players[0];
 
         PlayGames games;
 
@@ -60,8 +60,9 @@ public class App {
         gameData = games.play(true);
 
         // Display relevant data
+        System.out.println("\nP1");
         gameData[0].printData();
+        System.out.println("\nP2");
         gameData[1].printData();
-
     }
 }

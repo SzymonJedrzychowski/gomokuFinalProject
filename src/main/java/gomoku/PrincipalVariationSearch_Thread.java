@@ -157,12 +157,7 @@ public class PrincipalVariationSearch_Thread extends Thread {
 
         // Iterate through possible moves
         for (int moveIndex : legalMoves) {
-            try {
-                game.move(moveIndex);
-            } catch (Exception e) {
-                throw new Exception("Minimax: " + e);
-            }
-
+            game.move(moveIndex);
             game.updateHash(currentPlayer, moveIndex);
 
             newScore = -deepMove(game, globalDepth - 1, -b, -alpha); // Get value from deeper search
@@ -262,12 +257,7 @@ public class PrincipalVariationSearch_Thread extends Thread {
 
         // Iterate through the moves
         for (int moveIndex : legalMoves) {
-            try {
-                game.move(moveIndex);
-            } catch (Exception e) {
-                throw new Exception("Minimax: " + e);
-            }
-
+            game.move(moveIndex);
             game.updateHash(currentPlayer, moveIndex);
 
             newScore = -deepMove(game, depth - 1, -b, -alpha); // Get value from deeper search
